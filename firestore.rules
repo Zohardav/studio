@@ -1,0 +1,180 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * Drink & Earn Security Rules
+     *
+     * CORE PHILOSOPHY
+     * This ruleset implements a strict user-ownership model designed for the "Drink & Earn" hydration 
+     * tracking application. Security is enforced through structural path-based authorization, 
+     * ensuring users can only access data nested under their unique identifier.
+     *
+     * DATA STRUCTURE
+     * - Private User Data: All hydration logs, summaries, streaks, and settings are organized 
+     *   hierarchically under `/users/{userId}/...`.
+     * - Public Definitions: Static assets like achievement and world item definitions are 
+     *   located in top-level collections for global read access.
+     *
+     * KEY SECURITY DECISIONS
+     * - Ownership via Path: The `{userId}` wildcard in the path is the primary source of truth 
+     *   for authorization, compared against `request.auth.uid`.
+     * - Relational Integrity: On creation and update, rules verify that the document's internal 
+     *   `userId` or `id` field matches the authenticated user, preventing data from being orphaned 
+     *   or misattributed.
+     * - Public Read-Only: Definition collections are readable by all but restricted from 
+     *   client-side writes to maintain game balance and integrity.
+     * - Prototyping Mode: Schema validation is limited to relational fields (`userId`, `id`) 
+     *   to allow for rapid evolution of the data model while maintaining secure access control.
+     */
+
+    // --- Helper Functions ---
+
+    /** Checks if the request is from an authenticated user. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** Checks if the authenticated user's UID matches the provided userId. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** Checks if the user owns the existing document for update/delete operations. */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for the UserProfile document.
+     * @path /users/{userId}
+     * @allow (create) if auth user matches {userId} and provides correct internal 'id'.
+     * @deny (create) if userId in path does not match auth UID.
+     * @principle Self-Creation and Ownership.
+     */
+    match /users/{userId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update, delete: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+    }
+
+    /**
+     * @description Manages individual hydration logs for a user.
+     * @path /users/{userId}/hydrationLogs/{hydrationLogId}
+     * @allow (get) if user is the owner of the parent path.
+     * @deny (list) if user attempts to list logs for another user.
+     * @principle Path-based authorization for subcollections.
+     */
+    match /users/{userId}/hydrationLogs/{hydrationLogId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update, delete: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+    }
+
+    /**
+     * @description Tracks aggregated hydration totals for specific dates.
+     * @path /users/{userId}/dailySummaries/{date}
+     * @allow (update) if user is the owner and preserves the userId link.
+     * @deny (create) if the userId field in data does not match the path userId.
+     * @principle Relational integrity and ownership enforcement.
+     */
+    match /users/{userId}/dailySummaries/{date} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update, delete: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+    }
+
+    /**
+     * @description Tracks user streaks as a singleton resource within the user's path.
+     * @path /users/{userId}/userStreak
+     * @allow (get) if user is the owner.
+     * @deny (delete) if user is not authenticated as the owner.
+     * @principle Singleton resource protection.
+     */
+    match /users/{userId}/userStreak {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update, delete: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+    }
+
+    /**
+     * @description Records achievements unlocked by a specific user.
+     * @path /users/{userId}/userAchievements/{userAchievementId}
+     * @allow (create) if owner provides matching userId in document data.
+     * @deny (update) if attempting to change the userId field.
+     * @principle Immutability of ownership fields.
+     */
+    match /users/{userId}/userAchievements/{userAchievementId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update, delete: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+    }
+
+    /**
+     * @description Manages progress and state of the user's virtual world.
+     * @path /users/{userId}/virtualWorldProgress
+     * @allow (list) if owner.
+     * @deny (create) if data userId field is missing or incorrect.
+     * @principle Enforces data consistency between path and document.
+     */
+    match /users/{userId}/virtualWorldProgress {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update, delete: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+    }
+
+    /**
+     * @description User preferences for hydration reminders.
+     * @path /users/{userId}/reminderSetting
+     * @allow (update) if owner.
+     * @deny (get) if requester is not the owner.
+     * @principle Private user settings restriction.
+     */
+    match /users/{userId}/reminderSetting {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update, delete: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+    }
+
+    /**
+     * @description User preferences for in-app sound feedback.
+     * @path /users/{userId}/soundSetting
+     * @allow (create) if owner.
+     * @deny (list) for unauthorized users.
+     * @principle Path-based ownership.
+     */
+    match /users/{userId}/soundSetting {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update, delete: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+    }
+
+    /**
+     * @description Global definitions for achievements.
+     * @path /achievementDefinitions/{achievementId}
+     * @allow (get, list) for all users (Public Read).
+     * @deny (write) for all users to prevent tampering with game definitions.
+     * @principle Public Read with Owner-Only (Admin) Writes.
+     */
+    match /achievementDefinitions/{achievementId} {
+      allow get, list: if true;
+      // CRITICAL: Cannot implement owner-only writes. The 'AchievementDefinition' entity is missing an 'ownerId' or 'authorId' field.
+      allow create, update, delete: if false; // TODO: Add owner/admin validation once the schema is updated.
+    }
+
+    /**
+     * @description Global definitions for virtual world items.
+     * @path /worldItemDefinitions/{worldItemId}
+     * @allow (get, list) for all users (Public Read).
+     * @deny (write) for all users to prevent tampering with item metadata.
+     * @principle Public Read with Restricted Writes.
+     */
+    match /worldItemDefinitions/{worldItemId} {
+      allow get, list: if true;
+      // CRITICAL: Cannot implement owner-only writes. The 'WorldItemDefinition' entity is missing an 'ownerId' or 'authorId' field.
+      allow create, update, delete: if false; // TODO: Add owner/admin validation once the schema is updated.
+    }
+  }
+}

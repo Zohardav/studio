@@ -1,0 +1,521 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Stores user-specific settings and identifying information for the Drink & Earn application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's chosen display name for the application."
+        },
+        "dailyGoalMl": {
+          "type": "number",
+          "description": "The user's daily hydration goal, expressed in milliliters."
+        },
+        "preferredGlassSizeMl": {
+          "type": "number",
+          "description": "The user's customized preferred glass size, in milliliters, for easy logging."
+        },
+        "worldTheme": {
+          "type": "string",
+          "description": "The selected visual theme for the user's virtual world (e.g., 'garden', 'island')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "displayName",
+        "dailyGoalMl",
+        "preferredGlassSizeMl",
+        "worldTheme",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "HydrationLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "HydrationLog",
+      "type": "object",
+      "description": "Records each individual water intake event logged by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the HydrationLog entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile this log belongs to. (Relationship: UserProfile 1:N HydrationLog)"
+        },
+        "amountMl": {
+          "type": "number",
+          "description": "The amount of water logged in milliliters."
+        },
+        "loggedAt": {
+          "type": "string",
+          "description": "Timestamp when the hydration event was logged, in UTC.",
+          "format": "date-time"
+        },
+        "localDate": {
+          "type": "string",
+          "description": "The local date (YYYY-MM-DD) corresponding to the loggedAt timestamp, crucial for timezone-aware daily tracking.",
+          "format": "date"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "amountMl",
+        "loggedAt",
+        "localDate"
+      ]
+    },
+    "DailySummary": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "DailySummary",
+      "type": "object",
+      "description": "Aggregates a user's hydration data for a specific local day, used for history and progress tracking.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the DailySummary entity (e.g., userId_date)."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile this daily summary belongs to. (Relationship: UserProfile 1:N DailySummary)"
+        },
+        "date": {
+          "type": "string",
+          "description": "The local calendar date (YYYY-MM-DD) for which the summary applies.",
+          "format": "date"
+        },
+        "totalAmountMl": {
+          "type": "number",
+          "description": "The total amount of water consumed on this specific local date in milliliters."
+        },
+        "goalAchieved": {
+          "type": "boolean",
+          "description": "Indicates whether the user met their daily hydration goal on this date."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when this daily summary was first created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when this daily summary was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "date",
+        "totalAmountMl",
+        "goalAchieved",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserStreak": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserStreak",
+      "type": "object",
+      "description": "Tracks a user's current and longest hydration goal achievement streaks.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserStreak entity (e.g., userId)."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile this streak information belongs to. (Relationship: UserProfile 1:1 UserStreak)"
+        },
+        "currentStreakDays": {
+          "type": "number",
+          "description": "The number of consecutive days the user has met their hydration goal."
+        },
+        "longestStreakDays": {
+          "type": "number",
+          "description": "The historical maximum number of consecutive days the user has met their hydration goal."
+        },
+        "lastGoalAchievedDate": {
+          "type": "string",
+          "description": "The local date (YYYY-MM-DD) of the most recent day the user achieved their hydration goal. Used to calculate streak continuation.",
+          "format": "date"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the streak information was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "currentStreakDays",
+        "longestStreakDays",
+        "lastGoalAchievedDate",
+        "updatedAt"
+      ]
+    },
+    "AchievementDefinition": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AchievementDefinition",
+      "type": "object",
+      "description": "Defines the static characteristics of an achievement that users can unlock.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the AchievementDefinition (e.g., 'first-full-day', '100-glasses-total')."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the achievement (e.g., 'First Full Day')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of what the achievement entails."
+        },
+        "rewardType": {
+          "type": "string",
+          "description": "The type of reward granted for unlocking this achievement (e.g., 'badge', 'world_item', 'message')."
+        },
+        "rewardValue": {
+          "type": "string",
+          "description": "The specific value associated with the reward, such as an image URL for a badge or an ID for a world item."
+        },
+        "iconUrl": {
+          "type": "string",
+          "description": "URL to the icon image representing this achievement.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "rewardType",
+        "rewardValue",
+        "iconUrl"
+      ]
+    },
+    "UserAchievement": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserAchievement",
+      "type": "object",
+      "description": "Records which achievements a specific user has unlocked.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserAchievement entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who unlocked this achievement. (Relationship: UserProfile 1:N UserAchievement)"
+        },
+        "achievementId": {
+          "type": "string",
+          "description": "Reference to the AchievementDefinition that was unlocked. (Relationship: AchievementDefinition 1:N UserAchievement)"
+        },
+        "unlockedAt": {
+          "type": "string",
+          "description": "Timestamp when the achievement was unlocked by the user.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "achievementId",
+        "unlockedAt"
+      ]
+    },
+    "VirtualWorldProgress": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "VirtualWorldProgress",
+      "type": "object",
+      "description": "Stores the current state and progression of a user's personalized virtual world.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the VirtualWorldProgress entity (e.g., userId)."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile this virtual world belongs to. (Relationship: UserProfile 1:1 VirtualWorldProgress)"
+        },
+        "currentStage": {
+          "type": "string",
+          "description": "The current evolutionary stage of the user's virtual world (e.g., 'Seed', 'Sprout', 'Flower', 'Island')."
+        },
+        "totalPoints": {
+          "type": "number",
+          "description": "The total gamification points accumulated by the user, influencing world growth."
+        },
+        "unlockedWorldItemIds": {
+          "type": "array",
+          "description": "References to WorldItemDefinition entities that the user has unlocked for their virtual world. (Relationship: WorldItemDefinition N:N VirtualWorldProgress)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lastProgressionAt": {
+          "type": "string",
+          "description": "Timestamp when the virtual world last progressed or was updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "currentStage",
+        "totalPoints",
+        "unlockedWorldItemIds",
+        "lastProgressionAt"
+      ]
+    },
+    "WorldItemDefinition": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "WorldItemDefinition",
+      "type": "object",
+      "description": "Defines static decorative items that can be unlocked and placed in a user's virtual world.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the WorldItemDefinition (e.g., 'flower-pot', 'mini-fountain')."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the world item."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the world item."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL to the image asset for this world item.",
+          "format": "uri"
+        },
+        "unlockRequirement": {
+          "type": "string",
+          "description": "A description or code indicating the condition for unlocking this item (e.g., 'reach_stage_2', 'achievement_first_day')."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "imageUrl",
+        "unlockRequirement"
+      ]
+    },
+    "ReminderSetting": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ReminderSetting",
+      "type": "object",
+      "description": "Stores a user's preferences for hydration reminders.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ReminderSetting entity (e.g., userId)."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile these reminder settings belong to. (Relationship: UserProfile 1:1 ReminderSetting)"
+        },
+        "reminderTimes": {
+          "type": "array",
+          "description": "An array of preferred daily reminder times, in 'HH:MM' format.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reminderTone": {
+          "type": "string",
+          "description": "The selected tone or sound for the hydration reminders (e.g., 'chime', 'gong')."
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "A boolean indicating whether hydration reminders are currently enabled for the user."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the reminder settings were last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "reminderTimes",
+        "reminderTone",
+        "enabled",
+        "updatedAt"
+      ]
+    },
+    "SoundSetting": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SoundSetting",
+      "type": "object",
+      "description": "Stores a user's preferences for in-app sounds and audio feedback.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the SoundSetting entity (e.g., userId)."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile these sound settings belong to. (Relationship: UserProfile 1:1 SoundSetting)"
+        },
+        "masterSoundEnabled": {
+          "type": "boolean",
+          "description": "A boolean indicating whether all in-app sounds are globally enabled."
+        },
+        "celebrationSoundEnabled": {
+          "type": "boolean",
+          "description": "A boolean indicating whether special celebration sounds (e.g., for achievements) are enabled."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the sound settings were last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "masterSoundEnabled",
+        "celebrationSoundEnabled",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user-specific settings and identifying information. The document ID corresponds to the Firebase Authentication UID. Authorization is path-based: `request.auth.uid` must match `{userId}`."
+        }
+      },
+      {
+        "path": "/users/{userId}/hydrationLogs/{hydrationLogId}",
+        "definition": {
+          "entityName": "HydrationLog",
+          "schema": {
+            "$ref": "#/backend/entities/HydrationLog"
+          },
+          "description": "Records individual water intake events for a user. The document ID is `hydrationLogId`. Authorization is path-based: `request.auth.uid` must match `{userId}`. Includes `userId` field for data integrity and query efficiency, but not for authorization in rules."
+        }
+      },
+      {
+        "path": "/users/{userId}/dailySummaries/{date}",
+        "definition": {
+          "entityName": "DailySummary",
+          "schema": {
+            "$ref": "#/backend/entities/DailySummary"
+          },
+          "description": "Aggregates a user's hydration data for a specific local day. The document ID is the `date` in 'YYYY-MM-DD' format. Authorization is path-based: `request.auth.uid` must match `{userId}`. Includes `userId` field for data integrity and query efficiency."
+        }
+      },
+      {
+        "path": "/users/{userId}/userStreak",
+        "definition": {
+          "entityName": "UserStreak",
+          "schema": {
+            "$ref": "#/backend/entities/UserStreak"
+          },
+          "description": "Tracks a user's current and longest hydration goal achievement streaks. This is a singleton document within the subcollection, with its ID being 'userStreak'. Authorization is path-based: `request.auth.uid` must match `{userId}`."
+        }
+      },
+      {
+        "path": "/achievementDefinitions/{achievementId}",
+        "definition": {
+          "entityName": "AchievementDefinition",
+          "schema": {
+            "$ref": "#/backend/entities/AchievementDefinition"
+          },
+          "description": "Defines static characteristics of public achievements. The document ID is `achievementId`. This collection has a public read security posture."
+        }
+      },
+      {
+        "path": "/users/{userId}/userAchievements/{userAchievementId}",
+        "definition": {
+          "entityName": "UserAchievement",
+          "schema": {
+            "$ref": "#/backend/entities/UserAchievement"
+          },
+          "description": "Records which achievements a specific user has unlocked. The document ID is `userAchievementId`. Authorization is path-based: `request.auth.uid` must match `{userId}`. Includes `userId` field for data integrity and query efficiency."
+        }
+      },
+      {
+        "path": "/users/{userId}/virtualWorldProgress",
+        "definition": {
+          "entityName": "VirtualWorldProgress",
+          "schema": {
+            "$ref": "#/backend/entities/VirtualWorldProgress"
+          },
+          "description": "Stores the current state and progression of a user's personalized virtual world. This is a singleton document within the subcollection, with its ID being 'virtualWorldProgress'. Authorization is path-based: `request.auth.uid` must match `{userId}`."
+        }
+      },
+      {
+        "path": "/worldItemDefinitions/{worldItemId}",
+        "definition": {
+          "entityName": "WorldItemDefinition",
+          "schema": {
+            "$ref": "#/backend/entities/WorldItemDefinition"
+          },
+          "description": "Defines static decorative items that can be unlocked for the virtual world. The document ID is `worldItemId`. This collection has a public read security posture."
+        }
+      },
+      {
+        "path": "/users/{userId}/reminderSetting",
+        "definition": {
+          "entityName": "ReminderSetting",
+          "schema": {
+            "$ref": "#/backend/entities/ReminderSetting"
+          },
+          "description": "Stores a user's preferences for hydration reminders. This is a singleton document within the subcollection, with its ID being 'reminderSetting'. Authorization is path-based: `request.auth.uid` must match `{userId}`."
+        }
+      },
+      {
+        "path": "/users/{userId}/soundSetting",
+        "definition": {
+          "entityName": "SoundSetting",
+          "schema": {
+            "$ref": "#/backend/entities/SoundSetting"
+          },
+          "description": "Stores a user's preferences for in-app sounds and audio feedback. This is a singleton document within the subcollection, with its ID being 'soundSetting'. Authorization is path-based: `request.auth.uid` must match `{userId}`."
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure for the 'Drink & Earn' application is designed with a strong emphasis on Authorization Independence and enabling Secure Query-Allowed Patterns (QAPs), following a user-centric, hierarchical model. All user-specific data is rooted under a dedicated '/users/{userId}' collection, making authorization rules simple, explicit, and efficient. This primary segregation ensures that authorization logic primarily relies on matching the `request.auth.uid` to the `{userId}` wildcard in the path, thereby eliminating the need for expensive and complex `get()` calls to parent documents (e.g., a HydrationLog document does not need to fetch the UserProfile to verify ownership). This directly addresses the 'Authorization Independence' mandate.\n\nFor user-owned and user-specific entities such as `UserProfile`, `HydrationLog`, `DailySummary`, `UserStreak`, `UserAchievement`, `VirtualWorldProgress`, `ReminderSetting`, and `SoundSetting`, we utilize path-based ownership. Each document belonging to a user resides within a subcollection under their unique user ID, for example, `/users/{userId}/hydrationLogs/{logId}`. This structure inherently ensures that `list` operations (QAPs) are secure and performant; a user can only list documents within their own `/users/{userId}/...` path, which is enforced by security rules checking `request.auth.uid == userId`. There is no need for client-side filtering after fetching potentially unauthorized data. The `userId` field is also included in the documents for data integrity and easier querying/debugging outside of security rules, but it is not the primary authorization mechanism due to the path structure.\n\nStatic, public data, represented by `AchievementDefinition` and `WorldItemDefinition`, is placed in top-level collections like `/achievementDefinitions/{achievementId}` and `/worldItemDefinitions/{worldItemId}`. This 'Structural Segregation' ensures that documents with different security postures (public read-only versus private user-owned) are not mixed. This directly supports QAPs by allowing all users to `list` and `get` these definitions without any authentication, as they contain no sensitive data and are meant to be universally accessible, while also maintaining clear security boundaries. There are no denormalized authorization fields needed in these collections as access is global.\n\nFor 1:1 relationships with the user (e.g., `UserStreak`, `VirtualWorldProgress`), a singular document within a subcollection named after the entity (e.g., `/users/{userId}/userStreak` where 'userStreak' is the document ID) is used. This maintains consistency and clear semantic paths.\n\nOverall, this design prioritizes simple and robust security rules by externalizing authorization logic into the collection structure and pathing, minimizing runtime dependencies, and ensuring predictable access patterns for both private and public data."
+  }
+}
