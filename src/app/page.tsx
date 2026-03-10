@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -17,9 +18,11 @@ import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useFirebase, initiateAnonymousSignIn } from '@/firebase';
 
 export default function DrinkAndEarn() {
   const [mounted, setMounted] = useState(false);
+  const { auth, user } = useFirebase();
   const { 
     settings, setSettings, 
     currentAmountMl, progressPercent, 
@@ -34,6 +37,13 @@ export default function DrinkAndEarn() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Ensure user is signed in anonymously to allow for persistent data storage
+  useEffect(() => {
+    if (auth && !user) {
+      initiateAnonymousSignIn(auth);
+    }
+  }, [auth, user]);
 
   const handleAddWater = (amount: number) => {
     addWater(amount);
@@ -103,7 +113,7 @@ export default function DrinkAndEarn() {
         <Tabs defaultValue="home" className="w-full">
           <AnimatePresence mode="wait">
             <TabsContent value="home" key="home" className="space-y-8 mt-0 focus-visible:ring-0">
-              <PixelWorld totalLifetimeMl={totalLifetimeMl} theme={settings.worldTheme} />
+              <PixelWorld totalLifetimeMl={totalLifetimeMl} />
               
               <HydrationTracker 
                 currentAmount={currentAmountMl}
@@ -238,7 +248,6 @@ export default function DrinkAndEarn() {
                 </CardContent>
               </Card>
               
-              {/* Developer Rituals Section */}
               <Card className="pixel-card border-dashed border-2 border-reward/30 bg-reward/5 overflow-hidden">
                 <CardHeader>
                   <CardTitle className="text-lg font-headline font-bold text-reward/80 flex items-center gap-2">
@@ -315,7 +324,6 @@ export default function DrinkAndEarn() {
             </TabsContent>
           </AnimatePresence>
 
-          {/* Magical Navigation */}
           <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-4rem)] max-w-sm z-[100]">
             <div className="pixel-card p-3 shadow-2xl border-white/40">
               <TabsList className="w-full bg-transparent h-16 grid grid-cols-3 gap-2">
