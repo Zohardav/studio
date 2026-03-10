@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Logic for the 64-stage visual progression engine (mapped from 100 hydration stages).
  * Updated to reflect the initial world state from user image.
