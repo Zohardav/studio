@@ -2,8 +2,14 @@
 {
   "placeholderImages": [
     {
+      "id": "stage-1-initial",
+      "description": "Initial dry world with spindly tree and white rocks",
+      "imageUrl": "https://picsum.photos/seed/initial-world/600/750",
+      "imageHint": "pixel desert"
+    },
+    {
       "id": "pixel-soil-dry",
-      "description": "Dry sandy soil patch for early game stages",
+      "description": "Dry sandy soil patch",
       "imageUrl": "https://picsum.photos/seed/soil-dry/400/300",
       "imageHint": "pixel desert"
     },
@@ -11,7 +17,7 @@
       "id": "pixel-soil-moist",
       "description": "Partially green pixel art soil",
       "imageUrl": "https://picsum.photos/seed/soil-wet/400/300",
-      "imageHint": "pixel grass-patches"
+      "imageHint": "pixel grass"
     },
     {
       "id": "pixel-soil-lush",
@@ -21,7 +27,7 @@
     },
     {
       "id": "pixel-tree-small",
-      "description": "Tiny pixel art sapling",
+      "description": "Spindly pixel art tree",
       "imageUrl": "https://picsum.photos/seed/sapling/200/200",
       "imageHint": "pixel sapling"
     },
