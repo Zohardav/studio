@@ -7,7 +7,7 @@ import { VirtualWorld } from '@/components/world/VirtualWorld';
 import { HydrationTracker } from '@/components/dashboard/HydrationTracker';
 import { Onboarding } from '@/components/dashboard/Onboarding';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, LayoutDashboard, History, Settings2, Sparkles, TrendingUp } from 'lucide-react';
+import { Award, LayoutDashboard, History, Settings2, Sparkles, TrendingUp, Droplets } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
