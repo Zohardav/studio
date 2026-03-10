@@ -1,22 +1,23 @@
+
 "use client"
 
 import React from 'react';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { getLayersForStage, getThresholdForStage } from '@/lib/world-engine/stages';
+import { getLayersForStage, getThresholdForStage, getVisualLevel } from '@/lib/world-engine/stages';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { Zap } from 'lucide-react';
+import { Zap, Sparkles } from 'lucide-react';
 
 export function WorldLibrary() {
-  // We want to show all 64 visual milestones
-  const visualStages = Array.from({ length: 64 }, (_, i) => i + 1);
+  // Show all 64 visual milestones from the grid
+  const visualLevels = Array.from({ length: 64 }, (_, i) => i + 1);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 pb-12">
-      {visualStages.map((vLevel) => {
-        // Find a hydration stage that corresponds to this visual level
-        const hydrationStageId = Math.ceil(((vLevel - 1) * 100) / 64) + 1;
+      {visualLevels.map((vLevel) => {
+        // Map visual level back to a representative hydration stage (1-100)
+        const hydrationStageId = Math.ceil((vLevel * 100) / 64);
         const layers = getLayersForStage(hydrationStageId);
         const threshold = getThresholdForStage(hydrationStageId);
 
@@ -39,7 +40,7 @@ export function WorldLibrary() {
                     style={{ zIndex: layer.z }}
                   >
                     <div 
-                      className="relative w-full h-full p-8"
+                      className="relative w-full h-full p-4"
                       style={{ 
                         transform: `scale(${layer.scale}) translate(${layer.x || 0}px, ${layer.y || 0}px)` 
                       }}
@@ -64,21 +65,21 @@ export function WorldLibrary() {
 
             <div className="space-y-1 px-2">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Requirement</span>
+                <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Hydration Mark</span>
                 <div className="flex items-center gap-1">
                   <Zap className="h-3 w-3 text-reward fill-reward" />
                   <span className="text-sm font-bold text-primary">{threshold}ml</span>
                 </div>
               </div>
               <p className="text-[9px] font-bold text-muted-foreground leading-tight">
-                {vLevel <= 8 && "Foundation: Dry soil begins its journey."}
-                {vLevel > 8 && vLevel <= 16 && "Moisture: Soil softens as the first drop hits."}
-                {vLevel > 16 && vLevel <= 24 && "Lushness: Life begins to stir beneath."}
-                {vLevel > 24 && vLevel <= 32 && "Floral: The first magical blooms appear."}
-                {vLevel > 32 && vLevel <= 40 && "Hydraulic: A pond forms to keep the soil wet."}
-                {vLevel > 40 && vLevel <= 48 && "Comfort: The garden becomes a home."}
-                {vLevel > 48 && vLevel <= 56 && "Abundance: The orchard gives back fruit."}
-                {vLevel > 56 && "Ascension: The grand crystal fountain is born."}
+                {vLevel <= 8 && "Phase 1: Foundation. The soil awakens as the first sapling breaks through."}
+                {vLevel > 8 && vLevel <= 16 && "Phase 2: Colonization. Grass begins to spread across the dry earth."}
+                {vLevel > 16 && vLevel <= 24 && "Phase 3: Expansion. Early flowers bloom and the tree gains strength."}
+                {vLevel > 24 && vLevel <= 32 && "Phase 4: Structuring. Stone pathways and decorative shrubs appear."}
+                {vLevel > 32 && vLevel <= 40 && "Phase 5: Life Stream. A magical pond forms to nourish the world."}
+                {vLevel > 40 && vLevel <= 48 && "Phase 6: Sanctuary. Comforts like benches and lanterns are added."}
+                {vLevel > 48 && vLevel <= 56 && "Phase 7: Orchard. The tree matures into a fruit-bearing provider."}
+                {vLevel > 56 && "Phase 8: Grand Ascension. The final sanctuary featuring the Crystal Fountain."}
               </p>
             </div>
           </motion.div>

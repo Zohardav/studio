@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Logic for the 64-stage visual progression engine (mapped from 100 hydration stages).
  */
@@ -17,9 +18,9 @@ export function calculateStageId(totalMl: number): number {
 }
 
 /**
- * Maps the 1-100 hydration stage to the 1-64 visual level.
+ * Maps the 1-100 hydration stage to the 1-64 visual level from the grid.
  */
-function getVisualLevel(stageId: number): number {
+export function getVisualLevel(stageId: number): number {
   return Math.floor(((stageId - 1) * VISUAL_LEVELS) / MAX_HYDRATION_STAGES) + 1;
 }
 
@@ -32,100 +33,76 @@ export function getThresholdForStage(stageId: number): number {
 
 /**
  * Returns the layers for a given stage to render in the PixelWorld component.
- * This logic follows the 8x8 grid progression:
- * 1-8: Dirt + Seed -> Sprout
- * 9-16: Grass growth
- * 17-24: Mushrooms & Ground cover
- * 25-32: Floral Bloom
- * 33-40: The Pond
- * 41-48: Bench & Lanterns
+ * Logic is based on the 8x8 grid progression:
+ * 1-8: Foundation & Early Growth
+ * 9-16: Grass Colonization
+ * 17-24: Flora & Expansion
+ * 25-32: Paths & Shrubs
+ * 33-40: Water & Life
+ * 41-48: Sanctuary Amenities (Bench/Lanterns)
  * 49-56: The Fruit Orchard
- * 57-64: The Crystal Fountain
+ * 57-64: The Grand Ascension (Crystal Fountain)
  */
 export function getLayersForStage(stageId: number): WorldLayer[] {
-  const visualLevel = getVisualLevel(stageId);
+  const v = getVisualLevel(stageId);
   const layers: WorldLayer[] = [];
 
-  // 1. GROUND LAYER (Dirt -> Moist -> Lush)
+  // --- 1. GROUND LAYER ---
   let groundAsset = "pixel-soil-dry";
-  if (visualLevel > 8) groundAsset = "pixel-soil-moist";
-  if (visualLevel > 16) groundAsset = "pixel-soil-lush";
-  layers.push({ id: 'ground', assetId: groundAsset, scale: 1, y: 0, z: 1 });
+  if (v > 8) groundAsset = "pixel-soil-moist";
+  if (v > 16) groundAsset = "pixel-soil-lush";
+  if (v > 48) groundAsset = "pixel-soil-dense";
+  layers.push({ id: 'ground', assetId: groundAsset, scale: 1.2, y: 0, z: 1 });
 
-  // 2. MAIN FEATURE (Seed -> Tree -> Fruit Tree -> Crystal)
-  let featureAsset = "pixel-seed";
-  let featureScale = 0.6 + (visualLevel / 64) * 0.4;
+  // --- 2. THE PATHWAY (Appears in Phase 4) ---
+  if (v > 24) {
+    layers.push({ id: 'path', assetId: 'pixel-path', scale: 1.1, y: 60, z: 2 });
+  }
+
+  // --- 3. THE WATER (Appears in Phase 5) ---
+  if (v > 32) {
+    layers.push({ id: 'pond', assetId: 'pixel-pond', scale: 0.9, x: 40, y: 40, z: 3, animate: true });
+  }
+
+  // --- 4. THE TREE (Evolves continuously) ---
+  let treeAsset = "pixel-seed";
+  let treeScale = 0.5;
+  if (v > 4) { treeAsset = "pixel-sprout"; treeScale = 0.6; }
+  if (v > 8) { treeAsset = "pixel-tree-small"; treeScale = 0.7; }
+  if (v > 20) { treeAsset = "pixel-tree-mature"; treeScale = 1.0; }
+  if (v > 48) { treeAsset = "pixel-tree-fruit"; treeScale = 1.2; }
+
+  // Special: The fountain replaces the tree in the final phase
+  if (v <= 56) {
+    layers.push({ id: 'tree', assetId: treeAsset, scale: treeScale, y: -20, x: -20, z: 10 });
+  } else {
+    // Grand Fountain Phase
+    layers.push({ id: 'fountain', assetId: 'pixel-fountain', scale: 1.3, y: -40, z: 100, animate: true });
+  }
+
+  // --- 5. DECORATIONS & AMENITIES ---
+  // Flowers appear in Phase 3
+  if (v > 16) {
+    layers.push({ id: 'flora', assetId: 'pixel-flower-blue', scale: 0.4, x: -60, y: 40, z: 15 });
+  }
   
-  if (visualLevel > 4) featureAsset = "pixel-sprout";
-  if (visualLevel > 12) featureAsset = "pixel-tree-small";
-  if (visualLevel > 48) featureAsset = "pixel-tree-mature"; // Representing the orange/fruit tree
+  // Bench appears in Phase 6
+  if (v > 40) {
+    layers.push({ id: 'bench', assetId: 'pixel-bench', scale: 0.7, x: 30, y: 80, z: 20 });
+  }
+
+  // Lantern appears in Phase 6
+  if (v > 44) {
+    layers.push({ id: 'lantern', assetId: 'pixel-lantern', scale: 0.8, x: -80, y: 0, z: 25 });
+  }
+
+  // Butterflies & Sparkles in Final Phases
+  if (v > 52) {
+    layers.push({ id: 'butterflies', assetId: 'pixel-butterfly', scale: 0.5, x: 40, y: -100, z: 50, animate: true });
+  }
   
-  layers.push({ 
-    id: 'main-feature', 
-    assetId: featureAsset, 
-    scale: featureScale, 
-    y: -20, 
-    z: 10 
-  });
-
-  // 3. SECONDARY FEATURES (Pond, Bench, Lantern)
-  if (visualLevel > 32) {
-    layers.push({ 
-      id: 'pond', 
-      assetId: "pixel-soil-moist", // Placeholder for pond water
-      scale: 0.8, 
-      x: 40, 
-      y: 60, 
-      z: 5,
-      animate: true 
-    });
-  }
-
-  // 4. DECORATIONS (Mushrooms, Flowers, Butterflies)
-  if (visualLevel > 20) {
-    layers.push({ 
-      id: 'mushrooms', 
-      assetId: "pixel-seed", // Placeholder for mushrooms
-      scale: 0.3, 
-      x: -60, 
-      y: 30, 
-      z: 8 
-    });
-  }
-
-  if (visualLevel > 28) {
-    layers.push({ 
-      id: 'flowers', 
-      assetId: "pixel-flower-blue", 
-      scale: 0.4, 
-      x: -40, 
-      y: 45, 
-      z: 12 
-    });
-  }
-
-  if (visualLevel > 44) {
-    layers.push({ 
-      id: 'butterflies', 
-      assetId: "pixel-butterfly", 
-      scale: 0.4, 
-      x: 0, 
-      y: -120, 
-      z: 50, 
-      animate: true 
-    });
-  }
-
-  // 5. FINAL ASCENSION (Crystal Fountain)
-  if (visualLevel > 56) {
-    layers.push({ 
-      id: 'crystal', 
-      assetId: "pixel-flower-gold", // Placeholder for the final crystal
-      scale: 1.2, 
-      y: -40, 
-      z: 100, 
-      animate: true 
-    });
+  if (v > 60) {
+    layers.push({ id: 'magic', assetId: 'pixel-flower-gold', scale: 0.6, x: -20, y: -140, z: 110, animate: true });
   }
 
   return layers;

@@ -1,3 +1,4 @@
+
 {
   "placeholderImages": [
     {
@@ -19,6 +20,12 @@
       "imageHint": "pixel grass"
     },
     {
+      "id": "pixel-soil-dense",
+      "description": "Thick forest floor pixel art",
+      "imageUrl": "https://picsum.photos/seed/forest-floor/400/300",
+      "imageHint": "pixel dense grass"
+    },
+    {
       "id": "pixel-seed",
       "description": "Small glowing pixel seed",
       "imageUrl": "https://picsum.photos/seed/seed/200/200",
@@ -29,18 +36,6 @@
       "description": "Tiny green pixel sprout",
       "imageUrl": "https://picsum.photos/seed/sprout/200/200",
       "imageHint": "pixel sprout"
-    },
-    {
-      "id": "pixel-flower-blue",
-      "description": "Magical blue pixel flower",
-      "imageUrl": "https://picsum.photos/seed/flower-blue/300/300",
-      "imageHint": "pixel flower"
-    },
-    {
-      "id": "pixel-flower-gold",
-      "description": "Rare golden pixel flower",
-      "imageUrl": "https://picsum.photos/seed/flower-gold/300/300",
-      "imageHint": "pixel sun-flower"
     },
     {
       "id": "pixel-tree-small",
@@ -55,10 +50,58 @@
       "imageHint": "pixel tree"
     },
     {
+      "id": "pixel-tree-fruit",
+      "description": "Mature fruit tree pixel art",
+      "imageUrl": "https://picsum.photos/seed/fruit-tree/400/500",
+      "imageHint": "pixel fruit tree"
+    },
+    {
+      "id": "pixel-flower-blue",
+      "description": "Magical blue pixel flower",
+      "imageUrl": "https://picsum.photos/seed/flower-blue/300/300",
+      "imageHint": "pixel flower"
+    },
+    {
+      "id": "pixel-flower-gold",
+      "description": "Rare golden pixel flower",
+      "imageUrl": "https://picsum.photos/seed/flower-gold/300/300",
+      "imageHint": "pixel sun-flower"
+    },
+    {
       "id": "pixel-butterfly",
       "description": "Animated pixel butterfly",
       "imageUrl": "https://picsum.photos/seed/butterfly/100/100",
       "imageHint": "pixel butterfly"
+    },
+    {
+      "id": "pixel-bench",
+      "description": "Wooden park bench pixel art",
+      "imageUrl": "https://picsum.photos/seed/bench/200/100",
+      "imageHint": "pixel bench"
+    },
+    {
+      "id": "pixel-lantern",
+      "description": "Glowing lantern post pixel art",
+      "imageUrl": "https://picsum.photos/seed/lantern/100/300",
+      "imageHint": "pixel lantern"
+    },
+    {
+      "id": "pixel-pond",
+      "description": "Sparkling water pond pixel art",
+      "imageUrl": "https://picsum.photos/seed/pond/400/200",
+      "imageHint": "pixel pond"
+    },
+    {
+      "id": "pixel-fountain",
+      "description": "Grand crystal fountain pixel art",
+      "imageUrl": "https://picsum.photos/seed/fountain/400/500",
+      "imageHint": "pixel fountain"
+    },
+    {
+      "id": "pixel-path",
+      "description": "Stone path pixel art",
+      "imageUrl": "https://picsum.photos/seed/stone-path/300/200",
+      "imageHint": "pixel stone path"
     }
   ]
 }
