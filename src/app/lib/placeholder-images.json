@@ -3,8 +3,8 @@
   "placeholderImages": [
     {
       "id": "stage-1-initial",
-      "description": "Initial dry world with spindly tree and white rocks",
-      "imageUrl": "https://picsum.photos/seed/initial-world/600/750",
+      "description": "Initial dry world with brown soil, green grass borders, white rocks on the left and bottom, and a spindly tree in the top right.",
+      "imageUrl": "https://picsum.photos/seed/initial-world/600/600",
       "imageHint": "pixel desert"
     },
     {

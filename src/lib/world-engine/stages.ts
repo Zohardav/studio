@@ -24,13 +24,13 @@ export function getThresholdForStage(stageId: number): number {
 
 /**
  * Maps the 64 levels to the visual content.
- * Now supports full-scene images provided by the user.
+ * Follows the user-provided sequential images.
  */
 export function getLayersForStage(stageId: number): WorldLayer[] {
   const v = getVisualLevel(stageId);
   const layers: WorldLayer[] = [];
 
-  // LEVEL 1: Use the specific "Initial World" image provided by the user
+  // LEVEL 1: Use strictly the image provided by the user
   if (v === 1) {
     layers.push({ 
       id: 'initial-scene', 
@@ -42,7 +42,8 @@ export function getLayersForStage(stageId: number): WorldLayer[] {
     return layers;
   }
 
-  // --- FALLBACK LAYERED SYSTEM (Until next images are provided) ---
+  // --- FALLBACK LAYERED SYSTEM ---
+  // This will be replaced as the user provides more sequential images for v > 1
   
   // Ground
   let groundAsset = "pixel-soil-dry";
@@ -50,10 +51,10 @@ export function getLayersForStage(stageId: number): WorldLayer[] {
   if (v > 24) groundAsset = "pixel-soil-lush";
   layers.push({ id: 'ground', assetId: groundAsset, scale: 1.2, y: 0, z: 1 });
 
-  // Tree evolution (matches composition of initial photo)
+  // Tree evolution
   let treeAsset = "pixel-tree-small";
   let treeScale = 0.4;
-  let treeX = 80; // Upper right
+  let treeX = 80;
   let treeY = -100;
 
   if (v > 8) { treeScale = 0.6; treeX = 70; treeY = -80; }
@@ -66,7 +67,7 @@ export function getLayersForStage(stageId: number): WorldLayer[] {
     layers.push({ id: 'fountain', assetId: 'pixel-fountain', scale: 1.3, y: -40, z: 100, animate: true });
   }
 
-  // Decorations from the initial photo (white rocks)
+  // Initial rocks
   if (v < 32) {
     layers.push({ id: 'rocks-left', assetId: 'pixel-rocks', scale: 0.4, x: -100, y: -40, z: 5 });
   }
