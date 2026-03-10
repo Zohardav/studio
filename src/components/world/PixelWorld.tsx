@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo } from 'react';
@@ -27,12 +26,8 @@ export function PixelWorld({ totalLifetimeMl }: PixelWorldProps) {
 
   return (
     <div className="relative w-full aspect-square flex items-center justify-center pixel-card p-4 overflow-hidden border-none shadow-2xl">
-      {/* Atmosphere based on progress */}
-      <div className={`absolute inset-0 transition-all duration-2000 ${
-        stageNumber > 48 ? 'bg-gradient-to-b from-blue-200 to-green-100' : 
-        stageNumber > 24 ? 'bg-gradient-to-b from-blue-100 to-white' : 
-        'bg-[#FDF6E3]'
-      }`} />
+      {/* Set default stage background */}
+      <div className="absolute inset-0 bg-[#f8f1de]" />
 
       <AnimatePresence mode="wait">
         {isLoading ? (

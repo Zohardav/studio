@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react';
@@ -21,7 +20,6 @@ export function WorldLibrary() {
     const file = event.target.files?.[0];
     if (!file || !firestore) return;
 
-    // Optional: check file size (approx 1MB limit for Firestore docs)
     if (file.size > 1024 * 1024) {
       alert("File too large! Please use an image under 1MB.");
       return;
@@ -85,7 +83,7 @@ export function WorldLibrary() {
               viewport={{ once: true }}
               className="flex flex-col gap-3 p-4 bg-white/50 dark:bg-black/20 rounded-[2.5rem] border-4 border-white shadow-xl hover:border-primary/20 transition-all group"
             >
-              <div className="relative aspect-square w-full bg-slate-100 dark:bg-slate-900 rounded-[2rem] overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+              <div className="relative aspect-square w-full bg-[#f8f1de] rounded-[2rem] overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
                 {stageData?.imageUrl ? (
                   <div className="relative w-full h-full">
                     <Image
