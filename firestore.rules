@@ -14,9 +14,9 @@ service cloud.firestore {
     }
     
     match /worldStages/{stageId} {
-      // Allow public read access to visual progression stages
-      // Only authenticated users can write (managed by developer Rituals)
+      // Allow public read access so any user (guest or authenticated) can see the world progress
       allow read: if true;
+      // Allow write access for authenticated users (which includes anonymous sign-ins in this prototype)
       allow write: if isSignedIn();
     }
   }

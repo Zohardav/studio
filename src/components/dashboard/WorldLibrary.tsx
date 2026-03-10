@@ -4,12 +4,11 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, setDoc } from 'firebase/firestore';
 import { MAX_STAGES, getThresholdForStage } from '@/lib/world-engine/stages';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Upload, Loader2, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 export function WorldLibrary() {
   const firestore = useFirestore();
