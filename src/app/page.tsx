@@ -259,16 +259,18 @@ export default function DrinkAndEarn() {
                         </div>
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 border-none rounded-[3rem]">
-                      <DialogHeader className="p-8 pb-4">
+                    <DialogContent className="max-w-4xl h-[85vh] overflow-hidden flex flex-col p-0 border-none rounded-[3rem] bg-background/95 backdrop-blur-3xl shadow-2xl">
+                      <DialogHeader className="p-8 pb-4 shrink-0">
                         <DialogTitle className="text-3xl font-headline font-bold flex items-center gap-3">
                           <Sparkles className="h-6 w-6 text-reward" />
                           Evolution Codex (64 Stages)
                         </DialogTitle>
                       </DialogHeader>
-                      <ScrollArea className="flex-1 px-8 pb-8">
-                        <WorldLibrary />
-                      </ScrollArea>
+                      <div className="flex-1 min-h-0 relative">
+                        <ScrollArea className="h-full px-8 pb-8">
+                          <WorldLibrary />
+                        </ScrollArea>
+                      </div>
                     </DialogContent>
                   </Dialog>
 

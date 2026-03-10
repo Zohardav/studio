@@ -6,20 +6,16 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { getLayersForStage, getThresholdForStage } from '@/lib/world-engine/stages';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 
 export function WorldLibrary() {
   // We want to show all 64 visual milestones
-  // Since visual levels map from hydration stages 1-100, we'll pick
-  // hydration stages that trigger each of the 64 visual levels.
   const visualStages = Array.from({ length: 64 }, (_, i) => i + 1);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 pb-12">
       {visualStages.map((vLevel) => {
         // Find a hydration stage that corresponds to this visual level
-        // Inverse of visualLevel = Math.floor(((stageId - 1) * 64) / 100) + 1
-        // We'll just calculate layers for a representative hydration stage
         const hydrationStageId = Math.ceil(((vLevel - 1) * 100) / 64) + 1;
         const layers = getLayersForStage(hydrationStageId);
         const threshold = getThresholdForStage(hydrationStageId);
@@ -27,9 +23,9 @@ export function WorldLibrary() {
         return (
           <motion.div 
             key={vLevel}
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: "50px" }}
             className="flex flex-col gap-3 p-4 bg-white/50 dark:bg-black/20 rounded-[2.5rem] border-4 border-white shadow-xl hover:border-primary/20 transition-all group"
           >
             <div className="relative aspect-square w-full bg-gradient-to-b from-blue-50 to-white rounded-[2rem] overflow-hidden flex items-center justify-center border-2 border-primary/5">
@@ -39,7 +35,7 @@ export function WorldLibrary() {
                 return (
                   <div 
                     key={layer.id}
-                    className="absolute inset-0 flex items-center justify-center"
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
                     style={{ zIndex: layer.z }}
                   >
                     <div 
@@ -60,7 +56,7 @@ export function WorldLibrary() {
               })}
               
               <div className="absolute top-3 left-3 flex gap-2">
-                <Badge className="bg-primary/80 backdrop-blur-md text-white font-black border-none px-3">
+                <Badge className="bg-primary/80 backdrop-blur-md text-white font-black border-none px-3 shadow-lg">
                   LVL {vLevel}
                 </Badge>
               </div>
