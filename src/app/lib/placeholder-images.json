@@ -3,109 +3,85 @@
   "placeholderImages": [
     {
       "id": "pixel-soil-dry",
-      "description": "Dry sandy soil patch with sparse grass edges matching the initial game state",
+      "description": "Dry sandy soil patch for early game stages",
       "imageUrl": "https://picsum.photos/seed/soil-dry/400/300",
-      "imageHint": "sandy soil"
+      "imageHint": "pixel desert"
     },
     {
       "id": "pixel-soil-moist",
-      "description": "Watered pixel art soil",
+      "description": "Partially green pixel art soil",
       "imageUrl": "https://picsum.photos/seed/soil-wet/400/300",
-      "imageHint": "pixel mud"
+      "imageHint": "pixel grass-patches"
     },
     {
       "id": "pixel-soil-lush",
-      "description": "Grass covered pixel art soil",
+      "description": "Lush green meadow pixel art",
       "imageUrl": "https://picsum.photos/seed/grass/400/300",
-      "imageHint": "pixel grass"
-    },
-    {
-      "id": "pixel-soil-dense",
-      "description": "Thick forest floor pixel art",
-      "imageUrl": "https://picsum.photos/seed/forest-floor/400/300",
-      "imageHint": "pixel dense grass"
-    },
-    {
-      "id": "pixel-seed",
-      "description": "Small glowing pixel seed",
-      "imageUrl": "https://picsum.photos/seed/seed/200/200",
-      "imageHint": "pixel seed"
-    },
-    {
-      "id": "pixel-sprout",
-      "description": "Tiny green pixel sprout",
-      "imageUrl": "https://picsum.photos/seed/sprout/200/200",
-      "imageHint": "pixel sprout"
+      "imageHint": "pixel meadow"
     },
     {
       "id": "pixel-tree-small",
-      "description": "Spindly pixel art sapling",
-      "imageUrl": "https://picsum.photos/seed/sapling/300/400",
+      "description": "Tiny pixel art sapling",
+      "imageUrl": "https://picsum.photos/seed/sapling/200/200",
       "imageHint": "pixel sapling"
     },
     {
       "id": "pixel-tree-mature",
-      "description": "Lush pixel art tree",
+      "description": "Full leafy pixel art tree",
       "imageUrl": "https://picsum.photos/seed/tree/400/500",
-      "imageHint": "pixel tree"
+      "imageHint": "pixel oak"
     },
     {
       "id": "pixel-tree-fruit",
-      "description": "Mature fruit tree pixel art",
-      "imageUrl": "https://picsum.photos/seed/fruit-tree/400/500",
-      "imageHint": "pixel fruit tree"
+      "description": "Orange tree with visible fruit",
+      "imageUrl": "https://picsum.photos/seed/orange-tree/400/500",
+      "imageHint": "pixel orange-tree"
     },
     {
-      "id": "pixel-flower-blue",
-      "description": "Magical blue pixel flower",
-      "imageUrl": "https://picsum.photos/seed/flower-blue/300/300",
-      "imageHint": "pixel flower"
-    },
-    {
-      "id": "pixel-flower-gold",
-      "description": "Rare golden pixel flower",
-      "imageUrl": "https://picsum.photos/seed/flower-gold/300/300",
-      "imageHint": "pixel sun-flower"
+      "id": "pixel-flower-variety",
+      "description": "Field of small pixel flowers",
+      "imageUrl": "https://picsum.photos/seed/flowers/300/300",
+      "imageHint": "pixel flowers"
     },
     {
       "id": "pixel-butterfly",
-      "description": "Animated pixel butterfly",
+      "description": "Small pixel art butterflies",
       "imageUrl": "https://picsum.photos/seed/butterfly/100/100",
       "imageHint": "pixel butterfly"
     },
     {
       "id": "pixel-bench",
-      "description": "Wooden park bench pixel art",
+      "description": "Wooden bench pixel art",
       "imageUrl": "https://picsum.photos/seed/bench/200/100",
       "imageHint": "pixel bench"
     },
     {
       "id": "pixel-lantern",
-      "description": "Glowing lantern post pixel art",
+      "description": "Black iron lantern post",
       "imageUrl": "https://picsum.photos/seed/lantern/100/300",
       "imageHint": "pixel lantern"
     },
     {
       "id": "pixel-pond",
-      "description": "Sparkling water pond pixel art",
+      "description": "Blue water pond with rocks",
       "imageUrl": "https://picsum.photos/seed/pond/400/200",
       "imageHint": "pixel pond"
     },
     {
       "id": "pixel-fountain",
-      "description": "Grand crystal fountain pixel art",
+      "description": "Crystal fountain with flowing water",
       "imageUrl": "https://picsum.photos/seed/fountain/400/500",
       "imageHint": "pixel fountain"
     },
     {
       "id": "pixel-path",
-      "description": "Stone path pixel art",
+      "description": "Stone winding path",
       "imageUrl": "https://picsum.photos/seed/stone-path/300/200",
-      "imageHint": "pixel stone path"
+      "imageHint": "pixel path"
     },
     {
       "id": "pixel-rocks",
-      "description": "Smooth white rocks scattered",
+      "description": "Scattered white stones",
       "imageUrl": "https://picsum.photos/seed/rocks-white/200/200",
       "imageHint": "pixel rocks"
     }
