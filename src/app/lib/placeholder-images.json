@@ -1,0 +1,46 @@
+{
+  "placeholderImages": [
+    {
+      "id": "garden-stage-1",
+      "description": "Small seed in the ground",
+      "imageUrl": "https://picsum.photos/seed/garden1/400/400",
+      "imageHint": "seed soil"
+    },
+    {
+      "id": "garden-stage-2",
+      "description": "Small sprout coming out of soil",
+      "imageUrl": "https://picsum.photos/seed/garden2/400/400",
+      "imageHint": "sprout plant"
+    },
+    {
+      "id": "garden-stage-3",
+      "description": "Mature flower in full bloom",
+      "imageUrl": "https://picsum.photos/seed/garden3/400/400",
+      "imageHint": "flower garden"
+    },
+    {
+      "id": "island-stage-1",
+      "description": "Small sandy island",
+      "imageUrl": "https://picsum.photos/seed/island1/400/400",
+      "imageHint": "island beach"
+    },
+    {
+      "id": "island-stage-2",
+      "description": "Island with palm trees",
+      "imageUrl": "https://picsum.photos/seed/island2/400/400",
+      "imageHint": "tropical island"
+    },
+    {
+      "id": "island-stage-3",
+      "description": "Island with house and lush garden",
+      "imageUrl": "https://picsum.photos/seed/island3/400/400",
+      "imageHint": "paradise island"
+    },
+    {
+      "id": "achievement-badge",
+      "description": "Shiny gold achievement badge",
+      "imageUrl": "https://picsum.photos/seed/badge/200/200",
+      "imageHint": "medal award"
+    }
+  ]
+}
