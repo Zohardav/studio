@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHydration } from '@/hooks/use-hydration';
 import { useAudio } from '@/components/audio/AudioEngine';
 import { VirtualWorld } from '@/components/world/VirtualWorld';
@@ -16,6 +16,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 
 export default function DrinkAndEarn() {
+  const [mounted, setMounted] = useState(false);
   const { 
     settings, setSettings, 
     currentAmountMl, progressPercent, 
@@ -25,6 +26,10 @@ export default function DrinkAndEarn() {
 
   const { playWaterLog, playAchievement } = useAudio(settings.soundEnabled);
   const { toast } = useToast();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleAddWater = (amount: number) => {
     addWater(amount);
@@ -118,7 +123,7 @@ export default function DrinkAndEarn() {
                             <span className="font-medium">{log.amountMl}ml</span>
                           </div>
                           <span className="text-xs text-muted-foreground">
-                            {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {mounted ? new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
                           </span>
                         </div>
                       ))
