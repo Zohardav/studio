@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -7,8 +6,9 @@ import { useAudio } from '@/components/audio/AudioEngine';
 import { PixelWorld } from '@/components/world/PixelWorld';
 import { HydrationTracker } from '@/components/dashboard/HydrationTracker';
 import { Onboarding } from '@/components/dashboard/Onboarding';
+import { WorldLibrary } from '@/components/dashboard/WorldLibrary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Sparkles, Droplets, Home, Scroll, Heart, Trash2, FastForward, PlusCircle } from 'lucide-react';
+import { Award, Sparkles, Droplets, Home, Scroll, Heart, Trash2, FastForward, PlusCircle, BookOpen } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export default function DrinkAndEarn() {
   const [mounted, setMounted] = useState(false);
@@ -246,6 +247,31 @@ export default function DrinkAndEarn() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 gap-3">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-between h-12 bg-white/40 hover:bg-reward/10 rounded-2xl px-5"
+                      >
+                        <div className="flex items-center gap-3">
+                          <BookOpen className="h-4 w-4 text-reward" />
+                          <span className="text-xs font-black uppercase tracking-widest">View World Evolution Library</span>
+                        </div>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 border-none rounded-[3rem]">
+                      <DialogHeader className="p-8 pb-4">
+                        <DialogTitle className="text-3xl font-headline font-bold flex items-center gap-3">
+                          <Sparkles className="h-6 w-6 text-reward" />
+                          Evolution Codex (64 Stages)
+                        </DialogTitle>
+                      </DialogHeader>
+                      <ScrollArea className="flex-1 px-8 pb-8">
+                        <WorldLibrary />
+                      </ScrollArea>
+                    </DialogContent>
+                  </Dialog>
+
                   <Button 
                     variant="ghost" 
                     onClick={debugNextDay}
