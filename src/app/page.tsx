@@ -23,7 +23,7 @@ export default function DrinkAndEarn() {
     settings, setSettings, 
     currentAmountMl, progressPercent, 
     addWater, onboardingComplete, setOnboardingComplete,
-    aiMessage, achievements, streak, todayLogs, growthScore,
+    aiMessage, achievements, streak, todayLogs, totalLifetimeMl,
     debugReset, debugNextDay, debugAddStreak
   } = useHydration();
 
@@ -35,15 +35,11 @@ export default function DrinkAndEarn() {
   }, []);
 
   const handleAddWater = (amount: number) => {
-    handleAddWaterEffect(amount);
-  };
-
-  const handleAddWaterEffect = (amount: number) => {
     addWater(amount);
     playWaterLog();
     
-    // Check for "Evolution" milestone sounds
-    if (Math.floor(growthScore + (amount/10)) > Math.floor(growthScore)) {
+    // Check for growth milestones (every 100ml)
+    if (Math.floor((totalLifetimeMl + amount) / 100) > Math.floor(totalLifetimeMl / 100)) {
       playUnlock();
     }
 
@@ -66,7 +62,7 @@ export default function DrinkAndEarn() {
   }
 
   return (
-    <div className="max-w-md mx-auto min-h-svh bg-[#FFF9FC] dark:bg-[#120F1A] flex flex-col relative pb-32">
+    <div className="max-w-md mx-auto min-h-svh bg-[#FFF9FC] dark:bg-[#120F1A] flex flex-col relative pb-32" suppressHydrationWarning>
       {/* Magical background elements */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <motion.div 
@@ -106,7 +102,7 @@ export default function DrinkAndEarn() {
         <Tabs defaultValue="home" className="w-full">
           <AnimatePresence mode="wait">
             <TabsContent value="home" key="home" className="space-y-8 mt-0 focus-visible:ring-0">
-              <PixelWorld growthScore={growthScore} theme={settings.worldTheme} />
+              <PixelWorld totalLifetimeMl={totalLifetimeMl} theme={settings.worldTheme} />
               
               <HydrationTracker 
                 currentAmount={currentAmountMl}
