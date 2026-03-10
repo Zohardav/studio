@@ -3,9 +3,9 @@
   "placeholderImages": [
     {
       "id": "pixel-soil-dry",
-      "description": "Dry pixel art soil patch",
+      "description": "Dry sandy soil patch with sparse grass edges matching the initial game state",
       "imageUrl": "https://picsum.photos/seed/soil-dry/400/300",
-      "imageHint": "pixel soil"
+      "imageHint": "sandy soil"
     },
     {
       "id": "pixel-soil-moist",
@@ -39,7 +39,7 @@
     },
     {
       "id": "pixel-tree-small",
-      "description": "Young pixel art sapling",
+      "description": "Spindly pixel art sapling",
       "imageUrl": "https://picsum.photos/seed/sapling/300/400",
       "imageHint": "pixel sapling"
     },
@@ -102,6 +102,12 @@
       "description": "Stone path pixel art",
       "imageUrl": "https://picsum.photos/seed/stone-path/300/200",
       "imageHint": "pixel stone path"
+    },
+    {
+      "id": "pixel-rocks",
+      "description": "Smooth white rocks scattered",
+      "imageUrl": "https://picsum.photos/seed/rocks-white/200/200",
+      "imageHint": "pixel rocks"
     }
   ]
 }
