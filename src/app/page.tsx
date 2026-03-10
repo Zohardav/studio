@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -7,13 +8,14 @@ import { PixelWorld } from '@/components/world/PixelWorld';
 import { HydrationTracker } from '@/components/dashboard/HydrationTracker';
 import { Onboarding } from '@/components/dashboard/Onboarding';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Sparkles, Droplets, Home, Scroll, Heart } from 'lucide-react';
+import { Award, Sparkles, Droplets, Home, Scroll, Heart, Trash2, FastForward, PlusCircle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 
 export default function DrinkAndEarn() {
   const [mounted, setMounted] = useState(false);
@@ -21,7 +23,8 @@ export default function DrinkAndEarn() {
     settings, setSettings, 
     currentAmountMl, progressPercent, 
     addWater, onboardingComplete, setOnboardingComplete,
-    aiMessage, achievements, streak, todayLogs, growthScore
+    aiMessage, achievements, streak, todayLogs, growthScore,
+    debugReset, debugNextDay, debugAddStreak
   } = useHydration();
 
   const { playWaterLog, playAchievement, playUnlock } = useAudio(settings.soundEnabled);
@@ -32,6 +35,10 @@ export default function DrinkAndEarn() {
   }, []);
 
   const handleAddWater = (amount: number) => {
+    handleAddWaterEffect(amount);
+  };
+
+  const handleAddWaterEffect = (amount: number) => {
     addWater(amount);
     playWaterLog();
     
@@ -182,7 +189,7 @@ export default function DrinkAndEarn() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="self" key="self" className="space-y-6 mt-0 focus-visible:ring-0">
+            <TabsContent value="self" key="self" className="space-y-6 mt-0 focus-visible:ring-0 pb-12">
               <Card className="pixel-card border-none overflow-hidden">
                 <CardHeader>
                   <CardTitle className="text-xl font-headline font-bold">Guardian Settings</CardTitle>
@@ -234,6 +241,50 @@ export default function DrinkAndEarn() {
                 </CardContent>
               </Card>
               
+              {/* Developer Rituals Section */}
+              <Card className="pixel-card border-dashed border-2 border-reward/30 bg-reward/5 overflow-hidden">
+                <CardHeader>
+                  <CardTitle className="text-lg font-headline font-bold text-reward/80 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    Developer Rituals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 gap-3">
+                  <Button 
+                    variant="ghost" 
+                    onClick={debugNextDay}
+                    className="w-full justify-between h-12 bg-white/40 hover:bg-reward/10 rounded-2xl px-5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <FastForward className="h-4 w-4 text-reward" />
+                      <span className="text-xs font-black uppercase tracking-widest">Fast Forward 24h</span>
+                    </div>
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    onClick={debugAddStreak}
+                    className="w-full justify-between h-12 bg-white/40 hover:bg-reward/10 rounded-2xl px-5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <PlusCircle className="h-4 w-4 text-reward" />
+                      <span className="text-xs font-black uppercase tracking-widest">Manual Streak Boost</span>
+                    </div>
+                  </Button>
+
+                  <Button 
+                    variant="ghost" 
+                    onClick={debugReset}
+                    className="w-full justify-between h-12 bg-destructive/5 hover:bg-destructive/10 rounded-2xl px-5 text-destructive"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Trash2 className="h-4 w-4" />
+                      <span className="text-xs font-black uppercase tracking-widest">Reset Journey</span>
+                    </div>
+                  </Button>
+                </CardContent>
+              </Card>
+
               <div className="text-center opacity-30 py-8">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em]">Nourish & Grow • v2.0</p>
               </div>

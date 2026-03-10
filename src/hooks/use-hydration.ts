@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -53,11 +54,13 @@ export function useHydration() {
     const storedLogs = localStorage.getItem('hydration_logs');
     const storedAchievements = localStorage.getItem('hydration_achievements');
     const storedOnboarding = localStorage.getItem('hydration_onboarding');
+    const storedStreak = localStorage.getItem('hydration_streak');
 
     if (storedSettings) setSettings(JSON.parse(storedSettings));
     if (storedLogs) setLogs(JSON.parse(storedLogs));
     if (storedAchievements) setAchievements(JSON.parse(storedAchievements));
     if (storedOnboarding) setOnboardingComplete(JSON.parse(storedOnboarding));
+    if (storedStreak) setStreak(JSON.parse(storedStreak));
   }, []);
 
   // Sync data
@@ -66,7 +69,8 @@ export function useHydration() {
     localStorage.setItem('hydration_logs', JSON.stringify(logs));
     localStorage.setItem('hydration_achievements', JSON.stringify(achievements));
     localStorage.setItem('hydration_onboarding', JSON.stringify(onboardingComplete));
-  }, [settings, logs, achievements, onboardingComplete]);
+    localStorage.setItem('hydration_streak', JSON.stringify(streak));
+  }, [settings, logs, achievements, onboardingComplete, streak]);
 
   const todayLogs = useMemo(() => logs.filter(log => {
     const date = new Date(log.timestamp);
@@ -129,6 +133,28 @@ export function useHydration() {
     }));
   }, [currentAmountMl, settings, todayLogs.length]);
 
+  // Developer Features
+  const debugReset = useCallback(() => {
+    localStorage.clear();
+    window.location.reload();
+  }, []);
+
+  const debugNextDay = useCallback(() => {
+    // Move all current logs to "yesterday"
+    setLogs(prev => prev.map(log => ({
+      ...log,
+      timestamp: log.timestamp - (24 * 60 * 60 * 1000)
+    })));
+    // If goal was reached yesterday, increment streak
+    if (currentAmountMl >= settings.dailyGoalMl) {
+      setStreak(s => s + 1);
+    }
+  }, [currentAmountMl, settings.dailyGoalMl]);
+
+  const debugAddStreak = useCallback(() => {
+    setStreak(s => s + 1);
+  }, []);
+
   return {
     settings,
     setSettings,
@@ -138,10 +164,14 @@ export function useHydration() {
     progressPercent,
     growthScore,
     streak,
+    setStreak,
     achievements,
     onboardingComplete,
     setOnboardingComplete,
     addWater,
     aiMessage,
+    debugReset,
+    debugNextDay,
+    debugAddStreak
   };
 }
