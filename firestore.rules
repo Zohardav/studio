@@ -1,186 +1,21 @@
-/**
- * FIREBASE SECURITY RULES: WORLD EVOLUTION & HYDRATION TRACKER
- *
- * Core Philosophy:
- * This ruleset implements a strict Path-Based Ownership model. All personal user data (logs, summaries, 
- * streaks, and progression) is stored within a hierarchical tree under /users/{userId}, where the 
- * document path itself serves as the primary authorization boundary. Access is granted only if the 
- * authenticated user's UID matches the {userId} wildcard in the document path.
- *
- * Data Structure:
- * - /users/{userId}: The root document for user-specific settings.
- * - /users/{userId}/{subcollections}: Private user data (Hydration Logs, Streaks, Achievements, Progressions).
- * - /virtualWorldThemes, /achievements, /unlockableItems: Global master data collections.
- * - /virtualWorldThemes/{themeId}/worldStages: Subcollection defining theme-specific evolution stages.
- *
- * Key Security Decisions:
- * 1. Authorization Independence: User-owned documents denormalize 'userId' to allow security checks 
- *    without requiring parent document lookups (get() calls), ensuring high performance.
- * 2. Master Data Integrity: System-wide collections (Themes, Achievements, Items) are globally readable 
- *    by all authenticated users but strictly read-only for client-side requests to prevent tampering 
- *    with game definitions.
- * 3. Relational Integrity: On creation of user-owned records, the rules enforce that internal data 
- *    fields (like 'userId') match the path wildcard and the current auth token, preventing data 
- *    injection into other users' accounts.
- *
- * Denormalization for Authorization:
- * Each document in a user subcollection contains a 'userId' field. This allows for direct validation:
- * 'allow create: if request.resource.data.userId == userId && isOwner(userId)'.
- */
 
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // --- GLOBAL HELPER FUNCTIONS ---
-
-    /** @description Checks if the request is from a signed-in user. */
     function isSignedIn() {
       return request.auth != null;
     }
-
-    /** @description Checks if the user's UID matches the provided ID. */
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    /** @description Checks ownership and ensures the document exists for modifications. */
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
-    // --- COLLECTION RULES ---
-
-    /**
-     * @description Rules for UserProfile. Owners can manage their own profile data.
-     * @path /users/{userId}
-     * @allow (get) If the user is the owner.
-     * @deny (create) If the user attempts to set an 'id' field that doesn't match their UID.
-     * @principle Pattern 1 (Ownership) & Pattern 4 (Self-Creation).
-     */
+    
     match /users/{userId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
-
-      /**
-       * @description Records of individual water intake. Scoped to the user's private tree.
-       * @path /users/{userId}/hydrationLogs/{logId}
-       * @allow (create) If userId field matches the path and auth UID.
-       * @principle Validates relational integrity between path and document content.
-       */
-      match /hydrationLogs/{logId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
-      }
-
-      /**
-       * @description Daily aggregation summaries.
-       * @path /users/{userId}/dailySummaries/{date}
-       * @allow (list) If the requesting user is the owner of the path.
-       */
-      match /dailySummaries/{date} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
-      }
-
-      /**
-       * @description Trackers for consecutive goal completion.
-       * @path /users/{userId}/streaks/{streakType}
-       */
-      match /streaks/{streakType} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
-      }
-
-      /**
-       * @description Records of achievements unlocked by the user.
-       * @path /users/{userId}/userAchievements/{userAchievementId}
-       */
-      match /userAchievements/{userAchievementId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
-      }
-
-      /**
-       * @description User's personal reminder preferences.
-       * @path /users/{userId}/reminderSettings/{reminderSettingId}
-       */
-      match /reminderSettings/{reminderSettingId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
-      }
-
-      /**
-       * @description User's progress through a specific world theme.
-       * @path /users/{userId}/userWorldProgressions/{virtualWorldThemeId}
-       */
-      match /userWorldProgressions/{virtualWorldThemeId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
+      allow read, write: if request.auth.uid == userId;
+      match /logs/{logId} {
+        allow read, write: if request.auth.uid == userId;
       }
     }
-
-    /**
-     * @description Global achievement definitions.
-     * @path /achievements/{achievementId}
-     * @allow (get, list) If the user is authenticated.
-     * @deny (write) Restricted to system/admin. Entity lacks author/owner field for client writes.
-     */
-    match /achievements/{achievementId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if false; // TODO: Admin authorization required for content creation.
-    }
-
-    /**
-     * @description Global virtual world themes.
-     * @path /virtualWorldThemes/{themeId}
-     * @allow (get, list) All authenticated users.
-     */
-    match /virtualWorldThemes/{themeId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if false; // TODO: Admin authorization required.
-
-      /**
-       * @description Visual stages within a theme. Includes imageUrl for each stage.
-       * @path /virtualWorldThemes/{themeId}/worldStages/{stageId}
-       * @principle Ensures stages are tied correctly to their parent theme.
-       */
-      match /worldStages/{stageId} {
-        allow get, list: if isSignedIn();
-        allow create, update, delete: if false; // TODO: Admin authorization required.
-      }
-    }
-
-    /**
-     * @description Definitions of decorative items and rewards.
-     * @path /unlockableItems/{itemId}
-     */
-    match /unlockableItems/{itemId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if false; // TODO: Admin authorization required.
-    }
-
-    /**
-     * @description Pre-curated messages used for user motivation.
-     * @path /encouragementMessageTemplates/{templateId}
-     */
-    match /encouragementMessageTemplates/{templateId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if false; // TODO: Admin authorization required.
+    
+    match /worldStages/{stageId} {
+      // Allow all authenticated users to read and write for the developer preview
+      allow read, write: if isSignedIn();
     }
   }
 }

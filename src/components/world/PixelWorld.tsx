@@ -3,69 +3,80 @@
 
 import React, { useMemo } from 'react';
 import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Sun, ArrowUpCircle, Zap } from 'lucide-react';
-import { calculateStageId, getLayersForStage, getNextMilestoneInfo, getVisualLevel } from '@/lib/world-engine/stages';
+import { Sparkles, ArrowUpCircle, Zap, Loader2, ImageOff } from 'lucide-react';
+import { calculateStageNumber, getNextMilestoneInfo } from '@/lib/world-engine/stages';
 
 interface PixelWorldProps {
   totalLifetimeMl: number;
-  theme: string;
 }
 
-export function PixelWorld({ totalLifetimeMl, theme }: PixelWorldProps) {
-  const stageId = useMemo(() => calculateStageId(totalLifetimeMl), [totalLifetimeMl]);
-  const vLevel = useMemo(() => getVisualLevel(stageId), [stageId]);
-  const layers = useMemo(() => getLayersForStage(stageId), [stageId]);
-  const milestone = useMemo(() => getNextMilestoneInfo(stageId, totalLifetimeMl), [stageId, totalLifetimeMl]);
+export function PixelWorld({ totalLifetimeMl }: PixelWorldProps) {
+  const stageNumber = useMemo(() => calculateStageNumber(totalLifetimeMl), [totalLifetimeMl]);
+  const milestone = useMemo(() => getNextMilestoneInfo(stageNumber, totalLifetimeMl), [stageNumber, totalLifetimeMl]);
+
+  const firestore = useFirestore();
+  const stageDocRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'worldStages', stageNumber.toString());
+  }, [firestore, stageNumber]);
+
+  const { data: stageData, isLoading } = useDoc(stageDocRef);
 
   return (
     <div className="relative w-full aspect-[4/5] flex items-center justify-center pixel-card p-6 overflow-hidden border-none shadow-2xl">
-      {/* Dynamic background based on visual level */}
+      {/* Atmosphere based on progress */}
       <div className={`absolute inset-0 transition-all duration-2000 ${
-        vLevel > 48 ? 'bg-gradient-to-b from-blue-200 to-green-100' : 
-        vLevel > 24 ? 'bg-gradient-to-b from-blue-100 to-white' : 
-        'bg-[#FDF6E3]' // Warm sandy background for early desert stages
+        stageNumber > 48 ? 'bg-gradient-to-b from-blue-200 to-green-100' : 
+        stageNumber > 24 ? 'bg-gradient-to-b from-blue-100 to-white' : 
+        'bg-[#FDF6E3]'
       }`} />
 
-      {/* Atmospheric Effects */}
-      <div className="absolute top-10 left-0 right-0 flex justify-around px-8 opacity-40 pointer-events-none">
-        <Sun className={`h-16 w-16 text-reward/60 animate-spin-slow transition-opacity duration-1000 ${vLevel > 16 ? 'opacity-100' : 'opacity-20'}`} />
-        {vLevel > 48 && <Sparkles className="h-8 w-8 text-reward animate-bounce" />}
-      </div>
-
-      <AnimatePresence>
-        {layers.map((layer) => {
-          const asset = PlaceHolderImages.find(a => a.id === layer.assetId);
-          if (!asset) return null;
-
-          return (
-            <motion.div
-              key={`${layer.id}-${layer.assetId}`}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ 
-                opacity: 1, 
-                scale: layer.scale || 1, 
-                y: layer.y || 0,
-                x: layer.x || 0,
-              }}
-              exit={{ opacity: 0, scale: 1.1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className={`absolute flex items-center justify-center ${layer.animate ? 'animate-float-cozy' : ''}`}
-              style={{ zIndex: layer.z }}
-            >
-              <div className="relative w-72 h-72">
-                <Image
-                  src={asset.imageUrl}
-                  alt={asset.description}
-                  fill
-                  className="object-contain"
-                  data-ai-hint={asset.imageHint}
-                />
-              </div>
-            </motion.div>
-          );
-        })}
+      <AnimatePresence mode="wait">
+        {isLoading ? (
+          <motion.div 
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col items-center gap-2 z-10"
+          >
+            <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
+            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Glimpsing the World...</span>
+          </motion.div>
+        ) : stageData?.imageUrl ? (
+          <motion.div
+            key={stageData.id}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            transition={{ duration: 0.8 }}
+            className="relative w-full h-full z-10"
+          >
+            <Image
+              src={stageData.imageUrl}
+              alt={`World Stage ${stageNumber}`}
+              fill
+              className="object-contain"
+              priority
+            />
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="empty"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center gap-4 z-10 text-muted-foreground/30"
+          >
+            <ImageOff className="h-16 w-16" />
+            <div className="text-center">
+              <p className="text-xs font-black uppercase tracking-widest">Uncharted Territory</p>
+              <p className="text-[10px] font-bold">Upload Stage {stageNumber} in Codex</p>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* UI Overlay: Evolution Goal */}
@@ -81,7 +92,7 @@ export function PixelWorld({ totalLifetimeMl, theme }: PixelWorldProps) {
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] font-black text-primary uppercase tracking-widest leading-none mb-1">Target Milestone</span>
-              <span className="text-xs font-bold text-foreground">Evolution {Math.ceil(vLevel / 8)}/8</span>
+              <span className="text-xs font-bold text-foreground">Evolution {milestone.nextStage}/64</span>
             </div>
           </div>
           <div className="text-right flex flex-col items-end">
@@ -97,13 +108,13 @@ export function PixelWorld({ totalLifetimeMl, theme }: PixelWorldProps) {
       {/* Progress Badge */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50">
         <motion.div
-          key={vLevel}
+          key={stageNumber}
           initial={{ scale: 0.9 }}
           animate={{ scale: 1 }}
           className="bg-white/95 backdrop-blur-md px-6 py-2 rounded-full border-2 border-primary/10 shadow-xl flex items-center gap-3"
         >
-          <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Sanctuary Level</span>
-          <span className="text-xl font-headline font-bold text-primary">{vLevel}</span>
+          <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Current Stage</span>
+          <span className="text-xl font-headline font-bold text-primary">{stageNumber}</span>
         </motion.div>
       </div>
     </div>

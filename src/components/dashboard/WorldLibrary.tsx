@@ -1,85 +1,127 @@
 
 "use client"
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { getLayersForStage, getThresholdForStage, getVisualLevel } from '@/lib/world-engine/stages';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { MAX_STAGES, getThresholdForStage } from '@/lib/world-engine/stages';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { Zap, Sparkles } from 'lucide-react';
+import { Upload, Loader2, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export function WorldLibrary() {
-  // Show all 64 visual milestones from the grid
-  const visualLevels = Array.from({ length: 64 }, (_, i) => i + 1);
+  const firestore = useFirestore();
+  const stagesQuery = useMemoFirebase(() => collection(firestore, 'worldStages'), [firestore]);
+  const { data: stages, isLoading } = useCollection(stagesQuery);
+  const [uploadingStage, setUploadingStage] = useState<number | null>(null);
+
+  const handleFileUpload = async (stageNumber: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !firestore) return;
+
+    setUploadingStage(stageNumber);
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      const stageId = stageNumber.toString();
+      
+      try {
+        await setDoc(doc(firestore, 'worldStages', stageId), {
+          id: stageId,
+          stageNumber,
+          imageUrl: base64String,
+          updatedAt: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Failed to upload stage image:', error);
+      } finally {
+        setUploadingStage(null);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Syncing World Codex...</p>
+      </div>
+    );
+  }
+
+  const stageList = Array.from({ length: MAX_STAGES }, (_, i) => i + 1);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 pb-12">
-      {visualLevels.map((vLevel) => {
-        // Map visual level back to a representative hydration stage (1-100)
-        const hydrationStageId = Math.ceil((vLevel * 100) / 64);
-        const layers = getLayersForStage(hydrationStageId);
-        const threshold = getThresholdForStage(hydrationStageId);
+      {stageList.map((num) => {
+        const stageData = stages?.find(s => s.stageNumber === num);
+        const isThisUploading = uploadingStage === num;
 
         return (
           <motion.div 
-            key={vLevel}
+            key={num}
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: "50px" }}
+            viewport={{ once: true }}
             className="flex flex-col gap-3 p-4 bg-white/50 dark:bg-black/20 rounded-[2.5rem] border-4 border-white shadow-xl hover:border-primary/20 transition-all group"
           >
-            <div className="relative aspect-square w-full bg-gradient-to-b from-blue-50 to-white rounded-[2rem] overflow-hidden flex items-center justify-center border-2 border-primary/5">
-              {layers.map((layer) => {
-                const asset = PlaceHolderImages.find(a => a.id === layer.assetId);
-                if (!asset) return null;
-                return (
-                  <div 
-                    key={layer.id}
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                    style={{ zIndex: layer.z }}
-                  >
-                    <div 
-                      className="relative w-full h-full p-4"
-                      style={{ 
-                        transform: `scale(${layer.scale}) translate(${layer.x || 0}px, ${layer.y || 0}px)` 
-                      }}
-                    >
-                      <Image
-                        src={asset.imageUrl}
-                        alt={asset.description}
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
+            <div className="relative aspect-square w-full bg-slate-100 dark:bg-slate-900 rounded-[2rem] overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+              {stageData?.imageUrl ? (
+                <div className="relative w-full h-full">
+                  <Image
+                    src={stageData.imageUrl}
+                    alt={`Stage ${num}`}
+                    fill
+                    className="object-contain"
+                  />
+                  <div className="absolute top-3 right-3">
+                    <CheckCircle2 className="h-6 w-6 text-green-500 fill-white" />
                   </div>
-                );
-              })}
-              
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2 opacity-30">
+                  <ImageIcon className="h-10 w-10" />
+                  <span className="text-[10px] font-black uppercase tracking-tighter">Empty Stage</span>
+                </div>
+              )}
+
+              {isThisUploading && (
+                <div className="absolute inset-0 bg-white/80 dark:bg-black/80 flex items-center justify-center z-10">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              )}
+
               <div className="absolute top-3 left-3 flex gap-2">
                 <Badge className="bg-primary/80 backdrop-blur-md text-white font-black border-none px-3 shadow-lg">
-                  LVL {vLevel}
+                  LVL {num}
                 </Badge>
               </div>
+
+              <label className="absolute inset-0 cursor-pointer opacity-0 hover:opacity-100 transition-opacity bg-primary/20 flex items-center justify-center group-hover:opacity-10 pointer-events-auto">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={(e) => handleFileUpload(num, e)}
+                  disabled={isThisUploading}
+                />
+                <div className="bg-white p-4 rounded-full shadow-2xl">
+                  <Upload className="h-6 w-6 text-primary" />
+                </div>
+              </label>
             </div>
 
-            <div className="space-y-1 px-2">
+            <div className="px-2">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Hydration Mark</span>
-                <div className="flex items-center gap-1">
-                  <Zap className="h-3 w-3 text-reward fill-reward" />
-                  <span className="text-sm font-bold text-primary">{threshold}ml</span>
-                </div>
+                <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Requirement</span>
+                <span className="text-sm font-bold text-primary">{getThresholdForStage(num)}ml</span>
               </div>
-              <p className="text-[9px] font-bold text-muted-foreground leading-tight">
-                {vLevel <= 8 && "Phase 1: Foundation. The soil awakens as the first sapling breaks through."}
-                {vLevel > 8 && vLevel <= 16 && "Phase 2: Colonization. Grass begins to spread across the dry earth."}
-                {vLevel > 16 && vLevel <= 24 && "Phase 3: Expansion. Early flowers bloom and the tree gains strength."}
-                {vLevel > 24 && vLevel <= 32 && "Phase 4: Structuring. Stone pathways and decorative shrubs appear."}
-                {vLevel > 32 && vLevel <= 40 && "Phase 5: Life Stream. A magical pond forms to nourish the world."}
-                {vLevel > 40 && vLevel <= 48 && "Phase 6: Sanctuary. Comforts like benches and lanterns are added."}
-                {vLevel > 48 && vLevel <= 56 && "Phase 7: Orchard. The tree matures into a fruit-bearing provider."}
-                {vLevel > 56 && "Phase 8: Grand Ascension. The final sanctuary featuring the Crystal Fountain."}
+              <p className="text-[9px] font-bold text-muted-foreground mt-1">
+                {stageData ? 'Image uploaded and active.' : 'Pending visual asset.'}
               </p>
             </div>
           </motion.div>
