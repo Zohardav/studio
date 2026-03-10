@@ -1,10 +1,11 @@
+
 "use client"
 
 import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Cloud, Sun, Ghost } from 'lucide-react';
+import { Sparkles, Cloud, Sun, ArrowUpCircle } from 'lucide-react';
 
 interface PixelWorldProps {
   growthScore: number;
@@ -15,6 +16,11 @@ export function PixelWorld({ growthScore, theme }: PixelWorldProps) {
   // Logic for 100 stages of progression
   const stage = Math.min(100, Math.floor(growthScore));
   
+  // Calculate next major milestone (every 10%)
+  const nextMilestone = Math.ceil((stage + 1) / 10) * 10;
+  const progressToMilestone = nextMilestone - growthScore;
+  const mlToMilestone = Math.ceil(progressToMilestone * 100);
+
   const getLayers = useMemo(() => {
     const layers = [];
     
@@ -95,6 +101,29 @@ export function PixelWorld({ growthScore, theme }: PixelWorldProps) {
           );
         })}
       </AnimatePresence>
+
+      {/* Evolution Status Header */}
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 w-full px-8">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/40 backdrop-blur-xl border border-white/20 rounded-3xl p-3 flex items-center justify-between shadow-sm"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/20 rounded-2xl">
+              <ArrowUpCircle className="h-4 w-4 text-primary" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[9px] font-black text-primary uppercase tracking-widest">Next Evolution</span>
+              <span className="text-xs font-bold text-foreground">Stage {nextMilestone / 10}</span>
+            </div>
+          </div>
+          <div className="text-right flex flex-col">
+            <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">Needs</span>
+            <span className="text-xs font-black text-primary">{mlToMilestone}ml</span>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Progress Label */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50">

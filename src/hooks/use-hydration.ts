@@ -39,6 +39,7 @@ export function useHydration() {
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [logs, setLogs] = useState<HydrationLog[]>([]);
   const [streak, setStreak] = useState(0);
+  const [totalLifetimeMl, setTotalLifetimeMl] = useState(0);
   const [achievements, setAchievements] = useState<Achievement[]>([
     { id: 'first_drink', name: 'Awakening', description: 'Gave the soil its first drop.' },
     { id: 'daily_goal', name: 'Nourisher', description: 'Met the daily hydration ritual.' },
@@ -55,12 +56,14 @@ export function useHydration() {
     const storedAchievements = localStorage.getItem('hydration_achievements');
     const storedOnboarding = localStorage.getItem('hydration_onboarding');
     const storedStreak = localStorage.getItem('hydration_streak');
+    const storedTotalMl = localStorage.getItem('hydration_total_ml');
 
     if (storedSettings) setSettings(JSON.parse(storedSettings));
     if (storedLogs) setLogs(JSON.parse(storedLogs));
     if (storedAchievements) setAchievements(JSON.parse(storedAchievements));
     if (storedOnboarding) setOnboardingComplete(JSON.parse(storedOnboarding));
     if (storedStreak) setStreak(JSON.parse(storedStreak));
+    if (storedTotalMl) setTotalLifetimeMl(JSON.parse(storedTotalMl));
   }, []);
 
   // Sync data
@@ -70,7 +73,8 @@ export function useHydration() {
     localStorage.setItem('hydration_achievements', JSON.stringify(achievements));
     localStorage.setItem('hydration_onboarding', JSON.stringify(onboardingComplete));
     localStorage.setItem('hydration_streak', JSON.stringify(streak));
-  }, [settings, logs, achievements, onboardingComplete, streak]);
+    localStorage.setItem('hydration_total_ml', JSON.stringify(totalLifetimeMl));
+  }, [settings, logs, achievements, onboardingComplete, streak, totalLifetimeMl]);
 
   const todayLogs = useMemo(() => logs.filter(log => {
     const date = new Date(log.timestamp);
@@ -83,18 +87,12 @@ export function useHydration() {
   const currentAmountMl = useMemo(() => todayLogs.reduce((acc, log) => acc + log.amountMl, 0), [todayLogs]);
   const progressPercent = Math.min(100, (currentAmountMl / settings.dailyGoalMl) * 100);
 
-  // Growth Score Logic: The heart of the 100-stage progression
+  // Growth Score Logic: Now based on total lifetime effort (100ml = 1% Growth)
+  // This ensures progress is never lost and users can reach Stage 100 over time.
   const growthScore = useMemo(() => {
-    // Stage is 0-100.
-    // Daily progress accounts for up to 40 points
-    // Streak accounts for up to 30 points (10 days = max)
-    // Lifetime logs account for up to 30 points (100 logs = max)
-    const dailyPoints = (currentAmountMl / settings.dailyGoalMl) * 40;
-    const streakPoints = Math.min(30, (streak || 0) * 3);
-    const logPoints = Math.min(30, logs.length / 3);
-    
-    return Math.min(100, dailyPoints + streakPoints + logPoints);
-  }, [currentAmountMl, settings.dailyGoalMl, streak, logs.length]);
+    // 10,000ml total consumption = Stage 100 (100% Growth)
+    return Math.min(100, totalLifetimeMl / 100);
+  }, [totalLifetimeMl]);
 
   const addWater = useCallback(async (amountMl: number) => {
     const newLog: HydrationLog = {
@@ -104,6 +102,7 @@ export function useHydration() {
     };
 
     setLogs(prev => [...prev, newLog]);
+    setTotalLifetimeMl(prev => prev + amountMl);
 
     // AI Encouragement
     const isGoalReached = (currentAmountMl + amountMl) >= settings.dailyGoalMl;
@@ -153,6 +152,8 @@ export function useHydration() {
 
   const debugAddStreak = useCallback(() => {
     setStreak(s => s + 1);
+    // Also give some XP boost for testing higher stages
+    setTotalLifetimeMl(prev => prev + 1000); 
   }, []);
 
   return {
@@ -163,6 +164,7 @@ export function useHydration() {
     currentAmountMl,
     progressPercent,
     growthScore,
+    totalLifetimeMl,
     streak,
     setStreak,
     achievements,
