@@ -1,46 +1,64 @@
 {
   "placeholderImages": [
     {
-      "id": "garden-stage-1",
-      "description": "Small seed in the ground",
-      "imageUrl": "https://picsum.photos/seed/garden1/400/400",
-      "imageHint": "seed soil"
+      "id": "pixel-soil-dry",
+      "description": "Dry pixel art soil patch",
+      "imageUrl": "https://picsum.photos/seed/soil-dry/400/300",
+      "imageHint": "pixel soil"
     },
     {
-      "id": "garden-stage-2",
-      "description": "Small sprout coming out of soil",
-      "imageUrl": "https://picsum.photos/seed/garden2/400/400",
-      "imageHint": "sprout plant"
+      "id": "pixel-soil-moist",
+      "description": "Watered pixel art soil",
+      "imageUrl": "https://picsum.photos/seed/soil-wet/400/300",
+      "imageHint": "pixel mud"
     },
     {
-      "id": "garden-stage-3",
-      "description": "Mature flower in full bloom",
-      "imageUrl": "https://picsum.photos/seed/garden3/400/400",
-      "imageHint": "flower garden"
+      "id": "pixel-soil-lush",
+      "description": "Grass covered pixel art soil",
+      "imageUrl": "https://picsum.photos/seed/grass/400/300",
+      "imageHint": "pixel grass"
     },
     {
-      "id": "island-stage-1",
-      "description": "Small sandy island",
-      "imageUrl": "https://picsum.photos/seed/island1/400/400",
-      "imageHint": "island beach"
+      "id": "pixel-seed",
+      "description": "Small glowing pixel seed",
+      "imageUrl": "https://picsum.photos/seed/seed/200/200",
+      "imageHint": "pixel seed"
     },
     {
-      "id": "island-stage-2",
-      "description": "Island with palm trees",
-      "imageUrl": "https://picsum.photos/seed/island2/400/400",
-      "imageHint": "tropical island"
+      "id": "pixel-sprout",
+      "description": "Tiny green pixel sprout",
+      "imageUrl": "https://picsum.photos/seed/sprout/200/200",
+      "imageHint": "pixel sprout"
     },
     {
-      "id": "island-stage-3",
-      "description": "Island with house and lush garden",
-      "imageUrl": "https://picsum.photos/seed/island3/400/400",
-      "imageHint": "paradise island"
+      "id": "pixel-flower-blue",
+      "description": "Magical blue pixel flower",
+      "imageUrl": "https://picsum.photos/seed/flower-blue/300/300",
+      "imageHint": "pixel flower"
     },
     {
-      "id": "achievement-badge",
-      "description": "Shiny gold achievement badge",
-      "imageUrl": "https://picsum.photos/seed/badge/200/200",
-      "imageHint": "medal award"
+      "id": "pixel-flower-gold",
+      "description": "Rare golden pixel flower",
+      "imageUrl": "https://picsum.photos/seed/flower-gold/300/300",
+      "imageHint": "pixel sun-flower"
+    },
+    {
+      "id": "pixel-tree-small",
+      "description": "Young pixel art sapling",
+      "imageUrl": "https://picsum.photos/seed/sapling/300/400",
+      "imageHint": "pixel sapling"
+    },
+    {
+      "id": "pixel-tree-mature",
+      "description": "Lush pixel art tree",
+      "imageUrl": "https://picsum.photos/seed/tree/400/500",
+      "imageHint": "pixel tree"
+    },
+    {
+      "id": "pixel-butterfly",
+      "description": "Animated pixel butterfly",
+      "imageUrl": "https://picsum.photos/seed/butterfly/100/100",
+      "imageHint": "pixel butterfly"
     }
   ]
 }

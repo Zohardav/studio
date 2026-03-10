@@ -3,14 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { useHydration } from '@/hooks/use-hydration';
 import { useAudio } from '@/components/audio/AudioEngine';
-import { VirtualWorld } from '@/components/world/VirtualWorld';
+import { PixelWorld } from '@/components/world/PixelWorld';
 import { HydrationTracker } from '@/components/dashboard/HydrationTracker';
 import { Onboarding } from '@/components/dashboard/Onboarding';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, LayoutDashboard, History, Settings2, Sparkles, TrendingUp, Droplets } from 'lucide-react';
+import { Award, Sparkles, Droplets, Home, Scroll, Heart } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
@@ -22,10 +21,10 @@ export default function DrinkAndEarn() {
     settings, setSettings, 
     currentAmountMl, progressPercent, 
     addWater, onboardingComplete, setOnboardingComplete,
-    aiMessage, achievements, streak, todayLogs
+    aiMessage, achievements, streak, todayLogs, growthScore
   } = useHydration();
 
-  const { playWaterLog, playAchievement } = useAudio(settings.soundEnabled);
+  const { playWaterLog, playAchievement, playUnlock } = useAudio(settings.soundEnabled);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -35,14 +34,18 @@ export default function DrinkAndEarn() {
   const handleAddWater = (amount: number) => {
     addWater(amount);
     playWaterLog();
+    
+    // Check for "Evolution" milestone sounds
+    if (Math.floor(growthScore + (amount/10)) > Math.floor(growthScore)) {
+      playUnlock();
+    }
+
     if (currentAmountMl + amount >= settings.dailyGoalMl && currentAmountMl < settings.dailyGoalMl) {
-      if (settings.celebrationsEnabled) {
-        toast({
-          title: "Daily Goal Reached! 🎉",
-          description: "You've crushed your hydration target for today!",
-        });
-        playAchievement();
-      }
+      toast({
+        title: "Daily Goal Fulfilled! ✨",
+        description: "Your world glows with gratitude!",
+      });
+      playAchievement();
     }
   };
 
@@ -56,11 +59,19 @@ export default function DrinkAndEarn() {
   }
 
   return (
-    <div className="max-w-md mx-auto min-h-svh bg-background flex flex-col relative pb-28">
-      {/* Decorative blobs */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-20%] w-[80%] h-[40%] bg-primary/5 rounded-full blur-[100px]" />
-        <div className="absolute bottom-[-10%] right-[-20%] w-[80%] h-[40%] bg-accent/5 rounded-full blur-[100px]" />
+    <div className="max-w-md mx-auto min-h-svh bg-[#FFF9FC] dark:bg-[#120F1A] flex flex-col relative pb-32">
+      {/* Magical background elements */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1], x: [0, 20, 0] }}
+          transition={{ duration: 15, repeat: Infinity }}
+          className="absolute top-[-10%] left-[-20%] w-full h-[60%] bg-primary/10 rounded-full blur-[120px]" 
+        />
+        <motion.div 
+          animate={{ scale: [1, 1.3, 1], y: [0, -30, 0] }}
+          transition={{ duration: 20, repeat: Infinity }}
+          className="absolute bottom-[-10%] right-[-20%] w-full h-[60%] bg-reward/10 rounded-full blur-[120px]" 
+        />
       </div>
 
       <header className="p-8 pb-4">
@@ -70,23 +81,26 @@ export default function DrinkAndEarn() {
           className="flex items-center justify-between"
         >
           <div className="space-y-1">
-            <h1 className="text-3xl font-headline font-bold text-foreground">
-              Hello, <span className="text-primary">{settings.name}</span>
+            <h1 className="text-3xl font-headline font-bold text-foreground leading-none">
+              Hi, <span className="text-primary">{settings.name}</span>
             </h1>
-            <p className="text-sm text-muted-foreground font-medium">Have you had enough water today?</p>
+            <p className="text-xs font-bold text-muted-foreground/60 tracking-widest uppercase">My Secret Sanctuary</p>
           </div>
-          <Badge variant="secondary" className="px-4 py-2 bg-reward/10 text-reward-foreground border-reward/20 rounded-2xl shadow-sm flex gap-2 items-center hover:scale-105 transition-transform cursor-default">
-            <Award className="w-4 h-4 text-reward" />
-            <span className="font-bold">{streak} Day Streak</span>
-          </Badge>
+          <motion.div whileTap={{ scale: 0.9 }}>
+            <Badge variant="secondary" className="px-4 py-3 bg-white/80 border-2 border-reward/20 rounded-[1.5rem] shadow-sm flex gap-2 items-center hover:bg-reward/5 transition-all">
+              <Award className="w-4 h-4 text-reward" />
+              <span className="font-black text-xs">{streak} DAY STREAK</span>
+            </Badge>
+          </motion.div>
         </motion.div>
       </header>
 
-      <main className="flex-1 px-8 space-y-8">
-        <Tabs defaultValue="dashboard" className="w-full">
+      <main className="flex-1 px-8 space-y-6">
+        <Tabs defaultValue="home" className="w-full">
           <AnimatePresence mode="wait">
-            <TabsContent value="dashboard" key="dashboard" className="space-y-10 mt-0">
-              <VirtualWorld progress={progressPercent} theme={settings.worldTheme} />
+            <TabsContent value="home" key="home" className="space-y-8 mt-0 focus-visible:ring-0">
+              <PixelWorld growthScore={growthScore} theme={settings.worldTheme} />
+              
               <HydrationTracker 
                 currentAmount={currentAmountMl}
                 goalAmount={settings.dailyGoalMl}
@@ -97,75 +111,50 @@ export default function DrinkAndEarn() {
               />
             </TabsContent>
 
-            <TabsContent value="stats" key="stats" className="space-y-8 mt-0">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="grid grid-cols-2 gap-4"
-              >
-                <Card className="glass-morphism p-6 rounded-[2rem] border-none flex flex-col items-center justify-center text-center gap-2">
-                  <div className="p-3 bg-primary/10 rounded-2xl">
-                    <TrendingUp className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{currentAmountMl}ml</p>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Today</p>
-                  </div>
-                </Card>
-                <Card className="glass-morphism p-6 rounded-[2rem] border-none flex flex-col items-center justify-center text-center gap-2">
-                  <div className="p-3 bg-reward/10 rounded-2xl">
-                    <Award className="h-6 w-6 text-reward" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{achievements.filter(a => a.unlockedAt).length}</p>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Badges</p>
-                  </div>
-                </Card>
-              </motion.div>
-
-              <Card className="glass-morphism border-none rounded-[2.5rem] overflow-hidden">
+            <TabsContent value="scroll" key="scroll" className="space-y-6 mt-0 focus-visible:ring-0">
+              <Card className="pixel-card border-none overflow-hidden">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xl font-headline font-bold flex items-center gap-2">
+                  <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
                     <Sparkles className="h-5 w-5 text-reward" />
-                    Achievements
+                    World Milestones
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-3">
+                <CardContent className="grid grid-cols-2 gap-4">
                   {achievements.map(a => (
-                    <div 
+                    <motion.div 
                       key={a.id} 
-                      className={`p-4 rounded-[1.5rem] flex flex-col items-center text-center border-2 transition-all group ${
+                      whileHover={{ scale: 1.05 }}
+                      className={`p-5 rounded-[2rem] flex flex-col items-center text-center border-4 transition-all ${
                         a.unlockedAt 
-                        ? 'border-reward/30 bg-reward/5 shadow-inner' 
-                        : 'border-dashed border-muted grayscale opacity-60'
+                        ? 'border-reward/40 bg-reward/5 shadow-inner' 
+                        : 'border-dashed border-muted opacity-40'
                       }`}
                     >
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-transform group-hover:scale-110 ${
-                        a.unlockedAt ? 'bg-white shadow-md' : 'bg-muted'
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3 ${
+                        a.unlockedAt ? 'bg-white shadow-xl reward-glow' : 'bg-muted'
                       }`}>
-                        <Award className={`h-6 w-6 ${a.unlockedAt ? 'text-reward' : 'text-muted-foreground'}`} />
+                        <Award className={`h-7 w-7 ${a.unlockedAt ? 'text-reward' : 'text-muted-foreground'}`} />
                       </div>
-                      <p className="text-xs font-bold leading-tight">{a.name}</p>
-                      <p className="text-[9px] text-muted-foreground mt-1 line-clamp-2">{a.description}</p>
-                    </div>
+                      <p className="text-[10px] font-black uppercase tracking-tight leading-tight">{a.name}</p>
+                    </motion.div>
                   ))}
                 </CardContent>
               </Card>
 
-              <Card className="glass-morphism border-none rounded-[2.5rem] overflow-hidden">
+              <Card className="pixel-card border-none overflow-hidden">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xl font-headline font-bold flex items-center gap-2">
-                    <History className="h-5 w-5 text-primary" />
-                    Recent Activity
+                  <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
+                    <Droplets className="h-5 w-5 text-primary" />
+                    Gifts to the Soil
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[250px] pr-4">
+                  <ScrollArea className="h-[280px] pr-2">
                     <div className="space-y-3">
                       {todayLogs.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-10 text-center opacity-40">
-                           <Droplets className="h-10 w-10 mb-2" />
-                           <p className="text-sm font-medium">No logs for today yet.</p>
+                        <div className="flex flex-col items-center justify-center py-12 text-center opacity-30">
+                           <Home className="h-10 w-10 mb-4" />
+                           <p className="text-xs font-bold uppercase tracking-widest">No water yet today</p>
                         </div>
                       ) : (
                         todayLogs.slice().reverse().map(log => (
@@ -173,7 +162,7 @@ export default function DrinkAndEarn() {
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             key={log.id} 
-                            className="flex justify-between items-center p-4 bg-white/40 dark:bg-black/20 rounded-2xl border border-white/20"
+                            className="flex justify-between items-center p-4 bg-white/50 rounded-2xl border-2 border-primary/10"
                           >
                             <div className="flex items-center gap-4">
                               <div className="p-2.5 bg-primary/10 rounded-xl">
@@ -181,7 +170,7 @@ export default function DrinkAndEarn() {
                               </div>
                               <span className="font-bold text-lg">{log.amountMl}ml</span>
                             </div>
-                            <span className="text-xs font-bold text-muted-foreground/60">
+                            <span className="text-[10px] font-black text-muted-foreground/60 uppercase">
                               {mounted ? new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
                             </span>
                           </motion.div>
@@ -193,23 +182,23 @@ export default function DrinkAndEarn() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="settings" key="settings" className="space-y-6 mt-0">
-              <Card className="glass-morphism border-none rounded-[2.5rem] overflow-hidden">
+            <TabsContent value="self" key="self" className="space-y-6 mt-0 focus-visible:ring-0">
+              <Card className="pixel-card border-none overflow-hidden">
                 <CardHeader>
-                  <CardTitle className="text-xl font-headline font-bold">Preferences</CardTitle>
+                  <CardTitle className="text-xl font-headline font-bold">Guardian Settings</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    { label: 'Display Name', value: settings.name, icon: Award, type: 'text', key: 'name' },
-                    { label: 'Daily Goal', value: settings.dailyGoalMl, icon: TrendingUp, type: 'number', key: 'dailyGoalMl', suffix: 'ml' },
-                    { label: 'Standard Glass', value: settings.glassSizeMl, icon: Droplets, type: 'number', key: 'glassSizeMl', suffix: 'ml' },
+                    { label: 'Guardian Name', value: settings.name, icon: Heart, type: 'text', key: 'name' },
+                    { label: 'Water Ritual', value: settings.dailyGoalMl, icon: Sparkles, type: 'number', key: 'dailyGoalMl', suffix: 'ml' },
+                    { label: 'Standard Vessel', value: settings.glassSizeMl, icon: Droplets, type: 'number', key: 'glassSizeMl', suffix: 'ml' },
                   ].map((item) => (
-                    <div key={item.key} className="flex items-center justify-between p-5 bg-white/40 dark:bg-black/20 rounded-3xl border border-white/20">
+                    <div key={item.key} className="flex items-center justify-between p-5 bg-white/60 rounded-3xl border-2 border-primary/5">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-muted rounded-xl">
                           <item.icon className="h-4 w-4 text-muted-foreground" />
                         </div>
-                        <p className="text-sm font-bold">{item.label}</p>
+                        <p className="text-xs font-black uppercase tracking-widest">{item.label}</p>
                       </div>
                       <div className="flex items-center gap-1">
                         <input 
@@ -221,34 +210,16 @@ export default function DrinkAndEarn() {
                             [item.key]: item.type === 'number' ? parseInt(e.target.value) || 0 : e.target.value
                           })}
                         />
-                        {item.suffix && <span className="text-[10px] font-bold text-muted-foreground">{item.suffix}</span>}
                       </div>
                     </div>
                   ))}
 
-                  <div className="flex items-center justify-between p-5 bg-white/40 dark:bg-black/20 rounded-3xl border border-white/20">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-muted rounded-xl">
-                        <Settings2 className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                      <p className="text-sm font-bold">World Theme</p>
-                    </div>
-                    <select 
-                      className="bg-transparent border-none font-black text-primary focus:ring-0 cursor-pointer text-right appearance-none px-4"
-                      value={settings.worldTheme}
-                      onChange={(e) => setSettings({...settings, worldTheme: e.target.value as any})}
-                    >
-                      <option value="garden">Enchanted Garden</option>
-                      <option value="island">Hidden Island</option>
-                    </select>
-                  </div>
-
-                  <div className="flex items-center justify-between p-5 bg-white/40 dark:bg-black/20 rounded-3xl border border-white/20">
+                  <div className="flex items-center justify-between p-5 bg-white/60 rounded-3xl border-2 border-primary/5">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-muted rounded-xl">
                         <Sparkles className="h-4 w-4 text-muted-foreground" />
                       </div>
-                      <p className="text-sm font-bold">Sound Effects</p>
+                      <p className="text-xs font-black uppercase tracking-widest">Enchantment Sounds</p>
                     </div>
                     <button 
                       onClick={() => setSettings({...settings, soundEnabled: !settings.soundEnabled})}
@@ -263,26 +234,27 @@ export default function DrinkAndEarn() {
                 </CardContent>
               </Card>
               
-              <div className="text-center opacity-40 py-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Drink & Earn • v1.2 Premium</p>
+              <div className="text-center opacity-30 py-8">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em]">Nourish & Grow • v2.0</p>
               </div>
             </TabsContent>
           </AnimatePresence>
 
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-4rem)] max-w-sm z-50">
-            <div className="glass-morphism rounded-[2.5rem] p-2 shadow-2xl border-white/30">
-              <TabsList className="w-full bg-transparent h-16 grid grid-cols-3 gap-1">
-                <TabsTrigger value="dashboard" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-[2rem] flex flex-col h-full transition-all duration-300">
-                  <LayoutDashboard className="h-5 w-5 mb-0.5" />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">World</span>
+          {/* Magical Navigation */}
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-4rem)] max-w-sm z-[100]">
+            <div className="pixel-card p-3 shadow-2xl border-white/40">
+              <TabsList className="w-full bg-transparent h-16 grid grid-cols-3 gap-2">
+                <TabsTrigger value="home" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-[1.5rem] flex flex-col h-full transition-all duration-300 group">
+                  <Home className="h-5 w-5 mb-1 group-data-[state=active]:animate-bounce" />
+                  <span className="text-[9px] font-black uppercase tracking-widest">World</span>
                 </TabsTrigger>
-                <TabsTrigger value="stats" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-[2rem] flex flex-col h-full transition-all duration-300">
-                  <Award className="h-5 w-5 mb-0.5" />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">Earned</span>
+                <TabsTrigger value="scroll" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-[1.5rem] flex flex-col h-full transition-all duration-300 group">
+                  <Scroll className="h-5 w-5 mb-1 group-data-[state=active]:animate-bounce" />
+                  <span className="text-[9px] font-black uppercase tracking-widest">History</span>
                 </TabsTrigger>
-                <TabsTrigger value="settings" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-[2rem] flex flex-col h-full transition-all duration-300">
-                  <Settings2 className="h-5 w-5 mb-0.5" />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">Self</span>
+                <TabsTrigger value="self" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-[1.5rem] flex flex-col h-full transition-all duration-300 group">
+                  <Heart className="h-5 w-5 mb-1 group-data-[state=active]:animate-bounce" />
+                  <span className="text-[9px] font-black uppercase tracking-widest">Guardian</span>
                 </TabsTrigger>
               </TabsList>
             </div>
