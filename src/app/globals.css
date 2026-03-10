@@ -4,54 +4,54 @@
 
 @layer base {
   :root {
-    --background: 195 20% 97%;
-    --foreground: 196 66% 15%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 196 66% 15%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 196 66% 15%;
-    --primary: 196 66% 42%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 165 84% 95%;
-    --secondary-foreground: 196 66% 30%;
-    --muted: 195 10% 90%;
-    --muted-foreground: 196 20% 45%;
-    --accent: 165 84% 56%;
-    --accent-foreground: 196 66% 15%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 199 89% 96%;
+    --secondary-foreground: 199 89% 30%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 172 66% 50%;
+    --accent-foreground: 222 47% 11%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 195 20% 90%;
-    --input: 195 20% 90%;
-    --ring: 196 66% 42%;
-    --radius: 1rem;
-    --reward: 43 83% 72%;
-    --chart-1: 196 66% 42%;
-    --chart-2: 165 84% 56%;
-    --chart-3: 43 83% 72%;
-    --chart-4: 196 66% 60%;
-    --chart-5: 165 84% 70%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 199 89% 48%;
+    --radius: 1.5rem;
+    --reward: 45 93% 47%;
+    --chart-1: 199 89% 48%;
+    --chart-2: 172 66% 50%;
+    --chart-3: 45 93% 47%;
+    --chart-4: 199 89% 60%;
+    --chart-5: 172 66% 70%;
   }
 
   .dark {
-    --background: 196 66% 5%;
-    --foreground: 195 20% 97%;
-    --card: 196 66% 8%;
-    --card-foreground: 195 20% 97%;
-    --popover: 196 66% 8%;
-    --popover-foreground: 195 20% 97%;
-    --primary: 196 66% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 196 66% 15%;
-    --secondary-foreground: 195 20% 90%;
-    --muted: 196 66% 15%;
-    --muted-foreground: 196 20% 65%;
-    --accent: 165 84% 56%;
-    --accent-foreground: 196 66% 5%;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 172 66% 50%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 196 66% 15%;
-    --input: 196 66% 15%;
-    --ring: 196 66% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 199 89% 48%;
   }
 }
 
@@ -60,21 +60,58 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-body antialiased;
+    @apply bg-background text-foreground font-body antialiased selection:bg-primary/20;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline;
+    @apply font-headline tracking-tight;
   }
 }
 
 .glass-morphism {
-  @apply bg-white/40 backdrop-blur-md border border-white/20;
+  @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl;
+}
+
+.dark .glass-morphism {
+  @apply bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl;
 }
 
 .reward-glow {
-  box-shadow: 0 0 20px hsl(var(--reward) / 0.5);
+  box-shadow: 0 0 30px hsl(var(--reward) / 0.4);
 }
 
-.progress-wave {
-  background: linear-gradient(180deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 100%);
+.water-wave {
+  background: linear-gradient(180deg, hsl(var(--accent) / 0.8) 0%, hsl(var(--primary)) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.water-wave::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 40%;
+  animation: wave 10s infinite linear;
+}
+
+@keyframes wave {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-float-subtle {
+  animation: float-subtle 4s ease-in-out infinite;
+}
+
+@keyframes float-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.sparkle-container {
+  position: absolute;
+  pointer-events: none;
 }
