@@ -3,7 +3,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, where, orderBy, getDocs, deleteDoc } from 'firebase/firestore';
+import { doc, collection, query, where, orderBy, getDocs, deleteDoc, writeBatch } from 'firebase/firestore';
 import { updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { generateHydrationEncouragement } from '@/ai/flows/hydration-encouragement-generator';
 
@@ -35,7 +35,6 @@ export function useHydration() {
   const { data: profile, isLoading: isProfileLoading } = useDoc(userRef);
 
   // 2. Fetch Today's Logs
-  const todayStr = new Date().toISOString().split('T')[0];
   const logsRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return collection(firestore, 'users', user.uid, 'logs');
@@ -63,6 +62,7 @@ export function useHydration() {
   const addGlass = useCallback(async () => {
     if (!user || !profile || !logsRef || !userRef) return;
 
+    const todayStr = new Date().toISOString().split('T')[0];
     const isGoalReached = (currentGlasses + 1) >= profile.dailyGoalGlasses;
     const isFirstDrinkOfDay = currentGlasses === 0;
 
@@ -106,7 +106,7 @@ export function useHydration() {
     }).catch(() => {
       // Quota issues or errors handled gracefully
     });
-  }, [user, profile, logsRef, userRef, currentGlasses, todayStr]);
+  }, [user, profile, logsRef, userRef, currentGlasses]);
 
   const setSettings = useCallback((newSettings: Partial<UserSettings>) => {
     if (!userRef || !profile) return;
@@ -123,25 +123,29 @@ export function useHydration() {
   ];
 
   const debugReset = useCallback(async () => {
-    if (!userRef || !logsRef || !user || !firestore) return;
+    if (!user || !firestore || !userRef || !logsRef) return;
     
     if (window.confirm("Are you sure? This will delete your entire sanctuary progress forever.")) {
       try {
-        // 1. Fetch and delete all logs
+        // 1. Fetch all logs and delete them in batches
         const snapshot = await getDocs(logsRef);
-        const deleteLogPromises = snapshot.docs.map(docSnap => deleteDoc(docSnap.ref));
-        await Promise.all(deleteLogPromises);
+        const batch = writeBatch(firestore);
+        snapshot.docs.forEach((docSnap) => {
+          batch.delete(docSnap.ref);
+        });
+        await batch.commit();
         
         // 2. Delete user profile
         await deleteDoc(userRef);
         
-        // The real-time listeners for useDoc and useCollection will automatically 
-        // update 'profile' to null, which triggers the onboarding UI.
+        // 3. Force a reload to ensure all local state is cleared and onboarding triggers
+        window.location.reload();
       } catch (error) {
         console.error("Reset failed:", error);
+        alert("Reset failed. Please try again.");
       }
     }
-  }, [userRef, logsRef, user, firestore]);
+  }, [user, firestore, userRef, logsRef]);
 
   const debugAddStreak = useCallback(() => {
     if (!userRef || !profile) return;
@@ -167,7 +171,7 @@ export function useHydration() {
     onboardingComplete: !!profile,
     addGlass,
     aiMessage,
-    isLoading: isAuthLoading || isProfileLoading,
+    isLoading: isAuthLoading || (!!user && isProfileLoading),
     debugReset,
     debugAddStreak
   };
