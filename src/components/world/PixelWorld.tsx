@@ -52,9 +52,10 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
       
       setVisibleMessage(aiMessage);
       
+      // Reduced timeout by 30% (3000ms -> 2100ms)
       timeoutRef.current = setTimeout(() => {
         setVisibleMessage(null);
-      }, 3000);
+      }, 2100);
     }
     
     return () => {
@@ -125,7 +126,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
             <div className="bg-white/60 backdrop-blur-md p-6 rounded-[2.5rem] border-2 border-white/40 shadow-2xl text-center max-w-[90%] pointer-events-none">
               <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] mb-2">Sanctuary Spirit</p>
               <motion.p 
-                key={visibleMessage} // Only animate the text cross-fade, not the whole box
+                key={visibleMessage}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-sm font-bold text-foreground leading-relaxed italic"
