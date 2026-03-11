@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, where, orderBy } from 'firebase/firestore';
+import { doc, collection, query, where, orderBy, getDocs, writeBatch, deleteDoc } from 'firebase/firestore';
 import { updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { generateHydrationEncouragement } from '@/ai/flows/hydration-encouragement-generator';
 
@@ -117,6 +117,34 @@ export function useHydration() {
     });
   }, [userRef, profile]);
 
+  /**
+   * Performs a full application reset for the current user.
+   * Deletes profile and all logs from Firestore and reloads the app.
+   */
+  const resetApp = useCallback(async () => {
+    if (!user || !firestore) return;
+
+    const batch = writeBatch(firestore);
+    
+    // 1. Delete all logs
+    const logsColRef = collection(firestore, 'users', user.uid, 'logs');
+    const logsSnap = await getDocs(logsColRef);
+    logsSnap.forEach(doc => batch.delete(doc.ref));
+
+    // 2. Delete profile
+    const profileRef = doc(firestore, 'users', user.uid);
+    batch.delete(profileRef);
+
+    // 3. Commit the batch
+    await batch.commit();
+
+    // 4. Clear local storage if any
+    localStorage.clear();
+
+    // 5. Hard reload to restart the app state
+    window.location.reload();
+  }, [user, firestore]);
+
   const achievements = [
     { id: 'first_glass', name: 'First Drop', description: 'Gave the soil its first glass of life.', unlockedAt: profile?.totalStars ? Date.now() : undefined },
     { id: 'daily_goal', name: 'Full Bloom', description: 'Met your daily hydration ritual.', unlockedAt: profile?.bonusEarnedDates?.length ? Date.now() : undefined },
@@ -138,6 +166,7 @@ export function useHydration() {
     achievements,
     onboardingComplete: !!profile,
     addGlass,
+    resetApp,
     aiMessage,
     isLoading: isAuthLoading || (!!user && isProfileLoading)
   };

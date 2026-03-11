@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -9,7 +8,7 @@ import { HydrationTracker } from '@/components/dashboard/HydrationTracker';
 import { Onboarding } from '@/components/dashboard/Onboarding';
 import { WorldLibrary } from '@/components/dashboard/WorldLibrary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Sparkles, Droplets, Home, Scroll, Heart, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn, Music, VolumeX, Volume2 } from 'lucide-react';
+import { Award, Sparkles, Droplets, Home, Scroll, Heart, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn, Music, VolumeX, Volume2, Trash2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useFirebase, initiateAnonymousSignIn, useCollection, useMemoFirebase, linkAccountToGoogle } from '@/firebase';
 import { collection, query, orderBy, setDoc, doc } from 'firebase/firestore';
 import { Switch } from '@/components/ui/switch';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 // Custom Glass of Water Icon
 const GlassWaterIcon = ({ className }: { className?: string }) => (
@@ -49,9 +49,10 @@ export default function DrinkAndEarn() {
     currentGlasses, dailyProgressPercent, 
     addGlass, onboardingComplete,
     aiMessage, achievements, todayLogs, totalStars,
-    isLoading
+    isLoading, resetApp
   } = useHydration();
 
+  const [isResetting, setIsResetting] = useState(false);
   const { toast } = useToast();
   const { playWaterLog, playAchievement } = useAudio(settings.soundEnabled);
   
@@ -132,11 +133,27 @@ export default function DrinkAndEarn() {
     }
   };
 
-  if (isLoading || !mounted) {
+  const handleResetApp = async () => {
+    setIsResetting(true);
+    try {
+      await resetApp();
+    } catch (error: any) {
+      setIsResetting(false);
+      toast({
+        variant: "destructive",
+        title: "Reset Failed",
+        description: error.message,
+      });
+    }
+  };
+
+  if (isLoading || isResetting || !mounted) {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-background z-50">
         <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Entering Sanctuary...</p>
+        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+          {isResetting ? 'Wiping Sanctuary...' : 'Entering Sanctuary...'}
+        </p>
       </div>
     );
   }
@@ -404,6 +421,39 @@ export default function DrinkAndEarn() {
                     </div>
                   </DialogContent>
                 </Dialog>
+
+                {/* Developer Features Section */}
+                <div className="pt-4 border-t-2 border-reward/20 mt-4 space-y-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-reward/60 px-2">Developer Features</p>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="destructive" 
+                        className="w-full h-12 rounded-2xl font-black text-xs uppercase tracking-widest bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border-2 border-red-500/20"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Reset App (Destroy Progress)
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="rounded-[2.5rem] p-8">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-2xl font-headline font-bold">Destroy All Progress?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-sm font-medium">
+                          This action is destructive and cannot be undone. It will permanently delete your profile, hydration history, stars, and all evolution progress from the cloud. You will be returned to the onboarding screen as a brand new user.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter className="mt-6 gap-3">
+                        <AlertDialogCancel className="rounded-2xl font-black text-xs uppercase tracking-widest">Nevermind</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={handleResetApp}
+                          className="rounded-2xl font-black text-xs uppercase tracking-widest bg-red-500 text-white hover:bg-red-600"
+                        >
+                          Wipe Everything
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
