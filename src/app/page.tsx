@@ -199,7 +199,7 @@ export default function DrinkAndEarn() {
               </motion.div>
               <motion.div whileTap={{ scale: 0.9 }}>
                 <Badge variant="secondary" className="px-3 py-2 bg-white/80 border-2 border-reward/20 rounded-[1.2rem] shadow-sm flex gap-2 items-center">
-                  <Award className="w-3.5 h-3.5 text-reward" />
+                  <Star className="w-3.5 h-3.5 text-reward fill-reward" />
                   <span className="font-black text-[10px]">{totalStars}</span>
                 </Badge>
               </motion.div>
