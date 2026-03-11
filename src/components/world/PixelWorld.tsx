@@ -66,7 +66,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
   }, [aiMessage]);
 
   return (
-    <div className="relative w-full aspect-[16/7] flex flex-col mb-12">
+    <div className="relative w-full aspect-[16/21] flex flex-col mb-12">
       {/* Main Sanctuary Card Container */}
       <div className="relative flex-1 flex flex-col pixel-card p-4 overflow-hidden border-none shadow-2xl">
         <div className="absolute inset-0 bg-[#f8f1de]" />
