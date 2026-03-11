@@ -7,6 +7,7 @@ import { useAudio, useBackgroundMusic } from '@/components/audio/AudioEngine';
 import { PixelWorld } from '@/components/world/PixelWorld';
 import { HydrationTracker } from '@/components/dashboard/HydrationTracker';
 import { Onboarding } from '@/components/dashboard/Onboarding';
+import { IntroOnboarding } from '@/components/dashboard/IntroOnboarding';
 import { WorldLibrary } from '@/components/dashboard/WorldLibrary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Award, Sparkles, Droplets, Home, Scroll, Heart, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn, Music, VolumeX, Volume2, Trash2, Info, ChevronRight } from 'lucide-react';
@@ -45,6 +46,7 @@ const GlassWaterIcon = ({ className }: { className?: string }) => (
 
 export default function DrinkAndEarn() {
   const [mounted, setMounted] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
   const { auth, firestore, user } = useFirebase();
   const { 
     settings, setSettings, 
@@ -75,6 +77,10 @@ export default function DrinkAndEarn() {
 
   useEffect(() => {
     setMounted(true);
+    const hasSeenIntro = localStorage.getItem('hasSeenIntro');
+    if (!hasSeenIntro) {
+      setShowIntro(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -168,6 +174,10 @@ export default function DrinkAndEarn() {
         </p>
       </div>
     );
+  }
+
+  if (showIntro) {
+    return <IntroOnboarding onComplete={() => setShowIntro(false)} />;
   }
 
   if (!onboardingComplete) {
