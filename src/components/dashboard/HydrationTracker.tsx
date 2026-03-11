@@ -1,9 +1,8 @@
-
 "use client"
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Droplets, Sparkles, Wand2, Star } from 'lucide-react';
+import { Droplets, Sparkles, Wand2, Star, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface HydrationTrackerProps {
@@ -26,6 +25,7 @@ export function HydrationTracker({
   aiMessage
 }: HydrationTrackerProps) {
   const evolutionProgress = Math.min(100, (totalStars / nextStageStars) * 100);
+  const isGoalReached = currentGlasses >= goalGlasses;
 
   return (
     <div className="space-y-8">
@@ -56,7 +56,9 @@ export function HydrationTracker({
           </div>
           <div className="flex justify-between mt-2 px-1">
             <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">Daily Goal</span>
-            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">{Math.max(0, goalGlasses - currentGlasses)} More to Go</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+              {isGoalReached ? "Satiated" : `${Math.max(0, goalGlasses - currentGlasses)} More to Go`}
+            </span>
           </div>
         </div>
       </div>
@@ -95,15 +97,41 @@ export function HydrationTracker({
         </div>
       </motion.div>
 
-      <Button 
-        className="w-full h-24 text-2xl font-black rounded-[2.5rem] bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/30 border-b-8 border-primary/20 active:border-b-2 active:translate-y-1 transition-all flex items-center justify-center gap-4 group"
-        onClick={onAddGlass}
-      >
-        <div className="bg-white/20 p-3 rounded-2xl group-hover:rotate-12 transition-transform">
-          <Wand2 className="h-8 w-8 text-white" />
-        </div>
-        Drink a Glass
-      </Button>
+      <div className="space-y-4">
+        <Button 
+          className={`w-full h-24 text-2xl font-black rounded-[2.5rem] transition-all flex items-center justify-center gap-4 group relative overflow-hidden ${
+            isGoalReached 
+            ? "bg-muted text-muted-foreground cursor-not-allowed opacity-80" 
+            : "bg-primary text-white hover:bg-primary/90 shadow-2xl shadow-primary/30 border-b-8 border-primary/20 active:border-b-2 active:translate-y-1"
+          }`}
+          onClick={onAddGlass}
+          disabled={isGoalReached}
+        >
+          <div className={`p-3 rounded-2xl transition-transform ${isGoalReached ? "bg-muted-foreground/20" : "bg-white/20 group-hover:rotate-12"}`}>
+            {isGoalReached ? <CheckCircle2 className="h-8 w-8" /> : <Wand2 className="h-8 w-8" />}
+          </div>
+          <span className="relative z-10">
+            {isGoalReached ? "Goal Fulfilled" : "Drink a Glass"}
+          </span>
+          {isGoalReached && (
+             <motion.div 
+               initial={{ opacity: 0 }} 
+               animate={{ opacity: 0.1 }} 
+               className="absolute inset-0 bg-primary pointer-events-none" 
+             />
+          )}
+        </Button>
+        
+        {isGoalReached && (
+          <motion.p 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60"
+          >
+            The sanctuary is glowing. Rest now, Guardian.
+          </motion.p>
+        )}
+      </div>
 
       <AnimatePresence>
         {aiMessage && (
