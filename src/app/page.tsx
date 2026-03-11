@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useHydration } from '@/hooks/use-hydration';
-import { useAudio } from '@/components/audio/AudioEngine';
+import { useAudio, useBackgroundMusic } from '@/components/audio/AudioEngine';
 import { PixelWorld } from '@/components/world/PixelWorld';
 import { HydrationTracker } from '@/components/dashboard/HydrationTracker';
 import { Onboarding } from '@/components/dashboard/Onboarding';
 import { WorldLibrary } from '@/components/dashboard/WorldLibrary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Sparkles, Droplets, Home, Scroll, Heart, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn } from 'lucide-react';
+import { Award, Sparkles, Droplets, Home, Scroll, Heart, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn, Music, VolumeX, Volume2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useFirebase, initiateAnonymousSignIn, useCollection, useMemoFirebase, linkAccountToGoogle } from '@/firebase';
 import { collection, query, orderBy, setDoc, doc } from 'firebase/firestore';
+import { Switch } from '@/components/ui/switch';
 
 export default function DrinkAndEarn() {
   const [mounted, setMounted] = useState(false);
@@ -33,6 +34,9 @@ export default function DrinkAndEarn() {
 
   const { toast } = useToast();
   const { playWaterLog, playAchievement } = useAudio(settings.soundEnabled);
+  
+  // Background music engine
+  useBackgroundMusic(settings.soundEnabled);
 
   // Fetch world stages to calculate evolution targets
   const stagesQuery = useMemoFirebase(() => {
@@ -318,6 +322,20 @@ export default function DrinkAndEarn() {
                     />
                     <span className="text-[10px] font-black opacity-30">GLASSES</span>
                   </div>
+                </div>
+                
+                {/* Audio Atmosphere Toggle */}
+                <div className="flex items-center justify-between p-5 bg-white/80 rounded-3xl border-2 border-primary/5">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-muted rounded-xl">
+                      {settings.soundEnabled ? <Volume2 className="h-4 w-4 text-primary" /> : <VolumeX className="h-4 w-4 text-muted-foreground" />}
+                    </div>
+                    <p className="text-xs font-black uppercase tracking-widest">Atmosphere</p>
+                  </div>
+                  <Switch 
+                    checked={settings.soundEnabled}
+                    onCheckedChange={(val) => setSettings({...settings, soundEnabled: val})}
+                  />
                 </div>
               </CardContent>
             </Card>

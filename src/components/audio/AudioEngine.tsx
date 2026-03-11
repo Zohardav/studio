@@ -33,18 +33,60 @@ export const useAudio = (enabled: boolean) => {
     });
   }, [enabled]);
 
-  const playUnlock = React.useCallback(() => {
-    if (!enabled) return;
-    
-    // Warm low to high swell
-    const synth = new Tone.MonoSynth({
-      oscillator: { type: "sine" },
-      envelope: { attack: 0.3, decay: 0.5, sustain: 0.5, release: 1 }
-    }).toDestination();
-    
-    synth.triggerAttackRelease("G3", "4n");
-    setTimeout(() => synth.triggerAttackRelease("G4", "2n"), 300);
-  }, [enabled]);
+  return { playWaterLog, playAchievement };
+};
 
-  return { playWaterLog, playAchievement, playUnlock };
+export const useBackgroundMusic = (enabled: boolean) => {
+  const playerRef = React.useRef<Tone.PolySynth | null>(null);
+  const filterRef = React.useRef<Tone.Filter | null>(null);
+  const loopRef = React.useRef<Tone.Loop | null>(null);
+
+  React.useEffect(() => {
+    if (enabled && !playerRef.current) {
+      // Create a soft ambient synth
+      filterRef.current = new Tone.Filter(800, "lowpass").toDestination();
+      playerRef.current = new Tone.PolySynth(Tone.Synth, {
+        oscillator: { type: "sine" },
+        envelope: { attack: 2, decay: 1, sustain: 1, release: 4 },
+        volume: -25 // Very low volume
+      }).connect(filterRef.current);
+
+      // Simple ambient pentatonic progression
+      const sequence = ["C3", "G3", "A3", "E4", "G4", "C4"];
+      let index = 0;
+
+      loopRef.current = new Tone.Loop((time) => {
+        if (playerRef.current) {
+          playerRef.current.triggerAttackRelease(sequence[index % sequence.length], "2n", time);
+          index++;
+        }
+      }, "4n").start(0);
+    }
+
+    if (enabled) {
+      Tone.start();
+      Tone.getTransport().start();
+    } else {
+      Tone.getTransport().stop();
+      if (playerRef.current) {
+        playerRef.current.releaseAll();
+      }
+    }
+
+    return () => {
+      Tone.getTransport().stop();
+      if (playerRef.current) {
+        playerRef.current.dispose();
+        playerRef.current = null;
+      }
+      if (filterRef.current) {
+        filterRef.current.dispose();
+        filterRef.current = null;
+      }
+      if (loopRef.current) {
+        loopRef.current.dispose();
+        loopRef.current = null;
+      }
+    };
+  }, [enabled]);
 };

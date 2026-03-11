@@ -53,7 +53,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
       
       timeoutRef.current = setTimeout(() => {
         setVisibleMessage(null);
-      }, 2100);
+      }, 1470); // Reduced by 30% from 2100ms
     }
     
     return () => {
@@ -81,9 +81,21 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
           <motion.div
             key={currentStage.id}
             initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={{ 
+              opacity: 1, 
+              scale: 1,
+              y: [0, -12, 0] // Jumping/Floating animation
+            }}
             exit={{ opacity: 0, scale: 1.1 }}
-            transition={{ duration: 0.8 }}
+            transition={{ 
+              opacity: { duration: 0.8 },
+              scale: { duration: 0.8 },
+              y: { 
+                repeat: Infinity, 
+                duration: 5, 
+                ease: "easeInOut" 
+              }
+            }}
             className="relative w-full h-full z-10"
           >
             <Image
@@ -112,9 +124,9 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
                 className="absolute -inset-4 bg-primary/5 rounded-full -z-10"
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 px-6">
               <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/40">Level 0: The Void</h3>
-              <p className="text-sm font-bold text-muted-foreground/60 max-w-[200px] leading-relaxed">
+              <p className="text-sm font-bold text-muted-foreground/60 max-w-[200px] leading-relaxed mx-auto">
                 You better start drinking water if you want to grow something!
               </p>
             </div>
@@ -122,26 +134,23 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
         )}
       </AnimatePresence>
 
-      {/* Motivation Pop-up */}
+      {/* Motivation Pop-up - Stable box, animated text */}
       <AnimatePresence>
         {visibleMessage && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: -10 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            transition={{ type: "spring", damping: 30, stiffness: 200 }}
             className="absolute inset-0 flex items-center justify-center z-[60] px-8 pointer-events-none"
           >
-            <div className="bg-white/60 backdrop-blur-md p-6 rounded-[2.5rem] border-2 border-white/40 shadow-2xl text-center max-w-[90%] pointer-events-none">
+            <div className="bg-white/70 backdrop-blur-xl p-6 rounded-[2.5rem] border-2 border-white/40 shadow-2xl text-center max-w-[90%] pointer-events-none">
               <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] mb-2">Sanctuary Spirit</p>
-              <motion.p 
-                key={visibleMessage}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-sm font-bold text-foreground leading-relaxed italic"
-              >
-                "{visibleMessage}"
-              </motion.p>
+              <div className="relative h-12 flex items-center justify-center">
+                <p className="text-sm font-bold text-foreground leading-relaxed italic">
+                  "{visibleMessage}"
+                </p>
+              </div>
             </div>
           </motion.div>
         )}

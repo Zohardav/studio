@@ -112,6 +112,7 @@ export function useHydration() {
     updateDocumentNonBlocking(userRef, {
       displayName: newSettings.name ?? profile.displayName,
       dailyGoalGlasses: newSettings.dailyGoalGlasses ?? profile.dailyGoalGlasses,
+      soundEnabled: newSettings.soundEnabled ?? (profile.soundEnabled !== undefined ? profile.soundEnabled : true),
       updatedAt: new Date().toISOString(),
     });
   }, [userRef, profile]);
@@ -125,7 +126,7 @@ export function useHydration() {
     settings: {
       name: profile?.displayName || 'Guardian',
       dailyGoalGlasses: profile?.dailyGoalGlasses || 8,
-      soundEnabled: true,
+      soundEnabled: profile?.soundEnabled !== undefined ? profile.soundEnabled : true,
     },
     setSettings,
     logs: logs || [],
