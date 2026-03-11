@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -20,6 +21,25 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useFirebase, initiateAnonymousSignIn, useCollection, useMemoFirebase, linkAccountToGoogle } from '@/firebase';
 import { collection, query, orderBy, setDoc, doc } from 'firebase/firestore';
 import { Switch } from '@/components/ui/switch';
+
+// Custom Glass of Water Icon
+const GlassWaterIcon = ({ className }: { className?: string }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M15.2 22H8.8c-.41 0-.78-.26-.92-.63L5 2h14l-2.88 19.37a1 1 0 0 1-.92.63Z" />
+    <path d="M6 12h12" />
+  </svg>
+);
 
 export default function DrinkAndEarn() {
   const [mounted, setMounted] = useState(false);
@@ -144,20 +164,30 @@ export default function DrinkAndEarn() {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between"
+          className="flex flex-col gap-6"
         >
-          <div className="space-y-1">
-            <h1 className="text-3xl font-headline font-bold text-foreground leading-none">
-              Hi, <span className="text-primary">{settings.name}</span>
-            </h1>
-            <p className="text-xs font-bold text-muted-foreground/60 tracking-widest uppercase">My Sanctuary</p>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h1 className="text-3xl font-headline font-bold text-foreground leading-none">
+                Hi, <span className="text-primary">{settings.name}</span>
+              </h1>
+              <p className="text-xs font-bold text-muted-foreground/60 tracking-widest uppercase">My Sanctuary</p>
+            </div>
+            <div className="flex gap-2">
+              <motion.div whileTap={{ scale: 0.9 }}>
+                <Badge variant="secondary" className="px-3 py-2 bg-white/80 border-2 border-primary/20 rounded-[1.2rem] shadow-sm flex gap-2 items-center">
+                  <GlassWaterIcon className="w-3.5 h-3.5 text-primary" />
+                  <span className="font-black text-[10px]">{currentGlasses}</span>
+                </Badge>
+              </motion.div>
+              <motion.div whileTap={{ scale: 0.9 }}>
+                <Badge variant="secondary" className="px-3 py-2 bg-white/80 border-2 border-reward/20 rounded-[1.2rem] shadow-sm flex gap-2 items-center">
+                  <Award className="w-3.5 h-3.5 text-reward" />
+                  <span className="font-black text-[10px]">{totalStars}</span>
+                </Badge>
+              </motion.div>
+            </div>
           </div>
-          <motion.div whileTap={{ scale: 0.9 }}>
-            <Badge variant="secondary" className="px-4 py-3 bg-white/80 border-2 border-reward/20 rounded-[1.5rem] shadow-sm flex gap-2 items-center">
-              <Award className="w-4 h-4 text-reward" />
-              <span className="font-black text-xs">STARS: {totalStars}</span>
-            </Badge>
-          </motion.div>
         </motion.div>
       </header>
 

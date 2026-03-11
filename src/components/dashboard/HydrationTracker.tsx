@@ -1,9 +1,10 @@
+
 "use client"
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Droplets, Sparkles, Wand2, Star, CheckCircle2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Wand2, Star, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface HydrationTrackerProps {
   currentGlasses: number;
@@ -13,6 +14,24 @@ interface HydrationTrackerProps {
   dailyProgress: number;
   onAddGlass: () => void;
 }
+
+const GlassWaterIcon = ({ className }: { className?: string }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M15.2 22H8.8c-.41 0-.78-.26-.92-.63L5 2h14l-2.88 19.37a1 1 0 0 1-.92.63Z" />
+    <path d="M6 12h12" />
+  </svg>
+);
 
 export function HydrationTracker({
   currentGlasses,
@@ -34,8 +53,11 @@ export function HydrationTracker({
             key={currentGlasses}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="inline-block"
+            className="flex items-center justify-center gap-3"
           >
+            <div className="p-2.5 bg-primary/10 rounded-2xl border-2 border-primary/20 shadow-sm">
+              <GlassWaterIcon className="h-6 w-6 text-primary" />
+            </div>
             <h2 className="text-6xl font-headline font-black text-primary drop-shadow-sm">
               {currentGlasses}<span className="text-xl font-headline font-bold text-muted-foreground/30 ml-1">/{goalGlasses}</span>
             </h2>
