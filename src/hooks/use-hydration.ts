@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useCallback, useMemo, useState } from 'react';
@@ -91,6 +92,11 @@ export function useHydration() {
     // 3. AI Feedback
     const immediateMsg = REFRESHING_MESSAGES[Math.floor(Math.random() * REFRESHING_MESSAGES.length)];
     setAiMessage(immediateMsg);
+    
+    // Automatically clear the message after a delay to prevent it from reappearing on navigation
+    setTimeout(() => {
+      setAiMessage(prev => prev === immediateMsg ? '' : prev);
+    }, 3000);
 
     generateHydrationEncouragement({
       userName: profile.displayName,
@@ -102,6 +108,10 @@ export function useHydration() {
       remainingAmountMl: Math.max(0, (profile.dailyGoalGlasses - (currentGlasses + 1)) * 250),
     }).then(response => {
       setAiMessage(response.message);
+      // Automatically clear the AI message after a delay
+      setTimeout(() => {
+        setAiMessage(prev => prev === response.message ? '' : prev);
+      }, 3000);
     }).catch(() => {
       // Quota issues or errors handled gracefully
     });
