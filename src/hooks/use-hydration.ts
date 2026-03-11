@@ -1,12 +1,11 @@
 
 "use client"
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
 import { doc, collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { updateDocumentNonBlocking, addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { generateHydrationEncouragement } from '@/ai/flows/hydration-encouragement-generator';
-import { useState } from 'react';
 
 export type UserSettings = {
   name: string;
@@ -104,7 +103,9 @@ export function useHydration() {
       remainingAmountMl: Math.max(0, (profile.dailyGoalGlasses - (currentGlasses + 1)) * 250),
     }).then(response => {
       setAiMessage(response.message);
-    }).catch(() => {});
+    }).catch(() => {
+      // Quota issues or errors handled gracefully
+    });
   }, [user, profile, logsRef, userRef, currentGlasses, todayStr]);
 
   const setSettings = useCallback((newSettings: Partial<UserSettings>) => {
@@ -126,14 +127,14 @@ export function useHydration() {
     
     if (window.confirm("Are you sure? This will delete your entire sanctuary progress forever.")) {
       try {
-        // Fetch and delete all logs
+        // 1. Fetch and delete all logs first
         const snapshot = await getDocs(logsRef);
         snapshot.docs.forEach(d => deleteDocumentNonBlocking(d.ref));
         
-        // Delete user profile
+        // 2. Delete user profile to trigger onboarding
         deleteDocumentNonBlocking(userRef);
         
-        // Brief delay and then reload to clear UI state
+        // 3. Brief delay to allow Firestore sync and then reload to clear UI state
         setTimeout(() => {
           window.location.reload();
         }, 800);
