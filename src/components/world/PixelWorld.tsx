@@ -23,10 +23,10 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
     return query(collection(firestore, 'worldStages'), orderBy('requiredStars', 'asc'));
   }, [firestore]);
 
-  const { data: stages, isLoading } = useCollection(stagesQuery);
+  const { data: stages } = useCollection(stagesQuery);
 
-  const { currentStage, nextStage } = useMemo(() => {
-    if (!stages || stages.length === 0) return { currentStage: null, nextStage: null };
+  const { currentStage, nextStage, isLoading } = useMemo(() => {
+    if (!stages || stages.length === 0) return { currentStage: null, nextStage: null, isLoading: true };
     
     let active = null;
     let next = stages[0] || null;
@@ -40,7 +40,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
       }
     }
 
-    return { currentStage: active, nextStage: next };
+    return { currentStage: active, nextStage: next, isLoading: false };
   }, [stages, totalStars]);
 
   const remainingStars = nextStage ? Math.max(0, nextStage.requiredStars - totalStars) : 0;
@@ -69,38 +69,38 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
     <div className="relative w-full aspect-[4/5] flex flex-col pixel-card p-4 overflow-hidden border-none shadow-2xl">
       <div className="absolute inset-0 bg-[#f8f1de]" />
 
-      {/* Evolution Milestone UI - Transparent Glass Box */}
-      <div className="relative z-50 w-full px-2 pt-4 mb-auto">
+      {/* Evolution Milestone UI - Transparent Glass Box (Shorter Version) */}
+      <div className="relative z-50 w-full px-2 pt-2 mb-auto">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/50 backdrop-blur-xl p-4 rounded-[2rem] border-2 border-white/30 shadow-xl space-y-3"
+          className="bg-white/50 backdrop-blur-xl p-2.5 px-4 rounded-[1.5rem] border-2 border-white/30 shadow-xl space-y-1.5"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-reward/10 rounded-full border border-reward/20">
-                <Star className="h-4 w-4 text-reward fill-reward" />
+              <div className="p-1.5 bg-reward/10 rounded-full border border-reward/20">
+                <Star className="h-3.5 w-3.5 text-reward fill-reward" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[8px] font-black text-reward uppercase tracking-[0.2em] leading-tight">Next Evolution</span>
-                <span className="text-sm font-bold text-foreground">Stage {nextStage?.stageNumber || '?'}</span>
+                <span className="text-[7px] font-black text-reward uppercase tracking-[0.2em] leading-tight">Next Evolution</span>
+                <span className="text-xs font-bold text-foreground">Stage {nextStage?.stageNumber || '?'}</span>
               </div>
             </div>
             <div className="flex flex-col items-end">
-              <span className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] leading-tight">Requirements</span>
-              <div className="flex items-center gap-1.5">
-                <Star className="h-3 w-3 text-reward fill-reward" />
-                <span className="text-xs font-black text-reward">{remainingStars} Stars</span>
+              <span className="text-[7px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] leading-tight">Requirements</span>
+              <div className="flex items-center gap-1">
+                <Star className="h-2.5 w-2.5 text-reward fill-reward" />
+                <span className="text-[10px] font-black text-reward">{remainingStars} Stars</span>
               </div>
             </div>
           </div>
           
-          <div className="h-1.5 w-full bg-white/40 rounded-full overflow-hidden border border-white/10 shadow-inner">
+          <div className="h-1 w-full bg-white/40 rounded-full overflow-hidden border border-white/5 shadow-inner">
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${evolutionProgress}%` }}
               transition={{ duration: 1.2, ease: "easeOut" }}
-              className="h-full bg-reward shadow-[0_0_10px_hsl(var(--reward)/0.3)]"
+              className="h-full bg-reward shadow-[0_0_8px_hsl(var(--reward)/0.3)]"
             />
           </div>
         </motion.div>
@@ -199,8 +199,8 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
         </AnimatePresence>
       </div>
 
-      {/* Level Badge */}
-      <div className="relative z-50 mb-4 flex justify-center">
+      {/* Level Badge - Overlapping for better visual integration */}
+      <div className="relative z-50 -mt-8 mb-6 flex justify-center">
         <motion.div
           key={currentStage?.stageNumber || 0}
           initial={{ scale: 0.9 }}
