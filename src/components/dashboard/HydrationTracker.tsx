@@ -12,7 +12,6 @@ interface HydrationTrackerProps {
   nextStageStars: number;
   dailyProgress: number;
   onAddGlass: () => void;
-  aiMessage?: string;
 }
 
 export function HydrationTracker({
@@ -21,8 +20,7 @@ export function HydrationTracker({
   totalStars,
   nextStageStars,
   dailyProgress,
-  onAddGlass,
-  aiMessage
+  onAddGlass
 }: HydrationTrackerProps) {
   const evolutionProgress = Math.min(100, (totalStars / nextStageStars) * 100);
   const isGoalReached = currentGlasses >= goalGlasses;
@@ -132,24 +130,6 @@ export function HydrationTracker({
           </motion.p>
         )}
       </div>
-
-      <AnimatePresence>
-        {aiMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="pixel-card p-6 flex gap-4 items-center relative overflow-hidden group border-none bg-gradient-to-br from-white to-secondary/30"
-          >
-            <div className="space-y-1 relative z-10">
-              <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] mb-1">Sanctuary Spirit</p>
-              <p className="text-sm text-foreground/80 font-bold leading-relaxed italic">
-                "{aiMessage}"
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

@@ -1,7 +1,6 @@
-
 "use client"
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
@@ -10,10 +9,13 @@ import { Star, ArrowUpCircle, Zap, Loader2, ImageOff, Sparkles } from 'lucide-re
 
 interface PixelWorldProps {
   totalStars: number;
+  aiMessage?: string;
 }
 
-export function PixelWorld({ totalStars }: PixelWorldProps) {
+export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
+  const [visibleMessage, setVisibleMessage] = useState<string | null>(null);
   const firestore = useFirestore();
+  
   const stagesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'worldStages'), orderBy('requiredStars', 'asc'));
@@ -41,9 +43,17 @@ export function PixelWorld({ totalStars }: PixelWorldProps) {
   }, [stages, totalStars]);
 
   const remainingStars = nextStage ? Math.max(0, nextStage.requiredStars - totalStars) : 0;
-  const evolutionProgress = nextStage 
-    ? ((totalStars - (currentStage?.requiredStars || 0)) / (nextStage.requiredStars - (currentStage?.requiredStars || 0))) * 100
-    : 100;
+
+  // Handle AI message pop-up visibility
+  useEffect(() => {
+    if (aiMessage) {
+      setVisibleMessage(aiMessage);
+      const timer = setTimeout(() => {
+        setVisibleMessage(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [aiMessage]);
 
   return (
     <div className="relative w-full aspect-square flex items-center justify-center pixel-card p-4 overflow-hidden border-none shadow-2xl">
@@ -90,6 +100,25 @@ export function PixelWorld({ totalStars }: PixelWorldProps) {
             <div className="text-center">
               <p className="text-xs font-black uppercase tracking-widest">Uncharted Territory</p>
               <p className="text-[10px] font-bold">Configure Stages in Codex</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Motivation Pop-up */}
+      <AnimatePresence>
+        {visibleMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="absolute inset-0 flex items-center justify-center z-[60] px-6 pointer-events-none"
+          >
+            <div className="bg-white/50 backdrop-blur-md p-6 rounded-[2.5rem] border-2 border-white/40 shadow-2xl text-center max-w-[80%]">
+              <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] mb-2">Sanctuary Spirit</p>
+              <p className="text-sm font-bold text-foreground leading-relaxed italic">
+                "{visibleMessage}"
+              </p>
             </div>
           </motion.div>
         )}

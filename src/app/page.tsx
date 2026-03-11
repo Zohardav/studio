@@ -118,7 +118,7 @@ export default function DrinkAndEarn() {
       <main className="flex-1 px-8 space-y-6">
         <Tabs defaultValue="home" className="w-full">
           <TabsContent value="home" className="space-y-8 mt-0 focus-visible:ring-0">
-            <PixelWorld totalStars={totalStars} />
+            <PixelWorld totalStars={totalStars} aiMessage={aiMessage} />
             
             <HydrationTracker 
               currentGlasses={currentGlasses}
@@ -127,7 +127,6 @@ export default function DrinkAndEarn() {
               nextStageStars={nextStage?.requiredStars || (totalStars + 10)}
               dailyProgress={dailyProgressPercent}
               onAddGlass={handleAddGlass}
-              aiMessage={aiMessage}
             />
           </TabsContent>
 
