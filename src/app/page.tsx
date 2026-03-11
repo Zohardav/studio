@@ -12,7 +12,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { useFirebase, initiateAnonymousSignIn, useCollection, useMemoFirebase, linkAccountToGoogle } from '@/firebase';
 import { collection, query, orderBy, setDoc, doc } from 'firebase/firestore';
 import { Switch } from '@/components/ui/switch';
@@ -332,6 +332,10 @@ export default function DrinkAndEarn() {
               <Dialog onOpenChange={(open) => { if (!open) setAdminAuth(''); }}>
                 <DialogTrigger asChild><Button variant="ghost" className="w-full justify-between h-12 bg-white/60 rounded-2xl px-5 text-xs font-black uppercase tracking-widest"><div className="flex items-center gap-3"><Lock className="h-4 w-4 text-reward" />Manage Stage Progression</div></Button></DialogTrigger>
                 <DialogContent className="max-w-4xl h-[85vh] overflow-hidden flex flex-col p-0 border-none rounded-[3rem] bg-background/95 backdrop-blur-3xl shadow-2xl">
+                  <DialogHeader className="sr-only">
+                    <DialogTitle>Stage Management</DialogTitle>
+                    <DialogDescription>Access and edit world evolution stages.</DialogDescription>
+                  </DialogHeader>
                   {adminAuth !== 'Admin' ? (
                     <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-6">
                       <Input type="password" placeholder="Enter Passcode..." className="text-center h-12 rounded-xl" value={adminAuth} onChange={(e) => setAdminAuth(e.target.value)} />
