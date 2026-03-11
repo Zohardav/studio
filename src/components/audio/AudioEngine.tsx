@@ -56,11 +56,11 @@ export const useBackgroundMusic = (enabled: boolean) => {
   React.useEffect(() => {
     if (enabled && !playerRef.current) {
       // Create a soft ambient synth with a bit more volume
-      filterRef.current = new Tone.Filter(600, "lowpass").toDestination();
+      filterRef.current = new Tone.Filter(800, "lowpass").toDestination();
       playerRef.current = new Tone.PolySynth(Tone.Synth, {
         oscillator: { type: "fatsine", count: 3, spread: 30 },
         envelope: { attack: 4, decay: 2, sustain: 0.8, release: 5 },
-        volume: -18 // Increased from -25
+        volume: -10 // Increased from -18 for better visibility
       }).connect(filterRef.current);
 
       // Simple ambient pentatonic progression
