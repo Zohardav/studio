@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
@@ -68,25 +69,37 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
     <div className="relative w-full aspect-[4/5] flex flex-col pixel-card p-4 overflow-hidden border-none shadow-2xl">
       <div className="absolute inset-0 bg-[#f8f1de]" />
 
-      {/* Evolution Milestone UI - Golden Theme */}
-      <div className="relative z-50 w-full px-4 pt-4 mb-auto">
+      {/* Evolution Milestone UI - Transparent Glass Box */}
+      <div className="relative z-50 w-full px-2 pt-4 mb-auto">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-2"
+          className="bg-white/60 backdrop-blur-xl p-4 rounded-[2rem] border-2 border-white/40 shadow-xl space-y-3"
         >
-          <div className="flex justify-between items-end px-1">
-            <div className="flex items-center gap-2">
-              <Star className="h-3 w-3 text-reward fill-reward" />
-              <span className="text-[10px] font-black text-reward uppercase tracking-[0.2em]">Next Evolution: Stage {nextStage?.stageNumber || '?'}</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-reward/10 rounded-full border border-reward/20">
+                <ArrowUpCircle className="h-5 w-5 text-reward" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[8px] font-black text-reward uppercase tracking-[0.2em] leading-tight">Next Evolution</span>
+                <span className="text-sm font-bold text-foreground">Stage {nextStage?.stageNumber || '?'}</span>
+              </div>
             </div>
-            <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">{remainingStars} stars left</span>
+            <div className="flex flex-col items-end">
+              <span className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] leading-tight">Requirements</span>
+              <div className="flex items-center gap-1.5">
+                <Star className="h-3 w-3 text-reward fill-reward" />
+                <span className="text-xs font-black text-reward">{remainingStars} Stars</span>
+              </div>
+            </div>
           </div>
-          <div className="h-2 w-full bg-white/40 backdrop-blur-md rounded-full overflow-hidden border border-white/20 shadow-sm">
+          
+          <div className="h-1.5 w-full bg-white/40 rounded-full overflow-hidden border border-white/20 shadow-inner">
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${evolutionProgress}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
               className="h-full bg-reward shadow-[0_0_10px_hsl(var(--reward)/0.3)]"
             />
           </div>
