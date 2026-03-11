@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
@@ -6,7 +5,7 @@ import Image from 'next/image';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, ArrowUpCircle, Zap, Loader2, ImageOff, Sparkles } from 'lucide-react';
+import { Star, ArrowUpCircle, Zap, Loader2, ImageOff, Sparkles, Droplets } from 'lucide-react';
 
 interface PixelWorldProps {
   totalStars: number;
@@ -28,8 +27,8 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
   const { currentStage, nextStage } = useMemo(() => {
     if (!stages || stages.length === 0) return { currentStage: null, nextStage: null };
     
-    let active = stages[0];
-    let next = stages[1] || null;
+    let active = null;
+    let next = stages[0] || null;
 
     for (let i = 0; i < stages.length; i++) {
       if (totalStars >= stages[i].requiredStars) {
@@ -52,7 +51,6 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
       
       setVisibleMessage(aiMessage);
       
-      // Reduced timeout by 30% (3000ms -> 2100ms)
       timeoutRef.current = setTimeout(() => {
         setVisibleMessage(null);
       }, 2100);
@@ -99,21 +97,32 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
           </motion.div>
         ) : (
           <motion.div 
-            key="empty"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center gap-4 z-10 text-muted-foreground/30"
+            key="empty-level-0"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center gap-6 z-10 text-center"
           >
-            <ImageOff className="h-16 w-16" />
-            <div className="text-center">
-              <p className="text-xs font-black uppercase tracking-widest">Uncharted Territory</p>
-              <p className="text-[10px] font-bold">Configure Stages in Codex</p>
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full bg-white/40 border-4 border-dashed border-primary/20 flex items-center justify-center">
+                <Droplets className="h-10 w-10 text-primary/20" />
+              </div>
+              <motion.div 
+                animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="absolute -inset-4 bg-primary/5 rounded-full -z-10"
+              />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/40">Level 0: The Void</h3>
+              <p className="text-sm font-bold text-muted-foreground/60 max-w-[200px] leading-relaxed">
+                You better start drinking water if you want to grow something!
+              </p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Motivation Pop-up - centered on top of garden */}
+      {/* Motivation Pop-up */}
       <AnimatePresence>
         {visibleMessage && (
           <motion.div
@@ -143,7 +152,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl py-2 px-4 flex items-center justify-between shadow-md"
+          className="bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl py-2 px-4 flex items-center justify-between shadow-md opacity-50"
         >
           <div className="flex items-center gap-3">
             <div className="p-1 bg-reward/20 rounded-lg">
@@ -151,7 +160,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
             </div>
             <div className="flex flex-col">
               <span className="text-[8px] font-black text-reward uppercase tracking-widest leading-none mb-0.5">Next Evolution</span>
-              <span className="text-[10px] font-bold text-foreground leading-none">Stage {nextStage?.stageNumber || 'Max'}</span>
+              <span className="text-[10px] font-bold text-foreground leading-none">Stage {nextStage?.stageNumber || '???'}</span>
             </div>
           </div>
           <div className="text-right flex flex-col items-end">
@@ -167,13 +176,13 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
       {/* Level Badge */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50">
         <motion.div
-          key={currentStage?.stageNumber}
+          key={currentStage?.stageNumber || 0}
           initial={{ scale: 0.9 }}
           animate={{ scale: 1 }}
           className="bg-white/95 backdrop-blur-md px-5 py-2 rounded-full border-2 border-primary/10 shadow-lg flex items-center gap-2"
         >
           <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">SANCTUARY LVL</span>
-          <span className="text-xl font-headline font-bold text-primary">{currentStage?.stageNumber || 1}</span>
+          <span className="text-xl font-headline font-bold text-primary">{currentStage?.stageNumber || 0}</span>
         </motion.div>
       </div>
     </div>
