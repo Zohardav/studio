@@ -46,7 +46,7 @@ const GlassWaterIcon = ({ className }: { className?: string }) => (
 
 export default function DrinkAndEarn() {
   const [mounted, setMounted] = useState(false);
-  const [showIntro, setShowIntro] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   const { auth, firestore, user } = useFirebase();
   const { 
     settings, setSettings, 
@@ -77,10 +77,6 @@ export default function DrinkAndEarn() {
 
   useEffect(() => {
     setMounted(true);
-    const hasSeenIntro = localStorage.getItem('hasSeenIntro');
-    if (!hasSeenIntro) {
-      setShowIntro(true);
-    }
   }, []);
 
   useEffect(() => {

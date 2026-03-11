@@ -52,7 +52,6 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
   ];
 
   const handleComplete = () => {
-    localStorage.setItem('hasSeenIntro', 'true');
     onComplete();
   };
 
