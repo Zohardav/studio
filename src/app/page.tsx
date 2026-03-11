@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -9,13 +8,13 @@ import { HydrationTracker } from '@/components/dashboard/HydrationTracker';
 import { Onboarding } from '@/components/dashboard/Onboarding';
 import { WorldLibrary } from '@/components/dashboard/WorldLibrary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Sparkles, Droplets, Home, Scroll, Heart, Trash2, PlusCircle, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn, Zap } from 'lucide-react';
+import { Award, Sparkles, Droplets, Home, Scroll, Heart, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useFirebase, initiateAnonymousSignIn, useCollection, useMemoFirebase, linkAccountToGoogle } from '@/firebase';
@@ -28,10 +27,8 @@ export default function DrinkAndEarn() {
     settings, setSettings, 
     currentGlasses, dailyProgressPercent, 
     addGlass, onboardingComplete,
-    aiMessage, achievements, streak, todayLogs, totalStars,
-    isLoading,
-    debugReset, debugAddStreak,
-    developerInitialize
+    aiMessage, achievements, todayLogs, totalStars,
+    isLoading
   } = useHydration();
 
   const { toast } = useToast();
@@ -359,27 +356,6 @@ export default function DrinkAndEarn() {
                     </div>
                   </DialogContent>
                 </Dialog>
-
-                <Button variant="ghost" onClick={debugAddStreak} className="w-full justify-between h-12 bg-white/60 rounded-2xl px-5">
-                  <div className="flex items-center gap-3">
-                    <PlusCircle className="h-4 w-4 text-reward" />
-                    <span className="text-xs font-black uppercase tracking-widest">Boost Evolution Stars</span>
-                  </div>
-                </Button>
-
-                <Button variant="ghost" onClick={developerInitialize} className="w-full justify-between h-12 bg-orange-500/10 text-orange-600 rounded-2xl px-5 border border-orange-200">
-                  <div className="flex items-center gap-3">
-                    <Zap className="h-4 w-4" />
-                    <span className="text-xs font-black uppercase tracking-widest">Initialize Sanctuary (Dev)</span>
-                  </div>
-                </Button>
-
-                <Button variant="ghost" onClick={debugReset} className="w-full justify-between h-12 bg-destructive/5 text-destructive rounded-2xl px-5">
-                  <div className="flex items-center gap-3">
-                    <Trash2 className="h-4 w-4" />
-                    <span className="text-xs font-black uppercase tracking-widest">Reset Sanctuary</span>
-                  </div>
-                </Button>
               </CardContent>
             </Card>
           </TabsContent>

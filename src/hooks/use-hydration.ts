@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, where, orderBy, getDocs, deleteDoc, writeBatch } from 'firebase/firestore';
+import { doc, collection, query, where, orderBy } from 'firebase/firestore';
 import { updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { generateHydrationEncouragement } from '@/ai/flows/hydration-encouragement-generator';
 
@@ -121,68 +121,6 @@ export function useHydration() {
     { id: 'daily_goal', name: 'Full Bloom', description: 'Met your daily hydration ritual.', unlockedAt: profile?.bonusEarnedDates?.length ? Date.now() : undefined },
   ];
 
-  const debugReset = useCallback(async () => {
-    if (!user?.uid || !firestore || !userRef || !logsRef) return;
-    
-    if (window.confirm("Are you sure? This will delete your entire sanctuary progress forever.")) {
-      try {
-        const batch = writeBatch(firestore);
-        const snapshot = await getDocs(logsRef);
-        
-        snapshot.docs.forEach((docSnap) => {
-          batch.delete(docSnap.ref);
-        });
-        
-        batch.delete(userRef);
-        await batch.commit();
-        
-        window.location.reload();
-      } catch (error) {
-        console.error("Reset failed:", error);
-        alert("Reset failed. Please try again.");
-      }
-    }
-  }, [user, firestore, userRef, logsRef]);
-
-  const debugAddStreak = useCallback(() => {
-    if (!userRef || !profile) return;
-    updateDocumentNonBlocking(userRef, {
-      totalStars: (profile.totalStars || 0) + 50,
-    });
-  }, [userRef, profile]);
-
-  const developerInitialize = useCallback(async () => {
-    if (!user?.uid || !firestore) {
-      alert("No user or database connection found.");
-      return;
-    }
-
-    const goAhead = window.confirm("Developer Action: Completely wipe and re-initialize all sanctuary data?");
-    if (!goAhead) return;
-
-    try {
-      const profilePath = doc(firestore, 'users', user.uid);
-      const logsPath = collection(firestore, 'users', user.uid, 'logs');
-      
-      // 1. Fetch current logs
-      const logEntries = await getDocs(logsPath);
-      const initBatch = writeBatch(firestore);
-
-      // 2. Queue deletions for logs and the profile itself
-      logEntries.docs.forEach(l => initBatch.delete(l.ref));
-      initBatch.delete(profilePath);
-
-      // 3. Commit the batch for atomicity
-      await initBatch.commit();
-      
-      // 4. Force environment reset
-      window.location.replace(window.location.origin);
-    } catch (err: any) {
-      console.error("Initialize Sanctuary Error:", err);
-      alert(`Initialization failed: ${err.message}`);
-    }
-  }, [user, firestore]);
-
   return {
     settings: {
       name: profile?.displayName || 'Guardian',
@@ -200,9 +138,6 @@ export function useHydration() {
     onboardingComplete: !!profile,
     addGlass,
     aiMessage,
-    isLoading: isAuthLoading || (!!user && isProfileLoading),
-    debugReset,
-    debugAddStreak,
-    developerInitialize
+    isLoading: isAuthLoading || (!!user && isProfileLoading)
   };
 }
