@@ -66,141 +66,144 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
   }, [aiMessage]);
 
   return (
-    <div className="relative w-full aspect-[4/5] flex flex-col pixel-card p-4 overflow-hidden border-none shadow-2xl">
-      <div className="absolute inset-0 bg-[#f8f1de]" />
+    <div className="relative w-full aspect-[4/5] flex flex-col mb-12">
+      {/* Main Sanctuary Card Container */}
+      <div className="relative flex-1 flex flex-col pixel-card p-4 overflow-hidden border-none shadow-2xl">
+        <div className="absolute inset-0 bg-[#f8f1de]" />
 
-      {/* Evolution Milestone UI - Transparent Glass Box (Shorter Version) */}
-      <div className="relative z-50 w-full px-2 pt-2 mb-auto">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white/50 backdrop-blur-xl p-2.5 px-4 rounded-[1.5rem] border-2 border-white/30 shadow-xl space-y-1.5"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-1.5 bg-reward/10 rounded-full border border-reward/20">
-                <Star className="h-3.5 w-3.5 text-reward fill-reward" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[7px] font-black text-reward uppercase tracking-[0.2em] leading-tight">Next Evolution</span>
-                <span className="text-xs font-bold text-foreground">Stage {nextStage?.stageNumber || '?'}</span>
-              </div>
-            </div>
-            <div className="flex flex-col items-end">
-              <span className="text-[7px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] leading-tight">Requirements</span>
-              <div className="flex items-center gap-1">
-                <Star className="h-2.5 w-2.5 text-reward fill-reward" />
-                <span className="text-[10px] font-black text-reward">{remainingStars} Stars</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="h-1 w-full bg-white/40 rounded-full overflow-hidden border border-white/5 shadow-inner">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${evolutionProgress}%` }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
-              className="h-full bg-reward shadow-[0_0_8px_hsl(var(--reward)/0.3)]"
-            />
-          </div>
-        </motion.div>
-      </div>
-
-      <div className="relative flex-1 w-full flex items-center justify-center">
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            <motion.div 
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-2 z-10"
-            >
-              <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Glimpsing the Sanctuary...</span>
-            </motion.div>
-          ) : currentStage?.imageUrl ? (
-            <motion.div
-              key={currentStage.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1,
-                y: [0, -12, 0]
-              }}
-              exit={{ opacity: 0, scale: 1.1 }}
-              transition={{ 
-                opacity: { duration: 0.8 },
-                scale: { duration: 0.8 },
-                y: { 
-                  repeat: Infinity, 
-                  duration: 5, 
-                  ease: "easeInOut" 
-                }
-              }}
-              className="relative w-full h-full z-10"
-            >
-              <Image
-                src={currentStage.imageUrl}
-                alt={`World Stage ${currentStage.stageNumber}`}
-                fill
-                className="object-contain pixelated"
-                style={{ imageRendering: 'pixelated' }}
-                priority
-              />
-            </motion.div>
-          ) : (
-            <motion.div 
-              key="empty-level-0"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center gap-6 z-10 text-center"
-            >
-              <div className="relative">
-                <div className="w-24 h-24 rounded-full bg-white/40 border-4 border-dashed border-primary/20 flex items-center justify-center">
-                  <Droplets className="h-10 w-10 text-primary/20" />
+        {/* Evolution Milestone UI - Thinner and more compact */}
+        <div className="relative z-50 w-full px-2 pt-2 mb-auto">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white/50 backdrop-blur-xl p-2.5 px-4 rounded-[1.5rem] border-2 border-white/30 shadow-xl space-y-1.5"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-1.5 bg-reward/10 rounded-full border border-reward/20">
+                  <Star className="h-3.5 w-3.5 text-reward fill-reward" />
                 </div>
-                <motion.div 
-                  animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                  className="absolute -inset-4 bg-primary/5 rounded-full -z-10"
-                />
+                <div className="flex flex-col">
+                  <span className="text-[7px] font-black text-reward uppercase tracking-[0.2em] leading-tight">Next Evolution</span>
+                  <span className="text-xs font-bold text-foreground">Stage {nextStage?.stageNumber || '?'}</span>
+                </div>
               </div>
-              <div className="space-y-2 px-6">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/40">Level 0: The Void</h3>
-                <p className="text-sm font-bold text-muted-foreground/60 max-w-[200px] leading-relaxed mx-auto">
-                  Drink water to grow your sanctuary!
-                </p>
+              <div className="flex flex-col items-end">
+                <span className="text-[7px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] leading-tight">Requirements</span>
+                <div className="flex items-center gap-1">
+                  <Star className="h-2.5 w-2.5 text-reward fill-reward" />
+                  <span className="text-[10px] font-black text-reward">{remainingStars} Stars</span>
+                </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+            
+            <div className="h-1 w-full bg-white/40 rounded-full overflow-hidden border border-white/5 shadow-inner">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${evolutionProgress}%` }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
+                className="h-full bg-reward shadow-[0_0_8px_hsl(var(--reward)/0.3)]"
+              />
+            </div>
+          </motion.div>
+        </div>
 
-        {/* Motivation Pop-up */}
-        <AnimatePresence>
-          {visibleMessage && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ type: "spring", damping: 30, stiffness: 200 }}
-              className="absolute inset-0 flex items-center justify-center z-[60] px-8 pointer-events-none"
-            >
-              <div className="bg-white/70 backdrop-blur-xl p-6 rounded-[2.5rem] border-2 border-white/40 shadow-2xl text-center max-w-[90%] pointer-events-none">
-                <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] mb-2">Sanctuary Spirit</p>
-                <div className="relative h-12 flex items-center justify-center">
-                  <p className="text-sm font-bold text-foreground leading-relaxed italic">
-                    "{visibleMessage}"
+        <div className="relative flex-1 w-full flex items-center justify-center">
+          <AnimatePresence mode="wait">
+            {isLoading ? (
+              <motion.div 
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center gap-2 z-10"
+              >
+                <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Glimpsing the Sanctuary...</span>
+              </motion.div>
+            ) : currentStage?.imageUrl ? (
+              <motion.div
+                key={currentStage.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1,
+                  y: [0, -12, 0]
+                }}
+                exit={{ opacity: 0, scale: 1.1 }}
+                transition={{ 
+                  opacity: { duration: 0.8 },
+                  scale: { duration: 0.8 },
+                  y: { 
+                    repeat: Infinity, 
+                    duration: 5, 
+                    ease: "easeInOut" 
+                  }
+                }}
+                className="relative w-full h-full z-10"
+              >
+                <Image
+                  src={currentStage.imageUrl}
+                  alt={`World Stage ${currentStage.stageNumber}`}
+                  fill
+                  className="object-contain pixelated"
+                  style={{ imageRendering: 'pixelated' }}
+                  priority
+                />
+              </motion.div>
+            ) : (
+              <motion.div 
+                key="empty-level-0"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center gap-6 z-10 text-center"
+              >
+                <div className="relative">
+                  <div className="w-24 h-24 rounded-full bg-white/40 border-4 border-dashed border-primary/20 flex items-center justify-center">
+                    <Droplets className="h-10 w-10 text-primary/20" />
+                  </div>
+                  <motion.div 
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                    className="absolute -inset-4 bg-primary/5 rounded-full -z-10"
+                  />
+                </div>
+                <div className="space-y-2 px-6">
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/40">Level 0: The Void</h3>
+                  <p className="text-sm font-bold text-muted-foreground/60 max-w-[200px] leading-relaxed mx-auto">
+                    Drink water to grow your sanctuary!
                   </p>
                 </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Motivation Pop-up */}
+          <AnimatePresence>
+            {visibleMessage && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                transition={{ type: "spring", damping: 30, stiffness: 200 }}
+                className="absolute inset-0 flex items-center justify-center z-[60] px-8 pointer-events-none"
+              >
+                <div className="bg-white/70 backdrop-blur-xl p-6 rounded-[2.5rem] border-2 border-white/40 shadow-2xl text-center max-w-[90%] pointer-events-none">
+                  <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] mb-2">Sanctuary Spirit</p>
+                  <div className="relative h-12 flex items-center justify-center">
+                    <p className="text-sm font-bold text-foreground leading-relaxed italic">
+                      "{visibleMessage}"
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
-      {/* Level Badge - Overlapping for better visual integration */}
-      <div className="relative z-50 -mt-8 mb-6 flex justify-center">
+      {/* Level Badge - Overlapping the bottom boundary for better visual attachment */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-[60] flex justify-center">
         <motion.div
           key={currentStage?.stageNumber || 0}
           initial={{ scale: 0.9 }}
