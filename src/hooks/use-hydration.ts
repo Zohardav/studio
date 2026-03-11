@@ -3,8 +3,8 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, where, orderBy, getDocs } from 'firebase/firestore';
-import { updateDocumentNonBlocking, addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { doc, collection, query, where, orderBy, getDocs, deleteDoc } from 'firebase/firestore';
+import { updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { generateHydrationEncouragement } from '@/ai/flows/hydration-encouragement-generator';
 
 export type UserSettings = {
@@ -127,17 +127,16 @@ export function useHydration() {
     
     if (window.confirm("Are you sure? This will delete your entire sanctuary progress forever.")) {
       try {
-        // 1. Fetch and delete all logs first
+        // 1. Fetch and delete all logs
         const snapshot = await getDocs(logsRef);
-        snapshot.docs.forEach(d => deleteDocumentNonBlocking(d.ref));
+        const deleteLogPromises = snapshot.docs.map(docSnap => deleteDoc(docSnap.ref));
+        await Promise.all(deleteLogPromises);
         
-        // 2. Delete user profile to trigger onboarding
-        deleteDocumentNonBlocking(userRef);
+        // 2. Delete user profile
+        await deleteDoc(userRef);
         
-        // 3. Brief delay to allow Firestore sync and then reload to clear UI state
-        setTimeout(() => {
-          window.location.reload();
-        }, 800);
+        // The real-time listeners for useDoc and useCollection will automatically 
+        // update 'profile' to null, which triggers the onboarding UI.
       } catch (error) {
         console.error("Reset failed:", error);
       }
