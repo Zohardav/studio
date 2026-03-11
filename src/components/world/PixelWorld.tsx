@@ -66,7 +66,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
   }, [aiMessage]);
 
   return (
-    <div className="relative w-full aspect-[16/9] flex flex-col mb-8">
+    <div className="relative w-full aspect-[16/7] flex flex-col mb-12">
       {/* Main Sanctuary Card Container */}
       <div className="relative flex-1 flex flex-col pixel-card p-4 overflow-hidden border-none shadow-2xl">
         <div className="absolute inset-0 bg-[#f8f1de]" />
@@ -127,10 +127,10 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
                 initial={{ opacity: 0, scale: 1 }}
                 animate={{ 
                   opacity: 1, 
-                  scale: 1,
+                  scale: 1.2,
                   y: [0, -12, 0]
                 }}
-                exit={{ opacity: 0, scale: 1.1 }}
+                exit={{ opacity: 0, scale: 1.3 }}
                 transition={{ 
                   opacity: { duration: 0.8 },
                   scale: { duration: 0.8 },
