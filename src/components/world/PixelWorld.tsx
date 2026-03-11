@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, ArrowUpCircle, Zap, Loader2, ImageOff, Sparkles, Droplets } from 'lucide-react';
+import { Star, Zap, Loader2, ImageOff, Sparkles, Droplets } from 'lucide-react';
 
 interface PixelWorldProps {
   totalStars: number;
@@ -74,12 +74,12 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/60 backdrop-blur-xl p-4 rounded-[2rem] border-2 border-white/40 shadow-xl space-y-3"
+          className="bg-white/50 backdrop-blur-xl p-4 rounded-[2rem] border-2 border-white/30 shadow-xl space-y-3"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-reward/10 rounded-full border border-reward/20">
-                <ArrowUpCircle className="h-5 w-5 text-reward" />
+              <div className="p-2 bg-reward/10 rounded-full border border-reward/20">
+                <Star className="h-4 w-4 text-reward fill-reward" />
               </div>
               <div className="flex flex-col">
                 <span className="text-[8px] font-black text-reward uppercase tracking-[0.2em] leading-tight">Next Evolution</span>
@@ -95,7 +95,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
             </div>
           </div>
           
-          <div className="h-1.5 w-full bg-white/40 rounded-full overflow-hidden border border-white/20 shadow-inner">
+          <div className="h-1.5 w-full bg-white/40 rounded-full overflow-hidden border border-white/10 shadow-inner">
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${evolutionProgress}%` }}
