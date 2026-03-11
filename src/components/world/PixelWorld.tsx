@@ -26,7 +26,7 @@ export function PixelWorld({ totalLifetimeMl }: PixelWorldProps) {
 
   return (
     <div className="relative w-full aspect-square flex items-center justify-center pixel-card p-4 overflow-hidden border-none shadow-2xl">
-      {/* Set default stage background */}
+      {/* Default stage background */}
       <div className="absolute inset-0 bg-[#f8f1de]" />
 
       <AnimatePresence mode="wait">
@@ -75,27 +75,27 @@ export function PixelWorld({ totalLifetimeMl }: PixelWorldProps) {
         )}
       </AnimatePresence>
 
-      {/* UI Overlay: Evolution Goal */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 w-full px-4">
+      {/* UI Overlay: Evolution Goal (Thinner and 50% transparent) */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 w-full px-6">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/60 backdrop-blur-2xl border border-white/40 rounded-2xl p-2.5 flex items-center justify-between shadow-lg"
+          className="bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl py-1.5 px-3 flex items-center justify-between shadow-md"
         >
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-primary/20 rounded-xl">
-              <ArrowUpCircle className="h-3.5 w-3.5 text-primary" />
+            <div className="p-1 bg-primary/20 rounded-lg">
+              <ArrowUpCircle className="h-3 w-3 text-primary" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[8px] font-black text-primary uppercase tracking-widest leading-none mb-1">Milestone</span>
-              <span className="text-[10px] font-bold text-foreground">Evolution {milestone.nextStage}/64</span>
+              <span className="text-[7px] font-black text-primary uppercase tracking-widest leading-none mb-0.5">Milestone</span>
+              <span className="text-[9px] font-bold text-foreground leading-none">Evolution {milestone.nextStage}/64</span>
             </div>
           </div>
           <div className="text-right flex flex-col items-end">
-            <span className="text-[8px] font-black text-muted-foreground/60 uppercase tracking-widest mb-1 leading-none">To Grow</span>
-            <div className="flex items-center gap-1">
+            <span className="text-[7px] font-black text-muted-foreground/60 uppercase tracking-widest mb-0.5 leading-none">To Grow</span>
+            <div className="flex items-center gap-1 leading-none">
                <Zap className="h-2.5 w-2.5 text-reward fill-reward" />
-               <span className="text-[10px] font-black text-primary">{milestone.remainingMl}ml</span>
+               <span className="text-[9px] font-black text-primary leading-none">{milestone.remainingMl}ml</span>
             </div>
           </div>
         </motion.div>
