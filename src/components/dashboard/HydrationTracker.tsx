@@ -1,9 +1,9 @@
 
 "use client"
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Wand2, Star, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Wand2, Star, CheckCircle2, Timer } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface HydrationTrackerProps {
@@ -41,8 +41,24 @@ export function HydrationTracker({
   dailyProgress,
   onAddGlass
 }: HydrationTrackerProps) {
+  const [cooldown, setCooldown] = useState(0);
   const evolutionProgress = Math.min(100, (totalStars / nextStageStars) * 100);
   const isGoalReached = currentGlasses >= goalGlasses;
+  const isCooldownActive = cooldown > 0;
+
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [cooldown]);
+
+  const handleAddClick = () => {
+    if (!isGoalReached && !isCooldownActive) {
+      onAddGlass();
+      setCooldown(10);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -120,18 +136,24 @@ export function HydrationTracker({
       <div className="space-y-4">
         <Button 
           className={`w-full h-24 text-2xl font-black rounded-[2.5rem] transition-all flex items-center justify-center gap-4 group relative overflow-hidden ${
-            isGoalReached 
+            (isGoalReached || isCooldownActive)
             ? "bg-muted text-muted-foreground cursor-not-allowed opacity-80" 
             : "bg-primary text-white hover:bg-primary/90 shadow-2xl shadow-primary/30 border-b-8 border-primary/20 active:border-b-2 active:translate-y-1"
           }`}
-          onClick={onAddGlass}
-          disabled={isGoalReached}
+          onClick={handleAddClick}
+          disabled={isGoalReached || isCooldownActive}
         >
-          <div className={`p-3 rounded-2xl transition-transform ${isGoalReached ? "bg-muted-foreground/20" : "bg-white/20 group-hover:rotate-12"}`}>
-            {isGoalReached ? <CheckCircle2 className="h-8 w-8" /> : <Wand2 className="h-8 w-8" />}
+          <div className={`p-3 rounded-2xl transition-transform ${isGoalReached || isCooldownActive ? "bg-muted-foreground/20" : "bg-white/20 group-hover:rotate-12"}`}>
+            {isGoalReached ? (
+              <CheckCircle2 className="h-8 w-8" />
+            ) : isCooldownActive ? (
+              <Timer className="h-8 w-8 animate-pulse" />
+            ) : (
+              <Wand2 className="h-8 w-8" />
+            )}
           </div>
           <span className="relative z-10">
-            {isGoalReached ? "Goal Fulfilled" : "Drink a Glass"}
+            {isGoalReached ? "Goal Fulfilled" : isCooldownActive ? `Wait ${cooldown}s` : "Drink a Glass"}
           </span>
           {isGoalReached && (
              <motion.div 
@@ -149,6 +171,16 @@ export function HydrationTracker({
             className="text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60"
           >
             The sanctuary is glowing. Rest now, Guardian.
+          </motion.p>
+        )}
+
+        {isCooldownActive && !isGoalReached && (
+          <motion.p 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center text-[10px] font-black uppercase tracking-widest text-primary/60"
+          >
+            Absorbing nourishment...
           </motion.p>
         )}
       </div>
