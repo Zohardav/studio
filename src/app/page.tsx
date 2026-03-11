@@ -356,7 +356,7 @@ export default function DrinkAndEarn() {
                 <div className="flex items-center justify-between p-5 bg-white/80 rounded-3xl border-2 border-primary/5">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-muted rounded-xl">
-                      <Sparkles className="h-4 w-4 text-muted-foreground" />
+                      <GlassWaterIcon className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <p className="text-xs font-black uppercase tracking-widest">Daily Goal</p>
                   </div>
