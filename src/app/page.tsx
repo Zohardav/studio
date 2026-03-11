@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -93,7 +94,13 @@ export default function DrinkAndEarn() {
         description: "Your progress is now linked to your Google account.",
       });
     } catch (error: any) {
-      if (error.code !== 'auth/popup-closed-by-user') {
+      if (error.code === 'auth/operation-not-allowed') {
+        toast({
+          variant: "destructive",
+          title: "Setup Required",
+          description: "Google Sign-In is not enabled in the Firebase Console. Please enable it to use this feature.",
+        });
+      } else if (error.code !== 'auth/popup-closed-by-user') {
         toast({
           variant: "destructive",
           title: "Link failed",
