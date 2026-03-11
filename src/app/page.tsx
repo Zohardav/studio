@@ -241,9 +241,9 @@ export default function DrinkAndEarn() {
                         </div>
                         <div className="flex items-center gap-2">
                           <ChevronRight className="h-3 w-3 text-muted-foreground/30" />
-                          <div className="flex items-center gap-1.5 bg-reward/10 px-3 py-1 rounded-full border border-reward/20">
-                            <Star className="h-3 w-3 text-reward fill-reward" />
-                            <span className="text-xs font-black text-reward">1</span>
+                          <div className="flex items-center gap-1.5 bg-reward px-3 py-1 rounded-full border border-white/20 shadow-sm">
+                            <Star className="h-3 w-3 text-white fill-white" />
+                            <span className="text-xs font-black text-white">1</span>
                           </div>
                         </div>
                       </div>
@@ -257,9 +257,9 @@ export default function DrinkAndEarn() {
                         </div>
                         <div className="flex items-center gap-2">
                           <ChevronRight className="h-3 w-3 text-muted-foreground/30" />
-                          <div className="flex items-center gap-1.5 bg-reward/20 px-3 py-1 rounded-full border border-reward/30 shadow-sm">
-                            <Star className="h-3 w-3 text-reward fill-reward" />
-                            <span className="text-xs font-black text-reward">5</span>
+                          <div className="flex items-center gap-1.5 bg-reward px-3 py-1 rounded-full border border-white/20 shadow-md">
+                            <Star className="h-3 w-3 text-white fill-white" />
+                            <span className="text-xs font-black text-white">5</span>
                           </div>
                         </div>
                       </div>
