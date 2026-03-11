@@ -66,7 +66,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
   }, [aiMessage]);
 
   return (
-    <div className="relative w-full aspect-[16/54] flex flex-col mb-12">
+    <div className="relative w-full aspect-[16/21] flex flex-col mb-12">
       {/* Main Sanctuary Card Container */}
       <div className="relative flex-1 flex flex-col pixel-card p-4 overflow-hidden border-none shadow-2xl">
         <div className="absolute inset-0 bg-[#f8f1de]" />
@@ -81,18 +81,18 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-1 bg-reward/10 rounded-full border border-reward/20">
-                  <Star className="h-3.5 w-3.5 text-reward fill-reward" />
+                  <Star className="h-3 w-3 text-reward fill-reward" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[7px] font-black text-reward uppercase tracking-[0.2em] leading-tight">Next Evolution</span>
-                  <span className="text-[11px] font-bold text-foreground">Stage {nextStage?.stageNumber || '?'}</span>
+                  <span className="text-[6px] font-black text-reward uppercase tracking-[0.2em] leading-tight">Next Evolution</span>
+                  <span className="text-[10px] font-bold text-foreground">Stage {nextStage?.stageNumber || '?'}</span>
                 </div>
               </div>
               <div className="flex flex-col items-end">
-                <span className="text-[7px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] leading-tight">Requirements</span>
+                <span className="text-[6px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] leading-tight">Requirements</span>
                 <div className="flex items-center gap-1">
-                  <Star className="h-2.5 w-2.5 text-reward fill-reward" />
-                  <span className="text-[10px] font-black text-reward">{remainingStars} Stars</span>
+                  <Star className="h-2 w-2 text-reward fill-reward" />
+                  <span className="text-[9px] font-black text-reward">{remainingStars} Stars</span>
                 </div>
               </div>
             </div>
@@ -127,10 +127,10 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
                 initial={{ opacity: 0, scale: 1 }}
                 animate={{ 
                   opacity: 1, 
-                  scale: 1.2,
+                  scale: 1,
                   y: [0, -12, 0]
                 }}
-                exit={{ opacity: 0, scale: 1.3 }}
+                exit={{ opacity: 0, scale: 1.1 }}
                 transition={{ 
                   opacity: { duration: 0.8 },
                   scale: { duration: 0.8 },
