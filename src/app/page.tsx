@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -21,6 +22,7 @@ import { useFirebase, initiateAnonymousSignIn, useCollection, useMemoFirebase, l
 import { collection, query, orderBy, setDoc, doc } from 'firebase/firestore';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import * as Tone from 'tone';
 
 // Custom Glass of Water Icon
 const GlassWaterIcon = ({ className }: { className?: string }) => (
@@ -81,7 +83,10 @@ export default function DrinkAndEarn() {
     }
   }, [auth, user, isLoading]);
 
-  const handleAddGlass = () => {
+  const handleAddGlass = async () => {
+    if (settings.soundEnabled) {
+      await Tone.start();
+    }
     addGlass();
     playWaterLog();
     
@@ -145,6 +150,13 @@ export default function DrinkAndEarn() {
         description: error.message,
       });
     }
+  };
+
+  const handleSoundToggle = async (val: boolean) => {
+    if (val) {
+      await Tone.start();
+    }
+    setSettings({...settings, soundEnabled: val});
   };
 
   if (isLoading || isResetting || !mounted) {
@@ -381,7 +393,7 @@ export default function DrinkAndEarn() {
                   </div>
                   <Switch 
                     checked={settings.soundEnabled}
-                    onCheckedChange={(val) => setSettings({...settings, soundEnabled: val})}
+                    onCheckedChange={handleSoundToggle}
                   />
                 </div>
               </CardContent>
