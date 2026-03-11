@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -42,7 +41,6 @@ export function HydrationTracker({
   onAddGlass
 }: HydrationTrackerProps) {
   const [cooldown, setCooldown] = useState(0);
-  const evolutionProgress = Math.min(100, (totalStars / nextStageStars) * 100);
   const isGoalReached = currentGlasses >= goalGlasses;
   const isCooldownActive = cooldown > 0;
 
@@ -98,40 +96,6 @@ export function HydrationTracker({
           </div>
         </div>
       </div>
-
-      {/* Evolution Progress Card */}
-      <motion.div 
-        whileHover={{ scale: 1.02 }}
-        className="pixel-card p-6 bg-gradient-to-br from-white/90 to-reward/5 border-none shadow-xl relative overflow-hidden group"
-      >
-        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-          <Star className="h-20 w-20 text-reward fill-reward" />
-        </div>
-        
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-reward/10 rounded-xl">
-            <Star className="h-5 w-5 text-reward fill-reward" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[9px] font-black text-reward uppercase tracking-[0.3em]">World Evolution</span>
-            <span className="text-sm font-bold text-foreground/80">{totalStars} / {nextStageStars} Stars to Level Up</span>
-          </div>
-        </div>
-
-        <div className="relative">
-          <div className="h-3 w-full bg-muted/50 rounded-full overflow-hidden border border-white/40">
-            <motion.div 
-              className="h-full bg-reward shadow-[0_0_15px_rgba(242,209,126,0.6)]"
-              initial={{ width: 0 }}
-              animate={{ width: `${evolutionProgress}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
-            />
-          </div>
-          <div className="absolute -top-1 right-0">
-             <Sparkles className="h-5 w-5 text-reward/40 animate-pulse" />
-          </div>
-        </div>
-      </motion.div>
 
       <div className="space-y-4">
         <Button 
