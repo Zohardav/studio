@@ -9,13 +9,13 @@ import { HydrationTracker } from '@/components/dashboard/HydrationTracker';
 import { Onboarding } from '@/components/dashboard/Onboarding';
 import { WorldLibrary } from '@/components/dashboard/WorldLibrary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Sparkles, Droplets, Home, Scroll, Heart, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn, Music, VolumeX, Volume2, Trash2 } from 'lucide-react';
+import { Award, Sparkles, Droplets, Home, Scroll, Heart, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn, Music, VolumeX, Volume2, Trash2, Info, ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useFirebase, initiateAnonymousSignIn, useCollection, useMemoFirebase, linkAccountToGoogle } from '@/firebase';
@@ -163,7 +163,7 @@ export default function DrinkAndEarn() {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-background z-50">
         <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">
           {isResetting ? 'Wiping Sanctuary...' : 'Entering Sanctuary...'}
         </p>
       </div>
@@ -209,12 +209,68 @@ export default function DrinkAndEarn() {
                   <span className="font-black text-[10px]">{currentGlasses}</span>
                 </Badge>
               </motion.div>
-              <motion.div whileTap={{ scale: 0.9 }}>
-                <Badge variant="secondary" className="px-3 py-2 bg-white/80 border-2 border-reward/20 rounded-[1.2rem] shadow-sm flex gap-2 items-center">
-                  <Star className="w-3.5 h-3.5 text-reward fill-reward" />
-                  <span className="font-black text-[10px]">{totalStars}</span>
-                </Badge>
-              </motion.div>
+              
+              <Dialog>
+                <DialogTrigger asChild>
+                  <motion.div whileTap={{ scale: 0.9 }} className="cursor-pointer">
+                    <Badge variant="secondary" className="px-3 py-2 bg-white/80 border-2 border-reward/20 rounded-[1.2rem] shadow-sm flex gap-2 items-center hover:bg-reward/5 transition-colors">
+                      <Star className="w-3.5 h-3.5 text-reward fill-reward" />
+                      <span className="font-black text-[10px]">{totalStars}</span>
+                    </Badge>
+                  </motion.div>
+                </DialogTrigger>
+                <DialogContent className="max-w-[320px] rounded-[2.5rem] p-0 border-none bg-white/80 backdrop-blur-2xl shadow-2xl overflow-hidden">
+                  <div className="p-8 space-y-6">
+                    <div className="flex flex-col items-center text-center space-y-2">
+                      <div className="p-4 bg-reward/10 rounded-[2rem] border-2 border-reward/20 shadow-inner mb-2">
+                        <Sparkles className="h-8 w-8 text-reward" />
+                      </div>
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl font-headline font-bold">Evolution Guide</DialogTitle>
+                        <CardDescription className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">How to earn stars</CardDescription>
+                      </DialogHeader>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-white/40 rounded-3xl border-2 border-primary/5 group">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
+                            <GlassWaterIcon className="h-5 w-5 text-primary" />
+                          </div>
+                          <span className="text-xs font-bold text-foreground/80">1 Glass</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <ChevronRight className="h-3 w-3 text-muted-foreground/30" />
+                          <div className="flex items-center gap-1.5 bg-reward/10 px-3 py-1 rounded-full border border-reward/20">
+                            <Star className="h-3 w-3 text-reward fill-reward" />
+                            <span className="text-xs font-black text-reward">1</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-white/40 rounded-3xl border-2 border-reward/10 group">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-reward/10 rounded-xl group-hover:rotate-12 transition-transform">
+                            <Award className="h-5 w-5 text-reward" />
+                          </div>
+                          <span className="text-xs font-bold text-foreground/80">Daily Goal</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <ChevronRight className="h-3 w-3 text-muted-foreground/30" />
+                          <div className="flex items-center gap-1.5 bg-reward/20 px-3 py-1 rounded-full border border-reward/30 shadow-sm">
+                            <Star className="h-3 w-3 text-reward fill-reward" />
+                            <span className="text-xs font-black text-reward">5</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-[9px] font-medium text-center text-muted-foreground/60 italic px-4">
+                      Collect stars to evolve your sanctuary into higher visual stages.
+                    </p>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </motion.div>
