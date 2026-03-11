@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -8,7 +9,7 @@ import { HydrationTracker } from '@/components/dashboard/HydrationTracker';
 import { Onboarding } from '@/components/dashboard/Onboarding';
 import { WorldLibrary } from '@/components/dashboard/WorldLibrary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Sparkles, Droplets, Home, Scroll, Heart, Trash2, FastForward, PlusCircle, BookOpen, Star } from 'lucide-react';
+import { Award, Sparkles, Droplets, Home, Scroll, Heart, Trash2, FastForward, PlusCircle, BookOpen, Star, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +19,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useFirebase, initiateAnonymousSignIn, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy, setDoc, doc } from 'firebase/firestore';
 
 export default function DrinkAndEarn() {
   const [mounted, setMounted] = useState(false);
@@ -26,8 +27,9 @@ export default function DrinkAndEarn() {
   const { 
     settings, setSettings, 
     currentGlasses, dailyProgressPercent, 
-    addGlass, onboardingComplete, setOnboardingComplete,
+    addGlass, onboardingComplete,
     aiMessage, achievements, streak, todayLogs, totalStars,
+    isLoading,
     debugReset, debugNextDay, debugAddStreak
   } = useHydration();
 
@@ -40,7 +42,6 @@ export default function DrinkAndEarn() {
 
   const nextStage = useMemo(() => {
     if (!stages) return null;
-    // Find the first stage that requires more stars than we currently have
     return stages.find(s => s.requiredStars > totalStars) || null;
   }, [stages, totalStars]);
 
@@ -70,10 +71,30 @@ export default function DrinkAndEarn() {
     }
   };
 
-  const handleOnboarding = (name: string, goal: number) => {
-    setSettings(prev => ({ ...prev, name, dailyGoalGlasses: goal }));
-    setOnboardingComplete(true);
+  const handleOnboarding = async (name: string, goal: number) => {
+    if (!user || !firestore) return;
+    
+    // Create initial profile in Firestore
+    const userRef = doc(firestore, 'users', user.uid);
+    await setDoc(userRef, {
+      id: user.uid,
+      displayName: name,
+      dailyGoalGlasses: goal,
+      totalStars: 0,
+      bonusEarnedDates: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
   };
+
+  if (isLoading || !mounted) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-background z-50">
+        <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Entering Sanctuary...</p>
+      </div>
+    );
+  }
 
   if (!onboardingComplete) {
     return <Onboarding onComplete={handleOnboarding} />;
@@ -109,7 +130,7 @@ export default function DrinkAndEarn() {
           <motion.div whileTap={{ scale: 0.9 }}>
             <Badge variant="secondary" className="px-4 py-3 bg-white/80 border-2 border-reward/20 rounded-[1.5rem] shadow-sm flex gap-2 items-center">
               <Award className="w-4 h-4 text-reward" />
-              <span className="font-black text-xs">{streak} DAY STREAK</span>
+              <span className="font-black text-xs">STARS EARNED: {totalStars}</span>
             </Badge>
           </motion.div>
         </motion.div>
@@ -175,7 +196,7 @@ export default function DrinkAndEarn() {
                          <p className="text-xs font-bold uppercase tracking-widest">No nourishment yet today</p>
                       </div>
                     ) : (
-                      todayLogs.slice().reverse().map(log => (
+                      todayLogs.map(log => (
                         <div 
                           key={log.id} 
                           className="flex justify-between items-center p-4 bg-white/80 rounded-2xl border-2 border-primary/10"
@@ -184,7 +205,7 @@ export default function DrinkAndEarn() {
                             <div className="p-2.5 bg-primary/10 rounded-xl">
                               <Droplets className="h-5 w-5 text-primary" />
                             </div>
-                            <span className="font-bold text-lg">1 Glass</span>
+                            <span className="font-bold text-lg">{log.glassesCount} Glass</span>
                           </div>
                           <span className="text-[10px] font-black text-muted-foreground/60 uppercase">
                             {mounted ? new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
@@ -272,13 +293,6 @@ export default function DrinkAndEarn() {
                   </DialogContent>
                 </Dialog>
 
-                <Button variant="ghost" onClick={debugNextDay} className="w-full justify-between h-12 bg-white/60 rounded-2xl px-5">
-                  <div className="flex items-center gap-3">
-                    <FastForward className="h-4 w-4 text-reward" />
-                    <span className="text-xs font-black uppercase tracking-widest">Simulate Next Day</span>
-                  </div>
-                </Button>
-                
                 <Button variant="ghost" onClick={debugAddStreak} className="w-full justify-between h-12 bg-white/60 rounded-2xl px-5">
                   <div className="flex items-center gap-3">
                     <PlusCircle className="h-4 w-4 text-reward" />

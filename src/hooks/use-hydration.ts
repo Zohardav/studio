@@ -1,32 +1,17 @@
 
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
+import { doc, collection, setDoc, addDoc, serverTimestamp, query, where, orderBy, limit } from 'firebase/firestore';
+import { updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { generateHydrationEncouragement } from '@/ai/flows/hydration-encouragement-generator';
+import { useState } from 'react';
 
 export type UserSettings = {
   name: string;
   dailyGoalGlasses: number;
   soundEnabled: boolean;
-};
-
-export type HydrationLog = {
-  id: string;
-  timestamp: number;
-  glassesCount: number;
-};
-
-export type Achievement = {
-  id: string;
-  name: string;
-  description: string;
-  unlockedAt?: number;
-};
-
-const DEFAULT_SETTINGS: UserSettings = {
-  name: 'Guardian',
-  dailyGoalGlasses: 8,
-  soundEnabled: true,
 };
 
 const REFRESHING_MESSAGES = [
@@ -38,145 +23,144 @@ const REFRESHING_MESSAGES = [
 ];
 
 export function useHydration() {
-  const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
-  const [logs, setLogs] = useState<HydrationLog[]>([]);
-  const [totalStars, setTotalStars] = useState(0);
-  const [bonusEarnedDates, setBonusEarnedDates] = useState<string[]>([]);
-  const [streak, setStreak] = useState(0);
-  const [onboardingComplete, setOnboardingComplete] = useState(false);
+  const { user, isUserLoading: isAuthLoading } = useUser();
+  const firestore = useFirestore();
   const [aiMessage, setAiMessage] = useState<string>('');
-  
-  const [achievements, setAchievements] = useState<Achievement[]>([
-    { id: 'first_glass', name: 'First Drop', description: 'Gave the soil its first glass of life.' },
-    { id: 'daily_goal', name: 'Full Bloom', description: 'Met your daily hydration ritual.' },
-    { id: 'streak_3', name: 'Constant Care', description: 'Protected the world for 3 days.' },
-  ]);
 
-  // Load data
-  useEffect(() => {
-    const storedSettings = localStorage.getItem('hydration_settings');
-    const storedLogs = localStorage.getItem('hydration_logs');
-    const storedAchievements = localStorage.getItem('hydration_achievements');
-    const storedOnboarding = localStorage.getItem('hydration_onboarding');
-    const storedStreak = localStorage.getItem('hydration_streak');
-    const storedStars = localStorage.getItem('hydration_total_stars');
-    const storedBonuses = localStorage.getItem('hydration_bonus_dates');
+  // 1. Fetch User Profile
+  const userRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
 
-    if (storedSettings) setSettings(JSON.parse(storedSettings));
-    if (storedLogs) setLogs(JSON.parse(storedLogs));
-    if (storedAchievements) setAchievements(JSON.parse(storedAchievements));
-    if (storedOnboarding) setOnboardingComplete(JSON.parse(storedOnboarding));
-    if (storedStreak) setStreak(JSON.parse(storedStreak));
-    if (storedStars) setTotalStars(JSON.parse(storedStars));
-    if (storedBonuses) setBonusEarnedDates(JSON.parse(storedBonuses));
-  }, []);
+  const { data: profile, isLoading: isProfileLoading } = useDoc(userRef);
 
-  // Sync data
-  useEffect(() => {
-    localStorage.setItem('hydration_settings', JSON.stringify(settings));
-    localStorage.setItem('hydration_logs', JSON.stringify(logs));
-    localStorage.setItem('hydration_achievements', JSON.stringify(achievements));
-    localStorage.setItem('hydration_onboarding', JSON.stringify(onboardingComplete));
-    localStorage.setItem('hydration_streak', JSON.stringify(streak));
-    localStorage.setItem('hydration_total_stars', JSON.stringify(totalStars));
-    localStorage.setItem('hydration_bonus_dates', JSON.stringify(bonusEarnedDates));
-  }, [settings, logs, achievements, onboardingComplete, streak, totalStars, bonusEarnedDates]);
+  // 2. Fetch Today's Logs
+  const todayStr = new Date().toISOString().split('T')[0];
+  const logsRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return collection(firestore, 'users', user.uid, 'logs');
+  }, [firestore, user]);
 
-  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const todayQuery = useMemoFirebase(() => {
+    if (!logsRef) return null;
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    return query(logsRef, where('timestamp', '>=', startOfDay.toISOString()), orderBy('timestamp', 'desc'));
+  }, [logsRef]);
 
-  const todayLogs = useMemo(() => logs.filter(log => {
-    const date = new Date(log.timestamp);
-    const today = new Date();
-    return date.getDate() === today.getDate() &&
-           date.getMonth() === today.getMonth() &&
-           date.getFullYear() === today.getFullYear();
-  }), [logs]);
+  const { data: logs, isLoading: isLogsLoading } = useCollection(todayQuery);
 
-  const currentGlasses = useMemo(() => todayLogs.reduce((acc, log) => acc + log.glassesCount, 0), [todayLogs]);
-  const dailyProgressPercent = Math.min(100, (currentGlasses / settings.dailyGoalGlasses) * 100);
+  const currentGlasses = useMemo(() => {
+    if (!logs) return 0;
+    return logs.reduce((acc, log) => acc + (log.glassesCount || 1), 0);
+  }, [logs]);
+
+  const dailyProgressPercent = useMemo(() => {
+    if (!profile) return 0;
+    return Math.min(100, (currentGlasses / profile.dailyGoalGlasses) * 100);
+  }, [currentGlasses, profile]);
 
   const addGlass = useCallback(async () => {
-    const newLog: HydrationLog = {
-      id: Math.random().toString(36).substring(2, 9),
-      timestamp: Date.now(),
+    if (!user || !profile || !logsRef || !userRef) return;
+
+    const isGoalReached = (currentGlasses + 1) >= profile.dailyGoalGlasses;
+    const isFirstDrinkOfDay = currentGlasses === 0;
+
+    // 1. Add Log Entry
+    const newLog = {
+      userId: user.uid,
       glassesCount: 1,
+      timestamp: new Date().toISOString(),
     };
+    addDocumentNonBlocking(logsRef, newLog);
 
-    setLogs(prev => [...prev, newLog]);
-    
-    // Earn 1 star for the glass
-    setTotalStars(prev => prev + 1);
+    // 2. Update Profile (Stars & Bonus)
+    let extraStars = 1; // 1 star per glass
+    let newBonusDates = [...(profile.bonusEarnedDates || [])];
 
-    const isGoalReached = (currentGlasses + 1) >= settings.dailyGoalGlasses;
-    const isFirstDrinkOfDay = todayLogs.length === 0;
+    if (isGoalReached && !newBonusDates.includes(todayStr)) {
+      extraStars += 5; // +5 for reaching goal
+      newBonusDates.push(todayStr);
+    }
 
-    // Set immediate message - Use a stable random pick for this specific action
+    updateDocumentNonBlocking(userRef, {
+      totalStars: (profile.totalStars || 0) + extraStars,
+      bonusEarnedDates: newBonusDates,
+      updatedAt: new Date().toISOString(),
+    });
+
+    // 3. AI Feedback
     const immediateMsg = REFRESHING_MESSAGES[Math.floor(Math.random() * REFRESHING_MESSAGES.length)];
     setAiMessage(immediateMsg);
 
-    // Check for daily bonus
-    if (isGoalReached && !bonusEarnedDates.includes(todayStr)) {
-      setTotalStars(prev => prev + 5);
-      setBonusEarnedDates(prev => [...prev, todayStr]);
-    }
-    
-    // Fetch AI message in background
     generateHydrationEncouragement({
-      userName: settings.name,
+      userName: profile.displayName,
       amountDrankMl: 250,
       currentAmountMl: (currentGlasses + 1) * 250,
-      dailyGoalMl: settings.dailyGoalGlasses * 250,
+      dailyGoalMl: profile.dailyGoalGlasses * 250,
       isFirstDrinkOfDay,
       isGoalReached,
-      remainingAmountMl: Math.max(0, (settings.dailyGoalGlasses - (currentGlasses + 1)) * 250),
+      remainingAmountMl: Math.max(0, (profile.dailyGoalGlasses - (currentGlasses + 1)) * 250),
     }).then(response => {
       setAiMessage(response.message);
-    }).catch(() => {
-      // If AI fails, we already have the immediate message shown
-    });
+    }).catch(() => {});
+  }, [user, profile, logsRef, userRef, currentGlasses, todayStr]);
 
-    // Check achievements
-    setAchievements(prev => prev.map(a => {
-      if (a.id === 'first_glass' && !a.unlockedAt) return { ...a, unlockedAt: Date.now() };
-      if (a.id === 'daily_goal' && isGoalReached && !a.unlockedAt) return { ...a, unlockedAt: Date.now() };
-      return a;
-    }));
-  }, [currentGlasses, settings, todayLogs.length, bonusEarnedDates, todayStr]);
+  const setOnboardingComplete = useCallback(async (complete: boolean) => {
+    // Usually handled by presence of profile, but can be a flag if needed
+  }, []);
+
+  const setSettings = useCallback((newSettings: Partial<UserSettings>) => {
+    if (!userRef || !profile) return;
+    updateDocumentNonBlocking(userRef, {
+      displayName: newSettings.name ?? profile.displayName,
+      dailyGoalGlasses: newSettings.dailyGoalGlasses ?? profile.dailyGoalGlasses,
+      updatedAt: new Date().toISOString(),
+    });
+  }, [userRef, profile]);
+
+  // Achievements logic can be added here fetching from a subcollection
+  const achievements = [
+    { id: 'first_glass', name: 'First Drop', description: 'Gave the soil its first glass of life.', unlockedAt: profile?.totalStars ? Date.now() : undefined },
+    { id: 'daily_goal', name: 'Full Bloom', description: 'Met your daily hydration ritual.', unlockedAt: profile?.bonusEarnedDates?.length ? Date.now() : undefined },
+  ];
 
   const debugReset = useCallback(() => {
-    localStorage.clear();
-    window.location.reload();
+    // Clear Firestore logs for user
+    alert("In a production app, this would delete your cloud data. For this prototype, please use the Developer menu.");
   }, []);
 
   const debugNextDay = useCallback(() => {
-    setLogs(prev => prev.map(log => ({
-      ...log,
-      timestamp: log.timestamp - (24 * 60 * 60 * 1000)
-    })));
-    if (currentGlasses >= settings.dailyGoalGlasses) {
-      setStreak(s => s + 1);
-    }
-  }, [currentGlasses, settings.dailyGoalGlasses]);
-
-  const debugAddStreak = useCallback(() => {
-    setStreak(s => s + 1);
-    setTotalStars(prev => prev + 50); 
+    // Simulate by clearing today's local view or adding a log with yesterday's timestamp
   }, []);
 
+  const debugAddStreak = useCallback(() => {
+    if (!userRef || !profile) return;
+    updateDocumentNonBlocking(userRef, {
+      totalStars: (profile.totalStars || 0) + 50,
+    });
+  }, [userRef, profile]);
+
   return {
-    settings,
+    settings: {
+      name: profile?.displayName || 'Guardian',
+      dailyGoalGlasses: profile?.dailyGoalGlasses || 8,
+      soundEnabled: true, // UI state
+    },
     setSettings,
-    logs,
-    todayLogs,
+    logs: logs || [],
+    todayLogs: logs || [],
     currentGlasses,
     dailyProgressPercent,
-    totalStars,
-    streak,
+    totalStars: profile?.totalStars || 0,
+    streak: 0, // Logic to be implemented based on bonusEarnedDates
     achievements,
-    onboardingComplete,
+    onboardingComplete: !!profile,
     setOnboardingComplete,
     addGlass,
     aiMessage,
+    isLoading: isAuthLoading || isProfileLoading || (user && !profile && !isProfileLoading),
     debugReset,
     debugNextDay,
     debugAddStreak
