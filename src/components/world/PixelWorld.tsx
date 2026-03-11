@@ -48,16 +48,22 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
     ? Math.min(100, (totalStars / nextStage.requiredStars) * 100)
     : 100;
 
-  // Handle message updates
+  // Handle message updates and synchronization with the prop
   useEffect(() => {
-    if (aiMessage) {
+    if (aiMessage && aiMessage.trim() !== '') {
+      // Clear any existing timeout to avoid premature hiding
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       
       setVisibleMessage(aiMessage);
       
+      // Auto-hide after a reasonable reading time
       timeoutRef.current = setTimeout(() => {
         setVisibleMessage(null);
-      }, 3000);
+      }, 5000);
+    } else if (aiMessage === '') {
+      // If the parent explicitly cleared the message, we should hide it too
+      setVisibleMessage(null);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }
     
     return () => {
@@ -66,7 +72,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
   }, [aiMessage]);
 
   return (
-    <div className="relative w-full aspect-[16/21] flex flex-col mb-12">
+    <div className="relative w-full aspect-[16/16] flex flex-col mb-12">
       {/* Main Sanctuary Card Container */}
       <div className="relative flex-1 flex flex-col pixel-card p-4 overflow-hidden border-none shadow-2xl">
         <div className="absolute inset-0 bg-[#f8f1de]" />
@@ -203,7 +209,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
       </div>
 
       {/* Level Badge - Overlapping the bottom boundary */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/3 z-[60] flex justify-center">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-[60] flex justify-center">
         <motion.div
           key={currentStage?.stageNumber || 0}
           initial={{ scale: 0.9 }}
