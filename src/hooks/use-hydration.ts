@@ -154,6 +154,36 @@ export function useHydration() {
     });
   }, [userRef, profile]);
 
+  const developerInitialize = useCallback(async () => {
+    if (!user?.uid || !firestore) return;
+
+    const goAhead = window.confirm("Developer Action: Completely initialize sanctuary data?");
+    if (!goAhead) return;
+
+    // Independent implementation style using manual path references
+    const profilePath = doc(firestore, 'users', user.uid);
+    const logsPath = collection(firestore, 'users', user.uid, 'logs');
+
+    try {
+      // 1. Manually fetch the snapshot to clear subcollections
+      const logEntries = await getDocs(logsPath);
+      const initBatch = writeBatch(firestore);
+
+      // 2. Queue all deletions
+      logEntries.docs.forEach(l => initBatch.delete(l.ref));
+      initBatch.delete(profilePath);
+
+      // 3. Execute batch
+      await initBatch.commit();
+      
+      // 4. Reset application environment
+      window.location.replace(window.location.origin);
+    } catch (err) {
+      console.error("Initialize Sanctuary Error:", err);
+      alert("Failed to initialize sanctuary.");
+    }
+  }, [user, firestore]);
+
   return {
     settings: {
       name: profile?.displayName || 'Guardian',
@@ -173,6 +203,7 @@ export function useHydration() {
     aiMessage,
     isLoading: isAuthLoading || (!!user && isProfileLoading),
     debugReset,
-    debugAddStreak
+    debugAddStreak,
+    developerInitialize
   };
 }

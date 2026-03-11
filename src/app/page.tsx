@@ -9,7 +9,7 @@ import { HydrationTracker } from '@/components/dashboard/HydrationTracker';
 import { Onboarding } from '@/components/dashboard/Onboarding';
 import { WorldLibrary } from '@/components/dashboard/WorldLibrary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Sparkles, Droplets, Home, Scroll, Heart, Trash2, PlusCircle, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn } from 'lucide-react';
+import { Award, Sparkles, Droplets, Home, Scroll, Heart, Trash2, PlusCircle, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn, Zap } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +30,8 @@ export default function DrinkAndEarn() {
     addGlass, onboardingComplete,
     aiMessage, achievements, streak, todayLogs, totalStars,
     isLoading,
-    debugReset, debugAddStreak
+    debugReset, debugAddStreak,
+    developerInitialize
   } = useHydration();
 
   const { toast } = useToast();
@@ -363,6 +364,13 @@ export default function DrinkAndEarn() {
                   <div className="flex items-center gap-3">
                     <PlusCircle className="h-4 w-4 text-reward" />
                     <span className="text-xs font-black uppercase tracking-widest">Boost Evolution Stars</span>
+                  </div>
+                </Button>
+
+                <Button variant="ghost" onClick={developerInitialize} className="w-full justify-between h-12 bg-orange-500/10 text-orange-600 rounded-2xl px-5 border border-orange-200">
+                  <div className="flex items-center gap-3">
+                    <Zap className="h-4 w-4" />
+                    <span className="text-xs font-black uppercase tracking-widest">Initialize Sanctuary (Dev)</span>
                   </div>
                 </Button>
 
