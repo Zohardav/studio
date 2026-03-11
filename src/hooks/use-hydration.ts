@@ -29,6 +29,14 @@ const DEFAULT_SETTINGS: UserSettings = {
   soundEnabled: true,
 };
 
+const REFRESHING_MESSAGES = [
+  "The soil drinks deeply...",
+  "Your sanctuary is grateful.",
+  "Nourishing the roots...",
+  "A refreshing drop of life.",
+  "The garden breathes a sigh of relief.",
+];
+
 export function useHydration() {
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [logs, setLogs] = useState<HydrationLog[]>([]);
@@ -99,9 +107,13 @@ export function useHydration() {
     // Earn 1 star for the glass
     setTotalStars(prev => prev + 1);
 
-    // AI Encouragement logic (adapted for glasses)
+    // AI Encouragement logic
     const isGoalReached = (currentGlasses + 1) >= settings.dailyGoalGlasses;
     const isFirstDrinkOfDay = todayLogs.length === 0;
+
+    // Set an immediate message for instant feedback
+    const immediateMsg = REFRESHING_MESSAGES[Math.floor(Math.random() * REFRESHING_MESSAGES.length)];
+    setAiMessage(immediateMsg);
 
     // Check for daily bonus
     if (isGoalReached && !bonusEarnedDates.includes(todayStr)) {
@@ -110,10 +122,9 @@ export function useHydration() {
     }
     
     try {
-      // We pass ML equivalent for the prompt but UI shows glasses
       const response = await generateHydrationEncouragement({
         userName: settings.name,
-        amountDrankMl: 250, // Static for the AI prompt's context
+        amountDrankMl: 250,
         currentAmountMl: (currentGlasses + 1) * 250,
         dailyGoalMl: settings.dailyGoalGlasses * 250,
         isFirstDrinkOfDay,

@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
@@ -14,6 +15,7 @@ interface PixelWorldProps {
 
 export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
   const [visibleMessage, setVisibleMessage] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const firestore = useFirestore();
   
   const stagesQuery = useMemoFirebase(() => {
@@ -26,7 +28,6 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
   const { currentStage, nextStage } = useMemo(() => {
     if (!stages || stages.length === 0) return { currentStage: null, nextStage: null };
     
-    // Find the highest stage where totalStars >= requiredStars
     let active = stages[0];
     let next = stages[1] || null;
 
@@ -44,15 +45,21 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
 
   const remainingStars = nextStage ? Math.max(0, nextStage.requiredStars - totalStars) : 0;
 
-  // Handle AI message pop-up visibility
+  // Immediately show messages and handle transitions
   useEffect(() => {
     if (aiMessage) {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      
       setVisibleMessage(aiMessage);
-      const timer = setTimeout(() => {
+      
+      timeoutRef.current = setTimeout(() => {
         setVisibleMessage(null);
-      }, 2000);
-      return () => clearTimeout(timer);
+      }, 2500);
     }
+    
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [aiMessage]);
 
   return (
@@ -105,16 +112,18 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
         )}
       </AnimatePresence>
 
-      {/* Motivation Pop-up */}
-      <AnimatePresence>
+      {/* Motivation Pop-up - centered on top of garden */}
+      <AnimatePresence mode="popLayout">
         {visibleMessage && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="absolute inset-0 flex items-center justify-center z-[60] px-6 pointer-events-none"
+            key={visibleMessage}
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: -10 }}
+            transition={{ type: "spring", damping: 20, stiffness: 200 }}
+            className="absolute inset-0 flex items-center justify-center z-[60] px-8 pointer-events-none"
           >
-            <div className="bg-white/50 backdrop-blur-md p-6 rounded-[2.5rem] border-2 border-white/40 shadow-2xl text-center max-w-[80%]">
+            <div className="bg-white/50 backdrop-blur-md p-6 rounded-[2.5rem] border-2 border-white/40 shadow-2xl text-center max-w-[90%] pointer-events-none">
               <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] mb-2">Sanctuary Spirit</p>
               <p className="text-sm font-bold text-foreground leading-relaxed italic">
                 "{visibleMessage}"
