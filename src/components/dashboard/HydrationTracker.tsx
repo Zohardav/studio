@@ -1,81 +1,109 @@
+
 "use client"
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Droplets, Plus, Sparkles, Wand2 } from 'lucide-react';
+import { Droplets, Sparkles, Wand2, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface HydrationTrackerProps {
-  currentAmount: number;
-  goalAmount: number;
-  progress: number;
-  glassSize: number;
-  onAddWater: (amount: number) => void;
+  currentGlasses: number;
+  goalGlasses: number;
+  totalStars: number;
+  nextStageStars: number;
+  dailyProgress: number;
+  onAddGlass: () => void;
   aiMessage?: string;
 }
 
 export function HydrationTracker({
-  currentAmount,
-  goalAmount,
-  progress,
-  glassSize,
-  onAddWater,
+  currentGlasses,
+  goalGlasses,
+  totalStars,
+  nextStageStars,
+  dailyProgress,
+  onAddGlass,
   aiMessage
 }: HydrationTrackerProps) {
+  const evolutionProgress = Math.min(100, (totalStars / nextStageStars) * 100);
+
   return (
-    <div className="space-y-6">
-      <div className="text-center space-y-1">
-        <motion.div 
-          key={currentAmount}
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="inline-block"
-        >
-          <h2 className="text-6xl font-headline font-black text-primary drop-shadow-sm">
-            {currentAmount}<span className="text-xl font-headline font-bold text-muted-foreground/30 ml-1">ml</span>
-          </h2>
-        </motion.div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Daily Goal: {goalAmount}ml</p>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="relative px-2">
-        <div className="h-6 w-full bg-secondary/80 rounded-full overflow-hidden border-2 border-white/50 shadow-inner">
+    <div className="space-y-8">
+      {/* Daily Progress Card */}
+      <div className="space-y-4">
+        <div className="text-center space-y-1">
           <motion.div 
-            className="h-full water-pulse"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ type: "spring", damping: 12, stiffness: 50 }}
-          />
+            key={currentGlasses}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="inline-block"
+          >
+            <h2 className="text-6xl font-headline font-black text-primary drop-shadow-sm">
+              {currentGlasses}<span className="text-xl font-headline font-bold text-muted-foreground/30 ml-1">/{goalGlasses}</span>
+            </h2>
+          </motion.div>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Glasses Today</p>
         </div>
-        <div className="flex justify-between mt-2 px-2">
-          <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">{Math.round(progress)}% Nourished</span>
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{Math.max(0, goalAmount - currentAmount)}ml Remaining</span>
+
+        <div className="relative px-2">
+          <div className="h-4 w-full bg-secondary/80 rounded-full overflow-hidden border-2 border-white/50 shadow-inner">
+            <motion.div 
+              className="h-full bg-primary"
+              initial={{ width: 0 }}
+              animate={{ width: `${dailyProgress}%` }}
+              transition={{ type: "spring", damping: 15, stiffness: 60 }}
+            />
+          </div>
+          <div className="flex justify-between mt-2 px-1">
+            <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">Daily Goal</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">{Math.max(0, goalGlasses - currentGlasses)} More to Go</span>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-3">
-        <Button 
-          className="col-span-4 h-24 text-2xl font-black rounded-[2.5rem] bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/30 border-b-8 border-primary/20 active:border-b-2 active:translate-y-1 transition-all flex items-center justify-center gap-4 group"
-          onClick={() => onAddWater(glassSize)}
-        >
-          <div className="bg-white/20 p-3 rounded-2xl group-hover:rotate-12 transition-transform">
-            <Wand2 className="h-8 w-8 text-white" />
+      {/* Evolution Progress Card */}
+      <motion.div 
+        whileHover={{ scale: 1.02 }}
+        className="pixel-card p-6 bg-gradient-to-br from-white/90 to-reward/5 border-none shadow-xl relative overflow-hidden group"
+      >
+        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+          <Star className="h-20 w-20 text-reward fill-reward" />
+        </div>
+        
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-reward/10 rounded-xl">
+            <Star className="h-5 w-5 text-reward fill-reward" />
           </div>
-          Nourish World
-        </Button>
-        <Button 
-          variant="outline"
-          className="h-24 w-full rounded-[2.5rem] border-4 border-primary/10 text-primary bg-white hover:bg-primary/5 active:scale-90 transition-all flex flex-col items-center justify-center gap-1"
-          onClick={() => {
-            const custom = prompt("Custom nourishment amount (ml)", glassSize.toString());
-            if (custom) onAddWater(parseInt(custom));
-          }}
-        >
-          <Plus className="h-7 w-7" />
-          <span className="text-[9px] font-black uppercase tracking-tighter">Extra</span>
-        </Button>
-      </div>
+          <div className="flex flex-col">
+            <span className="text-[9px] font-black text-reward uppercase tracking-[0.3em]">World Evolution</span>
+            <span className="text-sm font-bold text-foreground/80">{totalStars} / {nextStageStars} Stars to Level Up</span>
+          </div>
+        </div>
+
+        <div className="relative">
+          <div className="h-3 w-full bg-muted/50 rounded-full overflow-hidden border border-white/40">
+            <motion.div 
+              className="h-full bg-reward shadow-[0_0_15px_rgba(242,209,126,0.6)]"
+              initial={{ width: 0 }}
+              animate={{ width: `${evolutionProgress}%` }}
+              transition={{ duration: 1, ease: "easeOut" }}
+            />
+          </div>
+          <div className="absolute -top-1 right-0">
+             <Sparkles className="h-5 w-5 text-reward/40 animate-pulse" />
+          </div>
+        </div>
+      </motion.div>
+
+      <Button 
+        className="w-full h-24 text-2xl font-black rounded-[2.5rem] bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/30 border-b-8 border-primary/20 active:border-b-2 active:translate-y-1 transition-all flex items-center justify-center gap-4 group"
+        onClick={onAddGlass}
+      >
+        <div className="bg-white/20 p-3 rounded-2xl group-hover:rotate-12 transition-transform">
+          <Wand2 className="h-8 w-8 text-white" />
+        </div>
+        Drink a Glass
+      </Button>
 
       <AnimatePresence>
         {aiMessage && (
@@ -85,9 +113,6 @@ export function HydrationTracker({
             exit={{ opacity: 0, scale: 0.9 }}
             className="pixel-card p-6 flex gap-4 items-center relative overflow-hidden group border-none bg-gradient-to-br from-white to-secondary/30"
           >
-            <div className="absolute top-[-20%] right-[-10%] p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <Sparkles className="h-24 w-24 text-reward" />
-            </div>
             <div className="space-y-1 relative z-10">
               <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] mb-1">Sanctuary Spirit</p>
               <p className="text-sm text-foreground/80 font-bold leading-relaxed italic">

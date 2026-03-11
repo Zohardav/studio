@@ -1,14 +1,16 @@
+
 "use client"
 
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, doc, setDoc } from 'firebase/firestore';
-import { MAX_STAGES, getThresholdForStage } from '@/lib/world-engine/stages';
+import { MAX_STAGES } from '@/lib/world-engine/stages';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { Upload, Loader2, Image as ImageIcon, CheckCircle2, Info } from 'lucide-react';
+import { Upload, Loader2, Image as ImageIcon, CheckCircle2, Info, Star } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
 
 export function WorldLibrary() {
   const firestore = useFirestore();
@@ -16,34 +18,39 @@ export function WorldLibrary() {
   const { data: stages, isLoading } = useCollection(stagesQuery);
   const [uploadingStage, setUploadingStage] = useState<number | null>(null);
 
-  const handleFileUpload = async (stageNumber: number, event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpdateStage = async (stageNumber: number, data: { imageUrl?: string; requiredStars?: number }) => {
+    if (!firestore) return;
+    const stageId = stageNumber.toString();
+    const existing = stages?.find(s => s.stageNumber === stageNumber);
+    
+    setUploadingStage(stageNumber);
+    try {
+      await setDoc(doc(firestore, 'worldStages', stageId), {
+        id: stageId,
+        stageNumber,
+        imageUrl: data.imageUrl ?? existing?.imageUrl ?? '',
+        requiredStars: data.requiredStars ?? existing?.requiredStars ?? (stageNumber - 1) * 10,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    } catch (error) {
+      console.error('Failed to update stage:', error);
+    } finally {
+      setUploadingStage(null);
+    }
+  };
+
+  const handleFileUpload = (stageNumber: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !firestore) return;
+    if (!file) return;
 
     if (file.size > 1024 * 1024) {
       alert("File too large! Please use an image under 1MB.");
       return;
     }
 
-    setUploadingStage(stageNumber);
-
     const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64String = reader.result as string;
-      const stageId = stageNumber.toString();
-      
-      try {
-        await setDoc(doc(firestore, 'worldStages', stageId), {
-          id: stageId,
-          stageNumber,
-          imageUrl: base64String,
-          updatedAt: new Date().toISOString()
-        });
-      } catch (error) {
-        console.error('Failed to upload stage image:', error);
-      } finally {
-        setUploadingStage(null);
-      }
+    reader.onloadend = () => {
+      handleUpdateStage(stageNumber, { imageUrl: reader.result as string });
     };
     reader.readAsDataURL(file);
   };
@@ -65,12 +72,11 @@ export function WorldLibrary() {
         <Info className="h-4 w-4 text-primary" />
         <AlertTitle className="text-xs font-black uppercase tracking-widest text-primary">Evolution Specs</AlertTitle>
         <AlertDescription className="text-xs font-medium text-muted-foreground">
-          Upload Square (1:1) images. Recommended: 512x512px or 1024x1024px. 
-          Max file size: 1MB.
+          Upload Square (1:1) images. Define the Star threshold for each level.
         </AlertDescription>
       </Alert>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {stageList.map((num) => {
           const stageData = stages?.find(s => s.stageNumber === num);
           const isThisUploading = uploadingStage === num;
@@ -81,7 +87,7 @@ export function WorldLibrary() {
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="flex flex-col gap-3 p-4 bg-white/50 dark:bg-black/20 rounded-[2.5rem] border-4 border-white shadow-xl hover:border-primary/20 transition-all group"
+              className="flex flex-col gap-4 p-5 bg-white/60 dark:bg-black/20 rounded-[2.5rem] border-4 border-white shadow-xl hover:border-primary/20 transition-all group"
             >
               <div className="relative aspect-square w-full bg-[#f8f1de] rounded-[2rem] overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
                 {stageData?.imageUrl ? (
@@ -93,7 +99,7 @@ export function WorldLibrary() {
                       className="object-contain"
                     />
                     <div className="absolute top-3 right-3">
-                      <CheckCircle2 className="h-6 w-6 text-green-500 fill-white" />
+                      <CheckCircle2 className="h-6 w-6 text-green-500 fill-white shadow-lg" />
                     </div>
                   </div>
                 ) : (
@@ -104,39 +110,39 @@ export function WorldLibrary() {
                 )}
 
                 {isThisUploading && (
-                  <div className="absolute inset-0 bg-white/80 dark:bg-black/80 flex items-center justify-center z-10">
+                  <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 )}
 
                 <div className="absolute top-3 left-3 flex gap-2">
                   <Badge className="bg-primary/80 backdrop-blur-md text-white font-black border-none px-3 shadow-lg">
-                    LVL {num}
+                    STAGE {num}
                   </Badge>
                 </div>
 
-                <label className="absolute inset-0 cursor-pointer opacity-0 hover:opacity-100 transition-opacity bg-primary/20 flex items-center justify-center group-hover:opacity-10 pointer-events-auto">
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    className="hidden" 
-                    onChange={(e) => handleFileUpload(num, e)}
-                    disabled={isThisUploading}
-                  />
+                <label className="absolute inset-0 cursor-pointer opacity-0 hover:opacity-100 transition-opacity bg-primary/20 flex items-center justify-center pointer-events-auto">
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(num, e)} />
                   <div className="bg-white p-4 rounded-full shadow-2xl">
                     <Upload className="h-6 w-6 text-primary" />
                   </div>
                 </label>
               </div>
 
-              <div className="px-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Requirement</span>
-                  <span className="text-sm font-bold text-primary">{getThresholdForStage(num)}ml</span>
+              <div className="space-y-3 px-1">
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                    <Star className="h-2.5 w-2.5" /> Required Stars
+                  </label>
+                  <div className="flex gap-2">
+                    <Input 
+                      type="number"
+                      defaultValue={stageData?.requiredStars ?? (num - 1) * 10}
+                      onBlur={(e) => handleUpdateStage(num, { requiredStars: parseInt(e.target.value) || 0 })}
+                      className="h-10 rounded-xl bg-white border-2 border-primary/5 focus:ring-primary font-bold text-primary"
+                    />
+                  </div>
                 </div>
-                <p className="text-[9px] font-bold text-muted-foreground mt-1">
-                  {stageData ? 'Image uploaded and active.' : 'Pending visual asset.'}
-                </p>
               </div>
             </motion.div>
           );

@@ -6,17 +6,14 @@ import { generateHydrationEncouragement } from '@/ai/flows/hydration-encourageme
 
 export type UserSettings = {
   name: string;
-  dailyGoalMl: number;
-  glassSizeMl: number;
-  worldTheme: 'garden' | 'island' | 'room';
+  dailyGoalGlasses: number;
   soundEnabled: boolean;
-  celebrationsEnabled: boolean;
 };
 
 export type HydrationLog = {
   id: string;
   timestamp: number;
-  amountMl: number;
+  glassesCount: number;
 };
 
 export type Achievement = {
@@ -28,26 +25,24 @@ export type Achievement = {
 
 const DEFAULT_SETTINGS: UserSettings = {
   name: 'Guardian',
-  dailyGoalMl: 2000,
-  glassSizeMl: 250,
-  worldTheme: 'garden',
+  dailyGoalGlasses: 8,
   soundEnabled: true,
-  celebrationsEnabled: true,
 };
 
 export function useHydration() {
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [logs, setLogs] = useState<HydrationLog[]>([]);
+  const [totalStars, setTotalStars] = useState(0);
+  const [bonusEarnedDates, setBonusEarnedDates] = useState<string[]>([]);
   const [streak, setStreak] = useState(0);
-  const [totalLifetimeMl, setTotalLifetimeMl] = useState(0);
-  const [achievements, setAchievements] = useState<Achievement[]>([
-    { id: 'first_drink', name: 'Awakening', description: 'Gave the soil its first drop.' },
-    { id: 'daily_goal', name: 'Nourisher', description: 'Met the daily hydration ritual.' },
-    { id: 'streak_3', name: 'Constant Care', description: 'Protected the world for 3 days.' },
-    { id: 'big_gulp', name: 'Spring Flood', description: 'Logged 500ml at once.' },
-  ]);
   const [onboardingComplete, setOnboardingComplete] = useState(false);
   const [aiMessage, setAiMessage] = useState<string>('');
+  
+  const [achievements, setAchievements] = useState<Achievement[]>([
+    { id: 'first_glass', name: 'First Drop', description: 'Gave the soil its first glass of life.' },
+    { id: 'daily_goal', name: 'Full Bloom', description: 'Met your daily hydration ritual.' },
+    { id: 'streak_3', name: 'Constant Care', description: 'Protected the world for 3 days.' },
+  ]);
 
   // Load data
   useEffect(() => {
@@ -56,14 +51,16 @@ export function useHydration() {
     const storedAchievements = localStorage.getItem('hydration_achievements');
     const storedOnboarding = localStorage.getItem('hydration_onboarding');
     const storedStreak = localStorage.getItem('hydration_streak');
-    const storedTotalMl = localStorage.getItem('hydration_total_ml');
+    const storedStars = localStorage.getItem('hydration_total_stars');
+    const storedBonuses = localStorage.getItem('hydration_bonus_dates');
 
     if (storedSettings) setSettings(JSON.parse(storedSettings));
     if (storedLogs) setLogs(JSON.parse(storedLogs));
     if (storedAchievements) setAchievements(JSON.parse(storedAchievements));
     if (storedOnboarding) setOnboardingComplete(JSON.parse(storedOnboarding));
     if (storedStreak) setStreak(JSON.parse(storedStreak));
-    if (storedTotalMl) setTotalLifetimeMl(JSON.parse(storedTotalMl));
+    if (storedStars) setTotalStars(JSON.parse(storedStars));
+    if (storedBonuses) setBonusEarnedDates(JSON.parse(storedBonuses));
   }, []);
 
   // Sync data
@@ -73,8 +70,11 @@ export function useHydration() {
     localStorage.setItem('hydration_achievements', JSON.stringify(achievements));
     localStorage.setItem('hydration_onboarding', JSON.stringify(onboardingComplete));
     localStorage.setItem('hydration_streak', JSON.stringify(streak));
-    localStorage.setItem('hydration_total_ml', JSON.stringify(totalLifetimeMl));
-  }, [settings, logs, achievements, onboardingComplete, streak, totalLifetimeMl]);
+    localStorage.setItem('hydration_total_stars', JSON.stringify(totalStars));
+    localStorage.setItem('hydration_bonus_dates', JSON.stringify(bonusEarnedDates));
+  }, [settings, logs, achievements, onboardingComplete, streak, totalStars, bonusEarnedDates]);
+
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
 
   const todayLogs = useMemo(() => logs.filter(log => {
     const date = new Date(log.timestamp);
@@ -84,76 +84,73 @@ export function useHydration() {
            date.getFullYear() === today.getFullYear();
   }), [logs]);
 
-  const currentAmountMl = useMemo(() => todayLogs.reduce((acc, log) => acc + log.amountMl, 0), [todayLogs]);
-  const progressPercent = Math.min(100, (currentAmountMl / settings.dailyGoalMl) * 100);
+  const currentGlasses = useMemo(() => todayLogs.reduce((acc, log) => acc + log.glassesCount, 0), [todayLogs]);
+  const dailyProgressPercent = Math.min(100, (currentGlasses / settings.dailyGoalGlasses) * 100);
 
-  // Growth Score Logic: Now based on total lifetime effort (100ml = 1% Growth)
-  // This ensures progress is never lost and users can reach Stage 100 over time.
-  const growthScore = useMemo(() => {
-    // 10,000ml total consumption = Stage 100 (100% Growth)
-    return Math.min(100, totalLifetimeMl / 100);
-  }, [totalLifetimeMl]);
-
-  const addWater = useCallback(async (amountMl: number) => {
+  const addGlass = useCallback(async () => {
     const newLog: HydrationLog = {
       id: Math.random().toString(36).substring(2, 9),
       timestamp: Date.now(),
-      amountMl,
+      glassesCount: 1,
     };
 
     setLogs(prev => [...prev, newLog]);
-    setTotalLifetimeMl(prev => prev + amountMl);
+    
+    // Earn 1 star for the glass
+    setTotalStars(prev => prev + 1);
 
-    // AI Encouragement
-    const isGoalReached = (currentAmountMl + amountMl) >= settings.dailyGoalMl;
+    // AI Encouragement logic (adapted for glasses)
+    const isGoalReached = (currentGlasses + 1) >= settings.dailyGoalGlasses;
     const isFirstDrinkOfDay = todayLogs.length === 0;
+
+    // Check for daily bonus
+    if (isGoalReached && !bonusEarnedDates.includes(todayStr)) {
+      setTotalStars(prev => prev + 5);
+      setBonusEarnedDates(prev => [...prev, todayStr]);
+    }
     
     try {
+      // We pass ML equivalent for the prompt but UI shows glasses
       const response = await generateHydrationEncouragement({
         userName: settings.name,
-        amountDrankMl: amountMl,
-        currentAmountMl: currentAmountMl + amountMl,
-        dailyGoalMl: settings.dailyGoalMl,
+        amountDrankMl: 250, // Static for the AI prompt's context
+        currentAmountMl: (currentGlasses + 1) * 250,
+        dailyGoalMl: settings.dailyGoalGlasses * 250,
         isFirstDrinkOfDay,
         isGoalReached,
-        remainingAmountMl: Math.max(0, settings.dailyGoalMl - (currentAmountMl + amountMl)),
+        remainingAmountMl: Math.max(0, (settings.dailyGoalGlasses - (currentGlasses + 1)) * 250),
       });
       setAiMessage(response.message);
     } catch (e) {
-      setAiMessage("Your world feels refreshed!");
+      setAiMessage("Your sanctuary feels refreshed by your care!");
     }
 
     // Check achievements
     setAchievements(prev => prev.map(a => {
-      if (a.id === 'first_drink' && !a.unlockedAt) return { ...a, unlockedAt: Date.now() };
+      if (a.id === 'first_glass' && !a.unlockedAt) return { ...a, unlockedAt: Date.now() };
       if (a.id === 'daily_goal' && isGoalReached && !a.unlockedAt) return { ...a, unlockedAt: Date.now() };
-      if (a.id === 'big_gulp' && amountMl >= 500 && !a.unlockedAt) return { ...a, unlockedAt: Date.now() };
       return a;
     }));
-  }, [currentAmountMl, settings, todayLogs.length]);
+  }, [currentGlasses, settings, todayLogs.length, bonusEarnedDates, todayStr]);
 
-  // Developer Features
   const debugReset = useCallback(() => {
     localStorage.clear();
     window.location.reload();
   }, []);
 
   const debugNextDay = useCallback(() => {
-    // Move all current logs to "yesterday"
     setLogs(prev => prev.map(log => ({
       ...log,
       timestamp: log.timestamp - (24 * 60 * 60 * 1000)
     })));
-    // If goal was reached yesterday, increment streak
-    if (currentAmountMl >= settings.dailyGoalMl) {
+    if (currentGlasses >= settings.dailyGoalGlasses) {
       setStreak(s => s + 1);
     }
-  }, [currentAmountMl, settings.dailyGoalMl]);
+  }, [currentGlasses, settings.dailyGoalGlasses]);
 
   const debugAddStreak = useCallback(() => {
     setStreak(s => s + 1);
-    // Also give some XP boost for testing higher stages
-    setTotalLifetimeMl(prev => prev + 1000); 
+    setTotalStars(prev => prev + 50); 
   }, []);
 
   return {
@@ -161,16 +158,14 @@ export function useHydration() {
     setSettings,
     logs,
     todayLogs,
-    currentAmountMl,
-    progressPercent,
-    growthScore,
-    totalLifetimeMl,
+    currentGlasses,
+    dailyProgressPercent,
+    totalStars,
     streak,
-    setStreak,
     achievements,
     onboardingComplete,
     setOnboardingComplete,
-    addWater,
+    addGlass,
     aiMessage,
     debugReset,
     debugNextDay,

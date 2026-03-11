@@ -8,13 +8,13 @@
       "properties": {
         "id": { "type": "string" },
         "displayName": { "type": "string" },
-        "dailyGoalMl": { "type": "number" },
-        "preferredGlassSizeMl": { "type": "number" },
-        "totalLifetimeMl": { "type": "number" },
+        "dailyGoalGlasses": { "type": "number" },
+        "totalStars": { "type": "number" },
+        "bonusEarnedDates": { "type": "array", "items": { "type": "string" }, "description": "Dates (YYYY-MM-DD) when the daily goal bonus was earned." },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "displayName", "dailyGoalMl", "preferredGlassSizeMl", "totalLifetimeMl", "createdAt", "updatedAt"]
+      "required": ["id", "displayName", "dailyGoalGlasses", "totalStars", "createdAt", "updatedAt"]
     },
     "WorldStage": {
       "title": "WorldStage",
@@ -24,9 +24,10 @@
         "id": { "type": "string" },
         "stageNumber": { "type": "number" },
         "imageUrl": { "type": "string" },
+        "requiredStars": { "type": "number", "description": "Total stars needed to unlock this stage." },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "stageNumber", "imageUrl", "updatedAt"]
+      "required": ["id", "stageNumber", "requiredStars", "updatedAt"]
     },
     "HydrationLog": {
       "title": "HydrationLog",
@@ -34,10 +35,10 @@
       "properties": {
         "id": { "type": "string" },
         "userId": { "type": "string" },
-        "amountMl": { "type": "number" },
+        "glassesCount": { "type": "number", "default": 1 },
         "timestamp": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "userId", "amountMl", "timestamp"]
+      "required": ["id", "userId", "glassesCount", "timestamp"]
     }
   },
   "auth": {
@@ -54,7 +55,7 @@
     },
     "/worldStages/{stageId}": {
       "schema": { "$ref": "#/backend/entities/WorldStage" },
-      "description": "Global collection of visual world stages, managed by developers."
+      "description": "Global collection of visual world stages."
     }
   }
 }
