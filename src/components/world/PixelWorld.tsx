@@ -53,7 +53,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
       
       timeoutRef.current = setTimeout(() => {
         setVisibleMessage(null);
-      }, 1470); // Reduced by 30% from 2100ms
+      }, 1470); // Brief and punchy as requested
     }
     
     return () => {
@@ -84,7 +84,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
             animate={{ 
               opacity: 1, 
               scale: 1,
-              y: [0, -12, 0] // Jumping/Floating animation
+              y: [0, -12, 0] // Slow jump animation
             }}
             exit={{ opacity: 0, scale: 1.1 }}
             transition={{ 
@@ -127,14 +127,14 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
             <div className="space-y-2 px-6">
               <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/40">Level 0: The Void</h3>
               <p className="text-sm font-bold text-muted-foreground/60 max-w-[200px] leading-relaxed mx-auto">
-                You better start drinking water if you want to grow something!
+                Drink water to grow your sanctuary!
               </p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Motivation Pop-up - Stable box, animated text */}
+      {/* Motivation Pop-up */}
       <AnimatePresence>
         {visibleMessage && (
           <motion.div
