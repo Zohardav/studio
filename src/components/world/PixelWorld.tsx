@@ -68,7 +68,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
     <div className="relative w-full aspect-[4/5] flex flex-col pixel-card p-4 overflow-hidden border-none shadow-2xl">
       <div className="absolute inset-0 bg-[#f8f1de]" />
 
-      {/* Evolution Milestone UI - Thinner and Green */}
+      {/* Evolution Milestone UI - Golden Theme */}
       <div className="relative z-50 w-full px-4 pt-4 mb-auto">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -77,8 +77,8 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
         >
           <div className="flex justify-between items-end px-1">
             <div className="flex items-center gap-2">
-              <Star className="h-3 w-3 text-accent fill-accent" />
-              <span className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Next Evolution: Stage {nextStage?.stageNumber || '?'}</span>
+              <Star className="h-3 w-3 text-reward fill-reward" />
+              <span className="text-[10px] font-black text-reward uppercase tracking-[0.2em]">Next Evolution: Stage {nextStage?.stageNumber || '?'}</span>
             </div>
             <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">{remainingStars} stars left</span>
           </div>
@@ -87,7 +87,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
               initial={{ width: 0 }}
               animate={{ width: `${evolutionProgress}%` }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="h-full bg-accent shadow-[0_0_10px_rgba(145,151,114,0.3)]"
+              className="h-full bg-reward shadow-[0_0_10px_hsl(var(--reward)/0.3)]"
             />
           </div>
         </motion.div>
