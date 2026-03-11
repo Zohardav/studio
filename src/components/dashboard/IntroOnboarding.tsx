@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -66,7 +65,7 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
 
   return (
     <div 
-      className="fixed inset-0 z-[200] bg-background flex flex-col items-center justify-center overflow-hidden cursor-pointer"
+      className="fixed inset-0 z-[200] bg-background flex flex-col items-center justify-center overflow-y-auto cursor-pointer"
       onClick={handleContainerClick}
     >
       {/* Background Atmosphere */}
@@ -93,7 +92,7 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
         </Button>
       </div>
 
-      <div className="w-full max-w-md h-full flex flex-col px-8 pointer-events-none">
+      <div className="w-full max-w-md min-h-full flex flex-col px-8 pointer-events-none py-12">
         <Carousel 
           setApi={setApi} 
           className="flex-1 w-full pointer-events-auto"
