@@ -30,6 +30,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Fix for "Cross origin request detected" warning in Cloud Workstations
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        '6000-firebase-studio-1773164205444.cluster-qmsugz722jg6qxf6wapsr2r5hc.cloudworkstations.dev',
+        'localhost:9002'
+      ]
+    }
+  }
 };
 
 export default nextConfig;
