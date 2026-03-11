@@ -55,8 +55,20 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
     onComplete();
   };
 
+  const handleContainerClick = (e: React.MouseEvent) => {
+    // Don't advance if the user clicked a button (Skip or the final CTA)
+    if ((e.target as HTMLElement).closest('button')) return;
+    
+    if (api && current < slides.length - 1) {
+      api.scrollNext();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-[200] bg-background flex flex-col items-center justify-center overflow-hidden">
+    <div 
+      className="fixed inset-0 z-[200] bg-background flex flex-col items-center justify-center overflow-hidden cursor-pointer"
+      onClick={handleContainerClick}
+    >
       {/* Background Atmosphere */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -71,18 +83,28 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
       <div className="absolute top-10 right-8 z-[210]">
         <Button 
           variant="ghost" 
-          onClick={handleComplete}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleComplete();
+          }}
           className="text-xs font-black uppercase tracking-widest text-muted-foreground hover:bg-transparent hover:text-primary"
         >
           Skip
         </Button>
       </div>
 
-      <div className="w-full max-w-md h-full flex flex-col px-8">
-        <Carousel setApi={setApi} className="flex-1 w-full">
+      <div className="w-full max-w-md h-full flex flex-col px-8 pointer-events-none">
+        <Carousel 
+          setApi={setApi} 
+          className="flex-1 w-full pointer-events-auto"
+          opts={{
+            dragFree: false,
+            containScroll: "trimSnaps"
+          }}
+        >
           <CarouselContent className="h-full">
             {slides.map((slide, index) => (
-              <CarouselItem key={index} className="h-full flex flex-col items-center justify-center text-center space-y-8">
+              <CarouselItem key={index} className="h-full flex flex-col items-center justify-center text-center space-y-8 select-none">
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0, y: 20 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -119,7 +141,10 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
                     className="pt-8 w-full px-4"
                   >
                     <Button 
-                      onClick={handleComplete}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleComplete();
+                      }}
                       className="w-full h-16 text-xl font-bold rounded-[2rem] shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 group transition-all"
                     >
                       I'm Ready to Start
@@ -133,7 +158,7 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
         </Carousel>
 
         {/* Footer Navigation */}
-        <div className="py-12 flex items-center justify-between">
+        <div className="py-12 flex items-center justify-center">
           <div className="flex gap-2">
             {slides.map((_, i) => (
               <div 
@@ -142,17 +167,6 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
               />
             ))}
           </div>
-
-          {current < slides.length - 1 && (
-            <Button 
-              variant="outline"
-              size="icon"
-              onClick={() => api?.scrollNext()}
-              className="rounded-full w-12 h-12 border-2 border-primary/20 text-primary hover:bg-primary hover:text-white transition-all shadow-lg"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </Button>
-          )}
         </div>
       </div>
     </div>
