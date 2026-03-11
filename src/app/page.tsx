@@ -341,7 +341,9 @@ export default function DrinkAndEarn() {
                       <Input type="password" placeholder="Enter Passcode..." className="text-center h-12 rounded-xl" value={adminAuth} onChange={(e) => setAdminAuth(e.target.value)} />
                     </div>
                   ) : (
-                    <Suspense fallback={<LoadingSpinner />}><WorldLibrary /></Suspense>
+                    <ScrollArea className="flex-1 p-8">
+                      <Suspense fallback={<LoadingSpinner />}><WorldLibrary /></Suspense>
+                    </ScrollArea>
                   )}
                 </DialogContent>
               </Dialog>
