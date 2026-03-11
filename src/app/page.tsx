@@ -219,7 +219,7 @@ export default function DrinkAndEarn() {
                     </Badge>
                   </motion.div>
                 </DialogTrigger>
-                <DialogContent className="max-w-[320px] rounded-[2.5rem] p-0 border-none bg-white/80 backdrop-blur-2xl shadow-2xl overflow-hidden">
+                <DialogContent className="max-w-[320px] rounded-[2.5rem] p-0 border-none bg-white/20 backdrop-blur-3xl shadow-2xl overflow-hidden border border-white/20">
                   <div className="p-8 space-y-6">
                     <div className="flex flex-col items-center text-center space-y-2">
                       <div className="p-4 bg-reward/10 rounded-[2rem] border-2 border-reward/20 shadow-inner mb-2">
@@ -232,7 +232,7 @@ export default function DrinkAndEarn() {
                     </div>
 
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 bg-white/40 rounded-3xl border-2 border-primary/5 group">
+                      <div className="flex items-center justify-between p-4 bg-white/10 rounded-3xl border-2 border-primary/5 group">
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
                             <GlassWaterIcon className="h-5 w-5 text-primary" />
@@ -248,7 +248,7 @@ export default function DrinkAndEarn() {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between p-4 bg-white/40 rounded-3xl border-2 border-reward/10 group">
+                      <div className="flex items-center justify-between p-4 bg-white/10 rounded-3xl border-2 border-reward/10 group">
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-reward/10 rounded-xl group-hover:rotate-12 transition-transform">
                             <Award className="h-5 w-5 text-reward" />
