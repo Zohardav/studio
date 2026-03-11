@@ -6,12 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Droplets, Sparkles, TrendingUp, Heart } from 'lucide-react';
+import { Droplets, Sparkles, Heart, Minus, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export function Onboarding({ onComplete }: { onComplete: (name: string, goal: number) => void }) {
   const [name, setName] = useState('');
   const [goal, setGoal] = useState(8);
+
+  const handleDecrement = () => {
+    setGoal(prev => Math.max(1, prev - 1));
+  };
+
+  const handleIncrement = () => {
+    setGoal(prev => Math.min(30, prev + 1));
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex items-center justify-center p-8 overflow-hidden">
@@ -60,18 +68,43 @@ export function Onboarding({ onComplete }: { onComplete: (name: string, goal: nu
                 className="h-16 text-xl rounded-3xl border-none bg-white/50 focus:ring-2 focus:ring-primary px-6 shadow-inner"
               />
             </div>
+            
             <div className="space-y-3">
-              <Label htmlFor="goal" className="text-xs font-bold uppercase tracking-widest text-primary ml-2">Daily Glasses Goal</Label>
-              <div className="relative">
-                <Input 
-                  id="goal" 
-                  type="number" 
-                  value={goal} 
-                  onChange={(e) => setGoal(parseInt(e.target.value) || 0)}
-                  className="h-16 text-2xl font-bold rounded-3xl border-none bg-white/50 focus:ring-2 focus:ring-primary px-6 pr-16 shadow-inner"
-                />
-                <span className="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-muted-foreground/40">Glasses</span>
+              <Label className="text-xs font-bold uppercase tracking-widest text-primary ml-2">Daily Glasses Goal</Label>
+              <div className="flex items-center justify-between bg-white/50 rounded-[2.5rem] p-2 shadow-inner h-20 border-2 border-white/20">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleDecrement}
+                  className="h-14 w-14 rounded-2xl bg-white shadow-sm hover:bg-primary/5 text-primary active:scale-90 transition-all"
+                >
+                  <Minus className="h-6 w-6" />
+                </Button>
+                
+                <div className="flex flex-col items-center">
+                  <motion.span 
+                    key={goal}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-3xl font-black text-primary leading-none"
+                  >
+                    {goal}
+                  </motion.span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Glasses</span>
+                </div>
+
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleIncrement}
+                  className="h-14 w-14 rounded-2xl bg-white shadow-sm hover:bg-primary/5 text-primary active:scale-90 transition-all"
+                >
+                  <Plus className="h-6 w-6" />
+                </Button>
               </div>
+              <p className="text-[10px] font-bold text-center text-muted-foreground/50 italic tracking-tight">
+                Recommended: 8 glasses per day for optimal health
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-4">
