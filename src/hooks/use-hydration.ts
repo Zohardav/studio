@@ -108,7 +108,7 @@ export function useHydration() {
   }, [user, profile, logsRef, userRef, currentGlasses, todayStr]);
 
   const setOnboardingComplete = useCallback(async (complete: boolean) => {
-    // Usually handled by presence of profile, but can be a flag if needed
+    // Usually handled by presence of profile
   }, []);
 
   const setSettings = useCallback((newSettings: Partial<UserSettings>) => {
@@ -120,19 +120,16 @@ export function useHydration() {
     });
   }, [userRef, profile]);
 
-  // Achievements logic can be added here fetching from a subcollection
   const achievements = [
     { id: 'first_glass', name: 'First Drop', description: 'Gave the soil its first glass of life.', unlockedAt: profile?.totalStars ? Date.now() : undefined },
     { id: 'daily_goal', name: 'Full Bloom', description: 'Met your daily hydration ritual.', unlockedAt: profile?.bonusEarnedDates?.length ? Date.now() : undefined },
   ];
 
   const debugReset = useCallback(() => {
-    // Clear Firestore logs for user
-    alert("In a production app, this would delete your cloud data. For this prototype, please use the Developer menu.");
+    alert("Resetting data requires clearing your Firestore user document and logs.");
   }, []);
 
   const debugNextDay = useCallback(() => {
-    // Simulate by clearing today's local view or adding a log with yesterday's timestamp
   }, []);
 
   const debugAddStreak = useCallback(() => {
@@ -146,7 +143,7 @@ export function useHydration() {
     settings: {
       name: profile?.displayName || 'Guardian',
       dailyGoalGlasses: profile?.dailyGoalGlasses || 8,
-      soundEnabled: true, // UI state
+      soundEnabled: true,
     },
     setSettings,
     logs: logs || [],
@@ -154,13 +151,13 @@ export function useHydration() {
     currentGlasses,
     dailyProgressPercent,
     totalStars: profile?.totalStars || 0,
-    streak: 0, // Logic to be implemented based on bonusEarnedDates
+    streak: 0,
     achievements,
     onboardingComplete: !!profile,
     setOnboardingComplete,
     addGlass,
     aiMessage,
-    isLoading: isAuthLoading || isProfileLoading || (user && !profile && !isProfileLoading),
+    isLoading: isAuthLoading || isProfileLoading,
     debugReset,
     debugNextDay,
     debugAddStreak
