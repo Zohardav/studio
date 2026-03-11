@@ -56,17 +56,38 @@
 @layer base {
   * {
     @apply border-border;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-background text-foreground font-body antialiased selection:bg-primary/20 cursor-default;
+    @apply bg-background text-foreground font-body antialiased selection:bg-primary/20 cursor-default overflow-x-hidden;
+    /* Prevent Safari pull-to-refresh if desired, or keep for native feel */
+    overscroll-behavior-y: none;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline tracking-tight;
   }
 }
 
-.pixel-card {
-  @apply bg-white/80 dark:bg-black/40 backdrop-blur-3xl border-[3px] border-white/50 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.1)] rounded-[3rem];
+@layer components {
+  .pixel-card {
+    @apply bg-white/80 dark:bg-black/40 backdrop-blur-xl border-[3px] border-white/50 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.08)] rounded-[3rem];
+    /* GPU acceleration for cards with heavy shadows/blurs */
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
+
+  /* Optimized backdrop for mobile Safari */
+  @supports not (backdrop-filter: blur(1px)) {
+    .pixel-card {
+      @apply bg-white dark:bg-slate-900;
+    }
+  }
+
+  .gpu-boost {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
 }
 
 .reward-glow {
@@ -79,6 +100,7 @@
 
 .animate-float-cozy {
   animation: float-cozy 6s ease-in-out infinite;
+  will-change: transform;
 }
 
 @keyframes float-cozy {
@@ -91,6 +113,7 @@
   background: linear-gradient(180deg, hsl(var(--primary) / 0.8) 0%, hsl(var(--primary)) 100%);
   position: relative;
   overflow: hidden;
+  will-change: transform;
 }
 
 .water-pulse::after {
@@ -110,10 +133,15 @@
   to { transform: rotate(360deg); }
 }
 
-.magical-sparkle {
-  @apply absolute pointer-events-none;
-  background: radial-gradient(circle, #fff 0%, transparent 70%);
-  filter: blur(1px);
+/* Safe area utilities for iPhone Notch/Home Indicator */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+.min-h-svh {
+  min-height: 100svh;
 }
 
 input[type="number"]::-webkit-inner-spin-button,

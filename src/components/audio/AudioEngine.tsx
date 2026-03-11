@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -7,29 +6,32 @@ import * as Tone from 'tone';
 export const useAudio = (enabled: boolean) => {
   const playWaterLog = React.useCallback(async () => {
     if (!enabled) return;
-    await Tone.start();
     
-    // A high-pitched, soft "plink" using a sine wave
+    // Ensure AudioContext is running (Safari fix)
+    if (Tone.context.state !== 'running') {
+      await Tone.start();
+    }
+    
     const synth = new Tone.PolySynth(Tone.Synth, {
       oscillator: { type: "sine" },
       envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 1 },
       volume: -10
     }).toDestination();
     
-    // Pentatonic high note for positive feedback
     const now = Tone.now();
     synth.triggerAttackRelease("C5", "16n", now);
     synth.triggerAttackRelease("G5", "16n", now + 0.05);
     
-    // Cleanup
     setTimeout(() => synth.dispose(), 2000);
   }, [enabled]);
 
   const playAchievement = React.useCallback(async () => {
     if (!enabled) return;
-    await Tone.start();
     
-    // Arpeggio of sparkly notes
+    if (Tone.context.state !== 'running') {
+      await Tone.start();
+    }
+    
     const synth = new Tone.PolySynth(Tone.Synth, {
       oscillator: { type: "triangle" },
       envelope: { attack: 0.05, decay: 0.2, sustain: 0.3, release: 2 },
@@ -54,39 +56,43 @@ export const useBackgroundMusic = (enabled: boolean) => {
   const loopRef = React.useRef<Tone.Loop | null>(null);
 
   React.useEffect(() => {
-    if (enabled && !playerRef.current) {
-      // Create a soft ambient synth with a bit more volume
-      filterRef.current = new Tone.Filter(800, "lowpass").toDestination();
-      playerRef.current = new Tone.PolySynth(Tone.Synth, {
-        oscillator: { type: "fatsine", count: 3, spread: 30 },
-        envelope: { attack: 4, decay: 2, sustain: 0.8, release: 5 },
-        volume: -10 // Increased from -18 for better visibility
-      }).connect(filterRef.current);
+    // Only initialize if enabled to save battery/CPU on mobile
+    if (!enabled) {
+      if (Tone.getTransport().state === 'started') {
+        Tone.getTransport().stop();
+      }
+      return;
+    }
 
-      // Simple ambient pentatonic progression
-      const sequence = ["C3", "G3", "A3", "E3", "F3", "G3"];
-      let index = 0;
+    const initMusic = async () => {
+      if (!playerRef.current) {
+        filterRef.current = new Tone.Filter(800, "lowpass").toDestination();
+        playerRef.current = new Tone.PolySynth(Tone.Synth, {
+          oscillator: { type: "fatsine", count: 3, spread: 30 },
+          envelope: { attack: 4, decay: 2, sustain: 0.8, release: 5 },
+          volume: -12
+        }).connect(filterRef.current);
 
-      loopRef.current = new Tone.Loop((time) => {
-        if (playerRef.current) {
-          playerRef.current.triggerAttackRelease(sequence[index % sequence.length], "1n", time);
-          index++;
+        const sequence = ["C3", "G3", "A3", "E3", "F3", "G3"];
+        let index = 0;
+
+        loopRef.current = new Tone.Loop((time) => {
+          if (playerRef.current) {
+            playerRef.current.triggerAttackRelease(sequence[index % sequence.length], "1n", time);
+            index++;
+          }
+        }, "2n").start(0);
+      }
+
+      // Defer transport start to ensure it doesn't block main thread
+      requestAnimationFrame(() => {
+        if (Tone.context.state === 'running') {
+          Tone.getTransport().start();
         }
-      }, "2n").start(0);
-    }
+      });
+    };
 
-    if (enabled) {
-      Tone.start();
-      Tone.getTransport().start();
-      if (Tone.context.state !== 'running') {
-        Tone.context.resume();
-      }
-    } else {
-      Tone.getTransport().stop();
-      if (playerRef.current) {
-        playerRef.current.releaseAll();
-      }
-    }
+    initMusic();
 
     return () => {
       Tone.getTransport().stop();
