@@ -30,7 +30,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Fix for "Cross origin request detected" warning in Cloud Workstations
+  // @ts-ignore - Configuration for Next.js 15 workstation environments to allow workstation origins
+  allowedDevOrigins: [
+    '6000-firebase-studio-1773164205444.cluster-qmsugz722jg6qxf6wapsr2r5hc.cloudworkstations.dev'
+  ],
   experimental: {
     serverActions: {
       allowedOrigins: [

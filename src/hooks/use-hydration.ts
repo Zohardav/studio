@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useCallback, useMemo, useState } from 'react';
@@ -123,22 +122,20 @@ export function useHydration() {
   ];
 
   const debugReset = useCallback(async () => {
-    if (!user || !firestore || !userRef || !logsRef) return;
+    if (!user?.uid || !firestore || !userRef || !logsRef) return;
     
     if (window.confirm("Are you sure? This will delete your entire sanctuary progress forever.")) {
       try {
-        // 1. Fetch all logs and delete them in batches
-        const snapshot = await getDocs(logsRef);
         const batch = writeBatch(firestore);
+        const snapshot = await getDocs(logsRef);
+        
         snapshot.docs.forEach((docSnap) => {
           batch.delete(docSnap.ref);
         });
+        
+        batch.delete(userRef);
         await batch.commit();
         
-        // 2. Delete user profile
-        await deleteDoc(userRef);
-        
-        // 3. Force a reload to ensure all local state is cleared and onboarding triggers
         window.location.reload();
       } catch (error) {
         console.error("Reset failed:", error);
@@ -155,32 +152,34 @@ export function useHydration() {
   }, [userRef, profile]);
 
   const developerInitialize = useCallback(async () => {
-    if (!user?.uid || !firestore) return;
+    if (!user?.uid || !firestore) {
+      alert("No user or database connection found.");
+      return;
+    }
 
-    const goAhead = window.confirm("Developer Action: Completely initialize sanctuary data?");
+    const goAhead = window.confirm("Developer Action: Completely wipe and re-initialize all sanctuary data?");
     if (!goAhead) return;
 
-    // Independent implementation style using manual path references
-    const profilePath = doc(firestore, 'users', user.uid);
-    const logsPath = collection(firestore, 'users', user.uid, 'logs');
-
     try {
-      // 1. Manually fetch the snapshot to clear subcollections
+      const profilePath = doc(firestore, 'users', user.uid);
+      const logsPath = collection(firestore, 'users', user.uid, 'logs');
+      
+      // 1. Fetch current logs
       const logEntries = await getDocs(logsPath);
       const initBatch = writeBatch(firestore);
 
-      // 2. Queue all deletions
+      // 2. Queue deletions for logs and the profile itself
       logEntries.docs.forEach(l => initBatch.delete(l.ref));
       initBatch.delete(profilePath);
 
-      // 3. Execute batch
+      // 3. Commit the batch for atomicity
       await initBatch.commit();
       
-      // 4. Reset application environment
+      // 4. Force environment reset
       window.location.replace(window.location.origin);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Initialize Sanctuary Error:", err);
-      alert("Failed to initialize sanctuary.");
+      alert(`Initialization failed: ${err.message}`);
     }
   }, [user, firestore]);
 
