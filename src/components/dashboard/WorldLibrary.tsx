@@ -12,6 +12,19 @@ import { Upload, Loader2, Image as ImageIcon, CheckCircle2, Info, Star } from 'l
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 
+const DEFAULT_STARS_MAP: Record<number, number> = {
+  1: 1,
+  2: 2,
+  3: 4,
+  4: 10,
+  5: 11,
+  6: 13,
+  7: 14,
+  8: 20,
+};
+
+const getDefaultStars = (num: number) => DEFAULT_STARS_MAP[num] ?? (num - 1) * 10;
+
 export function WorldLibrary() {
   const firestore = useFirestore();
   const stagesQuery = useMemoFirebase(() => collection(firestore, 'worldStages'), [firestore]);
@@ -29,7 +42,7 @@ export function WorldLibrary() {
         id: stageId,
         stageNumber,
         imageUrl: data.imageUrl ?? existing?.imageUrl ?? '',
-        requiredStars: data.requiredStars ?? existing?.requiredStars ?? (stageNumber - 1) * 10,
+        requiredStars: data.requiredStars ?? existing?.requiredStars ?? getDefaultStars(stageNumber),
         updatedAt: new Date().toISOString()
       }, { merge: true });
     } catch (error) {
@@ -132,12 +145,12 @@ export function WorldLibrary() {
               <div className="space-y-3 px-1">
                 <div className="space-y-1">
                   <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-1">
-                    <Star className="h-2.5 w-2.5" /> Required Stars
+                    < Star className="h-2.5 w-2.5" /> Required Stars
                   </label>
                   <div className="flex gap-2">
                     <Input 
                       type="number"
-                      defaultValue={stageData?.requiredStars ?? (num - 1) * 10}
+                      defaultValue={stageData?.requiredStars ?? getDefaultStars(num)}
                       onBlur={(e) => handleUpdateStage(num, { requiredStars: parseInt(e.target.value) || 0 })}
                       className="h-10 rounded-xl bg-white border-2 border-primary/5 focus:ring-primary font-bold text-primary"
                     />
