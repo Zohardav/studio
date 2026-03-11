@@ -107,11 +107,10 @@ export function useHydration() {
     // Earn 1 star for the glass
     setTotalStars(prev => prev + 1);
 
-    // AI Encouragement logic
     const isGoalReached = (currentGlasses + 1) >= settings.dailyGoalGlasses;
     const isFirstDrinkOfDay = todayLogs.length === 0;
 
-    // Set an immediate message for instant feedback
+    // Set immediate message - Use a stable random pick for this specific action
     const immediateMsg = REFRESHING_MESSAGES[Math.floor(Math.random() * REFRESHING_MESSAGES.length)];
     setAiMessage(immediateMsg);
 
@@ -121,20 +120,20 @@ export function useHydration() {
       setBonusEarnedDates(prev => [...prev, todayStr]);
     }
     
-    try {
-      const response = await generateHydrationEncouragement({
-        userName: settings.name,
-        amountDrankMl: 250,
-        currentAmountMl: (currentGlasses + 1) * 250,
-        dailyGoalMl: settings.dailyGoalGlasses * 250,
-        isFirstDrinkOfDay,
-        isGoalReached,
-        remainingAmountMl: Math.max(0, (settings.dailyGoalGlasses - (currentGlasses + 1)) * 250),
-      });
+    // Fetch AI message in background
+    generateHydrationEncouragement({
+      userName: settings.name,
+      amountDrankMl: 250,
+      currentAmountMl: (currentGlasses + 1) * 250,
+      dailyGoalMl: settings.dailyGoalGlasses * 250,
+      isFirstDrinkOfDay,
+      isGoalReached,
+      remainingAmountMl: Math.max(0, (settings.dailyGoalGlasses - (currentGlasses + 1)) * 250),
+    }).then(response => {
       setAiMessage(response.message);
-    } catch (e) {
-      setAiMessage("Your sanctuary feels refreshed by your care!");
-    }
+    }).catch(() => {
+      // If AI fails, we already have the immediate message shown
+    });
 
     // Check achievements
     setAchievements(prev => prev.map(a => {

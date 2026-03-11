@@ -45,7 +45,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
 
   const remainingStars = nextStage ? Math.max(0, nextStage.requiredStars - totalStars) : 0;
 
-  // Immediately show messages and handle transitions
+  // Handle message updates
   useEffect(() => {
     if (aiMessage) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -54,7 +54,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
       
       timeoutRef.current = setTimeout(() => {
         setVisibleMessage(null);
-      }, 2500);
+      }, 3000);
     }
     
     return () => {
@@ -113,21 +113,25 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
       </AnimatePresence>
 
       {/* Motivation Pop-up - centered on top of garden */}
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence>
         {visibleMessage && (
           <motion.div
-            key={visibleMessage}
             initial={{ opacity: 0, scale: 0.8, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: -10 }}
-            transition={{ type: "spring", damping: 20, stiffness: 200 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="absolute inset-0 flex items-center justify-center z-[60] px-8 pointer-events-none"
           >
-            <div className="bg-white/50 backdrop-blur-md p-6 rounded-[2.5rem] border-2 border-white/40 shadow-2xl text-center max-w-[90%] pointer-events-none">
+            <div className="bg-white/60 backdrop-blur-md p-6 rounded-[2.5rem] border-2 border-white/40 shadow-2xl text-center max-w-[90%] pointer-events-none">
               <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] mb-2">Sanctuary Spirit</p>
-              <p className="text-sm font-bold text-foreground leading-relaxed italic">
+              <motion.p 
+                key={visibleMessage} // Only animate the text cross-fade, not the whole box
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-sm font-bold text-foreground leading-relaxed italic"
+              >
                 "{visibleMessage}"
-              </p>
+              </motion.p>
             </div>
           </motion.div>
         )}
