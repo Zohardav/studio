@@ -10,7 +10,7 @@ import { Onboarding } from '@/components/dashboard/Onboarding';
 import { IntroOnboarding } from '@/components/dashboard/IntroOnboarding';
 import { WorldLibrary } from '@/components/dashboard/WorldLibrary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Sparkles, Droplets, Home, Scroll, Heart, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn, Music, VolumeX, Volume2, Trash2, Info, ChevronRight } from 'lucide-react';
+import { Award, Sparkles, Droplets, Home, Scroll, Heart, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn, Music, VolumeX, Volume2, Trash2, Info, ChevronRight, Lock } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +23,7 @@ import { useFirebase, initiateAnonymousSignIn, useCollection, useMemoFirebase, l
 import { collection, query, orderBy, setDoc, doc } from 'firebase/firestore';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Input } from '@/components/ui/input';
 import * as Tone from 'tone';
 
 // Custom Glass of Water Icon
@@ -47,6 +48,7 @@ const GlassWaterIcon = ({ className }: { className?: string }) => (
 export default function DrinkAndEarn() {
   const [mounted, setMounted] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
+  const [adminAuth, setAdminAuth] = useState('');
   const { auth, firestore, user } = useFirebase();
   const { 
     settings, setSettings, 
@@ -468,8 +470,8 @@ export default function DrinkAndEarn() {
                   Evolution Codex
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 gap-3">
-                <Dialog>
+              <CardContent className="space-y-4">
+                <Dialog onOpenChange={(open) => { if (!open) setAdminAuth(''); }}>
                   <DialogTrigger asChild>
                     <Button 
                       variant="ghost" 
@@ -488,46 +490,64 @@ export default function DrinkAndEarn() {
                         Evolution Codex
                       </DialogTitle>
                     </DialogHeader>
-                    <div className="flex-1 min-h-0 relative">
-                      <ScrollArea className="h-full px-8 pb-8">
-                        <WorldLibrary />
-                      </ScrollArea>
-                    </div>
+                    
+                    {adminAuth !== 'Admin' ? (
+                      <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-6">
+                        <div className="p-6 bg-white/40 rounded-[2.5rem] shadow-xl border-2 border-white flex flex-col items-center gap-4 text-center w-full max-w-sm">
+                          <div className="p-3 bg-reward/10 rounded-2xl">
+                            <Lock className="h-6 w-6 text-reward" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-lg font-headline font-bold">Admin Access Required</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Unlock Stage Management</p>
+                          </div>
+                          <Input 
+                            type="password" 
+                            placeholder="Enter Passcode..." 
+                            className="text-center h-12 rounded-xl bg-white border-2 border-primary/5 focus:ring-primary font-bold"
+                            value={adminAuth}
+                            onChange={(e) => setAdminAuth(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex-1 min-h-0 relative">
+                        <ScrollArea className="h-full px-8 pb-8">
+                          <WorldLibrary />
+                        </ScrollArea>
+                      </div>
+                    )}
                   </DialogContent>
                 </Dialog>
 
-                {/* Developer Features Section */}
-                <div className="pt-4 border-t-2 border-reward/20 mt-4 space-y-4">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-reward/60 px-2">Developer Features</p>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="destructive" 
-                        className="w-full h-12 rounded-2xl font-black text-xs uppercase tracking-widest bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border-2 border-red-500/20"
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="destructive" 
+                      className="w-full h-12 rounded-2xl font-black text-xs uppercase tracking-widest bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border-2 border-red-500/20"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Reset App (Destroy Progress)
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="rounded-[2.5rem] p-8">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-2xl font-headline font-bold">Destroy All Progress?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-sm font-medium">
+                        This action is destructive and cannot be undone. It will permanently delete your profile, hydration history, stars, and all evolution progress from the cloud. You will be returned to the onboarding screen as a brand new user.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="mt-6 gap-3">
+                      <AlertDialogCancel className="rounded-2xl font-black text-xs uppercase tracking-widest">Nevermind</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={handleResetApp}
+                        className="rounded-2xl font-black text-xs uppercase tracking-widest bg-red-500 text-white hover:bg-red-600"
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Reset App (Destroy Progress)
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="rounded-[2.5rem] p-8">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle className="text-2xl font-headline font-bold">Destroy All Progress?</AlertDialogTitle>
-                        <AlertDialogDescription className="text-sm font-medium">
-                          This action is destructive and cannot be undone. It will permanently delete your profile, hydration history, stars, and all evolution progress from the cloud. You will be returned to the onboarding screen as a brand new user.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter className="mt-6 gap-3">
-                        <AlertDialogCancel className="rounded-2xl font-black text-xs uppercase tracking-widest">Nevermind</AlertDialogCancel>
-                        <AlertDialogAction 
-                          onClick={handleResetApp}
-                          className="rounded-2xl font-black text-xs uppercase tracking-widest bg-red-500 text-white hover:bg-red-600"
-                        >
-                          Wipe Everything
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
+                        Wipe Everything
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </CardContent>
             </Card>
           </TabsContent>
