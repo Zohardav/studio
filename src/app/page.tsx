@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -9,16 +8,16 @@ import { HydrationTracker } from '@/components/dashboard/HydrationTracker';
 import { Onboarding } from '@/components/dashboard/Onboarding';
 import { WorldLibrary } from '@/components/dashboard/WorldLibrary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Sparkles, Droplets, Home, Scroll, Heart, Trash2, FastForward, PlusCircle, BookOpen, Star, Loader2 } from 'lucide-react';
+import { Award, Sparkles, Droplets, Home, Scroll, Heart, Trash2, PlusCircle, BookOpen, Star, Loader2, ShieldCheck, Cloud, LogIn } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useFirebase, initiateAnonymousSignIn, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirebase, initiateAnonymousSignIn, useCollection, useMemoFirebase, linkAccountToGoogle } from '@/firebase';
 import { collection, query, orderBy, setDoc, doc } from 'firebase/firestore';
 
 export default function DrinkAndEarn() {
@@ -30,8 +29,11 @@ export default function DrinkAndEarn() {
     addGlass, onboardingComplete,
     aiMessage, achievements, streak, todayLogs, totalStars,
     isLoading,
-    debugReset, debugNextDay, debugAddStreak
+    debugReset, debugAddStreak
   } = useHydration();
+
+  const { toast } = useToast();
+  const { playWaterLog, playAchievement } = useAudio(settings.soundEnabled);
 
   // Fetch world stages to calculate evolution targets
   const stagesQuery = useMemoFirebase(() => {
@@ -45,18 +47,15 @@ export default function DrinkAndEarn() {
     return stages.find(s => s.requiredStars > totalStars) || null;
   }, [stages, totalStars]);
 
-  const { playWaterLog, playAchievement } = useAudio(settings.soundEnabled);
-  const { toast } = useToast();
-
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (auth && !user) {
+    if (auth && !user && !isLoading) {
       initiateAnonymousSignIn(auth);
     }
-  }, [auth, user]);
+  }, [auth, user, isLoading]);
 
   const handleAddGlass = () => {
     addGlass();
@@ -74,7 +73,6 @@ export default function DrinkAndEarn() {
   const handleOnboarding = async (name: string, goal: number) => {
     if (!user || !firestore) return;
     
-    // Create initial profile in Firestore
     const userRef = doc(firestore, 'users', user.uid);
     await setDoc(userRef, {
       id: user.uid,
@@ -85,6 +83,24 @@ export default function DrinkAndEarn() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
+  };
+
+  const handleLinkAccount = async () => {
+    try {
+      await linkAccountToGoogle(auth);
+      toast({
+        title: "Sanctuary Secured! 🛡️",
+        description: "Your progress is now linked to your Google account.",
+      });
+    } catch (error: any) {
+      if (error.code !== 'auth/popup-closed-by-user') {
+        toast({
+          variant: "destructive",
+          title: "Link failed",
+          description: error.message,
+        });
+      }
+    }
   };
 
   if (isLoading || !mounted) {
@@ -130,7 +146,7 @@ export default function DrinkAndEarn() {
           <motion.div whileTap={{ scale: 0.9 }}>
             <Badge variant="secondary" className="px-4 py-3 bg-white/80 border-2 border-reward/20 rounded-[1.5rem] shadow-sm flex gap-2 items-center">
               <Award className="w-4 h-4 text-reward" />
-              <span className="font-black text-xs">STARS EARNED: {totalStars}</span>
+              <span className="font-black text-xs">STARS: {totalStars}</span>
             </Badge>
           </motion.div>
         </motion.div>
@@ -220,6 +236,49 @@ export default function DrinkAndEarn() {
           </TabsContent>
 
           <TabsContent value="self" className="space-y-6 mt-0 focus-visible:ring-0 pb-12">
+            {/* Account Protection Card */}
+            {user?.isAnonymous && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                <Card className="pixel-card border-none overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 border-2 border-white">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
+                      <Cloud className="h-5 w-5 text-primary" />
+                      Secure Progress
+                    </CardTitle>
+                    <CardDescription className="text-xs font-medium text-foreground/60">
+                      Link your Google account to ensure your sanctuary is never lost.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      onClick={handleLinkAccount}
+                      className="w-full h-12 bg-white text-primary hover:bg-white/90 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg border-b-4 border-primary/10"
+                    >
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Backup to Cloud
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            {!user?.isAnonymous && (
+              <Card className="pixel-card border-none overflow-hidden bg-accent/5 border-2 border-accent/20">
+                <CardHeader className="flex flex-row items-center gap-4 py-4">
+                  <div className="p-3 bg-accent/10 rounded-2xl">
+                    <ShieldCheck className="h-6 w-6 text-accent" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-headline font-bold">Account Protected</CardTitle>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-accent/60">Cloud Sync Active</p>
+                  </div>
+                </CardHeader>
+              </Card>
+            )}
+
             <Card className="pixel-card border-none overflow-hidden bg-white/60">
               <CardHeader>
                 <CardTitle className="text-xl font-headline font-bold">Guardian Settings</CardTitle>

@@ -2,7 +2,7 @@
 
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, linkWithPopup } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore'
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
@@ -38,6 +38,16 @@ export function getSdks(firebaseApp: FirebaseApp) {
     auth: getAuth(firebaseApp),
     firestore: getFirestore(firebaseApp)
   };
+}
+
+/**
+ * Utility to link an anonymous account to Google.
+ */
+export async function linkAccountToGoogle(auth: any) {
+  const user = auth.currentUser;
+  if (!user) return;
+  const provider = new GoogleAuthProvider();
+  return linkWithPopup(user, provider);
 }
 
 export * from './provider';
