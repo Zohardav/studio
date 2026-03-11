@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useCallback, useMemo, useState, useEffect } from 'react';
@@ -85,6 +86,22 @@ export function useHydration() {
     if (!profile) return 0;
     return Math.min(100, (currentGlasses / profile.dailyGoalGlasses) * 100);
   }, [currentGlasses, profile]);
+
+  const isRewardClaimedToday = useMemo(() => {
+    return profile?.lastRewardClaimedDate === todayKey;
+  }, [profile, todayKey]);
+
+  const claimDailyReward = useCallback(async () => {
+    if (!user || !profile || !userRef || isRewardClaimedToday) return;
+
+    updateDocumentNonBlocking(userRef, {
+      totalStars: (profile.totalStars || 0) + 1,
+      lastRewardClaimedDate: todayKey,
+      updatedAt: new Date().toISOString(),
+    });
+
+    return true;
+  }, [user, profile, userRef, isRewardClaimedToday, todayKey]);
 
   const addGlass = useCallback(async () => {
     if (!user || !profile || !logsRef || !userRef) return;
@@ -193,6 +210,8 @@ export function useHydration() {
     addGlass,
     resetApp,
     aiMessage,
+    isRewardClaimedToday,
+    claimDailyReward,
     isLoading: isAuthLoading || (!!user && isProfileLoading)
   };
 }

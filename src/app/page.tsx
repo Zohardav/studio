@@ -1,10 +1,11 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react';
 import { useHydration } from '@/hooks/use-hydration';
 import { useAudio, useBackgroundMusic } from '@/components/audio/AudioEngine';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Droplets, Home, Scroll, Heart, Star, Loader2, ShieldCheck, Cloud, LogIn, VolumeX, Volume2, Trash2, ChevronRight, Lock } from 'lucide-react';
+import { Award, Droplets, Home, Scroll, Heart, Star, Loader2, ShieldCheck, Cloud, LogIn, VolumeX, Volume2, Trash2, ChevronRight, Lock, Gift, CheckCircle2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -51,7 +52,7 @@ export default function DrinkAndEarn() {
     currentGlasses, dailyProgressPercent, 
     addGlass, onboardingComplete,
     aiMessage, achievements, todayLogs, totalStars,
-    isLoading, resetApp
+    isLoading, resetApp, isRewardClaimedToday, claimDailyReward
   } = useHydration();
 
   const [isResetting, setIsResetting] = useState(false);
@@ -97,6 +98,24 @@ export default function DrinkAndEarn() {
         description: "Your sanctuary glows with gratitude!",
       });
       playAchievement();
+    }
+  };
+
+  const handleClaimDailyReward = async () => {
+    if (isRewardClaimedToday) return;
+    
+    // Ensure AudioContext is running
+    if (settings.soundEnabled && Tone.context.state !== 'running') {
+      await Tone.start();
+    }
+    
+    const success = await claimDailyReward();
+    if (success) {
+      playAchievement();
+      toast({
+        title: "Daily Star Claimed! ✨",
+        description: "Your sanctuary grows stronger with every visit. Come back tomorrow!",
+      });
     }
   };
 
@@ -264,6 +283,47 @@ export default function DrinkAndEarn() {
           </TabsContent>
 
           <TabsContent value="scroll" className="space-y-6 mt-0 focus-visible:ring-0">
+            <Card className="pixel-card border-none overflow-hidden bg-gradient-to-br from-reward/10 to-primary/10 border-2 border-white/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
+                  <Gift className="h-5 w-5 text-reward" />
+                  Daily Sanctuary Blessing
+                </CardTitle>
+                <CardDescription className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Visit your world to claim</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center gap-4 py-2">
+                  <div className={`p-4 rounded-[2rem] border-4 transition-all ${isRewardClaimedToday ? 'bg-reward/10 border-reward/40' : 'bg-white shadow-xl border-primary/20 animate-float-cozy'}`}>
+                    <Star className={`h-10 w-10 ${isRewardClaimedToday ? 'text-reward fill-reward opacity-40' : 'text-reward fill-reward reward-glow'}`} />
+                  </div>
+                  
+                  {isRewardClaimedToday ? (
+                    <div className="flex flex-col items-center gap-2 text-center">
+                      <Badge variant="outline" className="bg-reward/20 text-reward border-reward/30 font-black text-[9px] uppercase px-4 py-1 rounded-full">
+                        <CheckCircle2 className="h-3 w-3 mr-2" />
+                        Today's Reward Secured
+                      </Badge>
+                      <p className="text-xs font-bold text-muted-foreground italic leading-relaxed">
+                        "Your presence brings warmth to this world. Come back tomorrow for another star."
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-4 w-full">
+                      <p className="text-xs font-bold text-center text-muted-foreground leading-relaxed">
+                        Your world thrives on consistency. Claim your daily star to evolve your sanctuary.
+                      </p>
+                      <Button 
+                        onClick={handleClaimDailyReward}
+                        className="w-full h-12 bg-reward hover:bg-reward/90 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg border-b-4 border-reward/20 active:border-b-0 active:translate-y-1 transition-all"
+                      >
+                        Claim 1 Star
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="pixel-card border-none overflow-hidden bg-white/60">
               <CardHeader className="pb-2"><CardTitle className="text-xl font-headline font-bold flex items-center gap-3"><Star className="h-5 w-5 text-reward fill-reward" />Evolution Badges</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">

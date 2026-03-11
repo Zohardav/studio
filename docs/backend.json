@@ -11,6 +11,7 @@
         "dailyGoalGlasses": { "type": "number" },
         "totalStars": { "type": "number" },
         "bonusEarnedDates": { "type": "array", "items": { "type": "string" }, "description": "Dates (YYYY-MM-DD) when the daily goal bonus was earned." },
+        "lastRewardClaimedDate": { "type": "string", "description": "The last date (YYYY-MM-DD) the daily login reward was claimed." },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
