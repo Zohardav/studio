@@ -57,7 +57,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
       
       timeoutRef.current = setTimeout(() => {
         setVisibleMessage(null);
-      }, 1470);
+      }, 3000);
     }
     
     return () => {
@@ -66,12 +66,12 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
   }, [aiMessage]);
 
   return (
-    <div className="relative w-full aspect-[16/15] flex flex-col mb-12">
+    <div className="relative w-full aspect-[16/12] flex flex-col mb-8">
       {/* Main Sanctuary Card Container */}
       <div className="relative flex-1 flex flex-col pixel-card p-4 overflow-hidden border-none shadow-2xl">
         <div className="absolute inset-0 bg-[#f8f1de]" />
 
-        {/* Evolution Milestone UI - Thinner and more compact */}
+        {/* Evolution Milestone UI - Compact glass box */}
         <div className="relative z-50 w-full px-2 pt-1 mb-auto">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -124,13 +124,13 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
             ) : currentStage?.imageUrl ? (
               <motion.div
                 key={currentStage.id}
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 1.1 }}
                 animate={{ 
                   opacity: 1, 
-                  scale: 1,
+                  scale: 1.1,
                   y: [0, -12, 0]
                 }}
-                exit={{ opacity: 0, scale: 1.1 }}
+                exit={{ opacity: 0, scale: 1.2 }}
                 transition={{ 
                   opacity: { duration: 0.8 },
                   scale: { duration: 0.8 },
@@ -202,7 +202,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
         </div>
       </div>
 
-      {/* Level Badge - Overlapping the bottom boundary for better visual attachment */}
+      {/* Level Badge - Overlapping the bottom boundary */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-[60] flex justify-center">
         <motion.div
           key={currentStage?.stageNumber || 0}
