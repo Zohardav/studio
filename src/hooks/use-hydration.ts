@@ -3,8 +3,8 @@
 
 import { useCallback, useMemo } from 'react';
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
-import { doc, collection, setDoc, addDoc, serverTimestamp, query, where, orderBy, limit } from 'firebase/firestore';
-import { updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { doc, collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { updateDocumentNonBlocking, addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { generateHydrationEncouragement } from '@/ai/flows/hydration-encouragement-generator';
 import { useState } from 'react';
 
@@ -107,10 +107,6 @@ export function useHydration() {
     }).catch(() => {});
   }, [user, profile, logsRef, userRef, currentGlasses, todayStr]);
 
-  const setOnboardingComplete = useCallback(async (complete: boolean) => {
-    // Usually handled by presence of profile
-  }, []);
-
   const setSettings = useCallback((newSettings: Partial<UserSettings>) => {
     if (!userRef || !profile) return;
     updateDocumentNonBlocking(userRef, {
@@ -125,12 +121,27 @@ export function useHydration() {
     { id: 'daily_goal', name: 'Full Bloom', description: 'Met your daily hydration ritual.', unlockedAt: profile?.bonusEarnedDates?.length ? Date.now() : undefined },
   ];
 
-  const debugReset = useCallback(() => {
-    alert("Resetting data requires clearing your Firestore user document and logs.");
-  }, []);
-
-  const debugNextDay = useCallback(() => {
-  }, []);
+  const debugReset = useCallback(async () => {
+    if (!userRef || !logsRef || !user || !firestore) return;
+    
+    if (window.confirm("Are you sure? This will delete your entire sanctuary progress forever.")) {
+      try {
+        // Fetch and delete all logs
+        const snapshot = await getDocs(logsRef);
+        snapshot.docs.forEach(d => deleteDocumentNonBlocking(d.ref));
+        
+        // Delete user profile
+        deleteDocumentNonBlocking(userRef);
+        
+        // Brief delay and then reload to clear UI state
+        setTimeout(() => {
+          window.location.reload();
+        }, 800);
+      } catch (error) {
+        console.error("Reset failed:", error);
+      }
+    }
+  }, [userRef, logsRef, user, firestore]);
 
   const debugAddStreak = useCallback(() => {
     if (!userRef || !profile) return;
@@ -154,12 +165,10 @@ export function useHydration() {
     streak: 0,
     achievements,
     onboardingComplete: !!profile,
-    setOnboardingComplete,
     addGlass,
     aiMessage,
     isLoading: isAuthLoading || isProfileLoading,
     debugReset,
-    debugNextDay,
     debugAddStreak
   };
 }
