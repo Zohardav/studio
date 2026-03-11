@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, where, orderBy, getDocs, writeBatch, deleteDoc } from 'firebase/firestore';
+import { doc, collection, query, where, orderBy, getDocs, writeBatch } from 'firebase/firestore';
 import { updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { generateHydrationEncouragement } from '@/ai/flows/hydration-encouragement-generator';
 
@@ -13,11 +13,11 @@ export type UserSettings = {
 };
 
 const REFRESHING_MESSAGES = [
-  "The soil drinks deeply...",
-  "Your sanctuary is grateful.",
-  "Nourishing the roots...",
-  "A refreshing drop of life.",
-  "The garden breathes a sigh of relief.",
+  "Sanctuary nourished!",
+  "Pure life added.",
+  "Refreshing drop!",
+  "Roots drinking deeply.",
+  "Sanctuary feels alive.",
 ];
 
 export function useHydration() {

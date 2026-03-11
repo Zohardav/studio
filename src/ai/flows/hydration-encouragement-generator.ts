@@ -36,25 +36,22 @@ const prompt = ai.definePrompt({
   name: 'hydrationEncouragementPrompt',
   input: { schema: HydrationEncouragementGeneratorInputSchema },
   output: { schema: HydrationEncouragementGeneratorOutputSchema },
-  prompt: `As a supportive hydration coach named 'Hydro Helper', generate a warm and encouraging message for the user, {{{userName}}}.
+  prompt: `As a supportive hydration coach named 'Hydro Helper', generate a very brief, encouraging message for {{{userName}}}.
+
+CRITICAL: The message MUST be 10 words or less.
 
 Context:
-- You just logged {{{amountDrankMl}}}ml of water.
-- Your total intake for today is now {{{currentAmountMl}}}ml.
-- Your daily hydration goal is {{{dailyGoalMl}}}ml.
-- You have {{{remainingAmountMl}}}ml left to reach your goal.
-
-Instructions:
-1. Acknowledge the amount of water just consumed.
-2. Provide an update on the current progress towards the daily goal.
-3. Keep the message positive, supportive, and motivating.
+- Just drank: {{{amountDrankMl}}}ml
+- Total today: {{{currentAmountMl}}}ml
+- Daily goal: {{{dailyGoalMl}}}ml
+- Remaining: {{{remainingAmountMl}}}ml
 
 {{#if isGoalReached}}
-  Fantastic, {{{userName}}}! You just drank {{{amountDrankMl}}}ml and have officially reached your daily goal of {{{dailyGoalMl}}}ml! You're a hydration champion! Keep that amazing momentum going!
+  Goal reached! {{{currentAmountMl}}}ml done. You're a hydration champion!
 {{else if isFirstDrinkOfDay}}
-  What a refreshing start to your day, {{{userName}}}! That {{{amountDrankMl}}}ml is a great first step. You've now had {{{currentAmountMl}}}ml. Keep sipping, you're on your way to {{{dailyGoalMl}}}ml!
+  Great start, {{{userName}}}! {{{currentAmountMl}}}ml down. Keep it up!
 {{else}}
-  Excellent work, {{{userName}}}! You just added another {{{amountDrankMl}}}ml. You're now at {{{currentAmountMl}}}ml towards your {{{dailyGoalMl}}}ml goal. You're doing great, just {{{remainingAmountMl}}}ml more to go!
+  Keep going! {{{currentAmountMl}}}ml done, {{{remainingAmountMl}}}ml to your goal.
 {{/if}}
 `,
 });
