@@ -1,11 +1,11 @@
-
 "use client"
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
 import { doc, collection, query, where, orderBy, getDocs, writeBatch } from 'firebase/firestore';
 import { updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { generateHydrationEncouragement } from '@/ai/flows/hydration-encouragement-generator';
+import { getLocalDayKey, getStartOfLocalDayISO } from '@/lib/date-utils';
 
 export type UserSettings = {
   name: string;
@@ -25,6 +25,33 @@ export function useHydration() {
   const { user, isUserLoading: isAuthLoading } = useUser();
   const firestore = useFirestore();
   const [aiMessage, setAiMessage] = useState<string>('');
+  
+  // Reactive "today" key to handle day changes while the app is open
+  const [todayKey, setTodayKey] = useState(getLocalDayKey());
+
+  // Check for day changes every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const nowKey = getLocalDayKey();
+      if (nowKey !== todayKey) {
+        setTodayKey(nowKey);
+      }
+    }, 30000);
+    
+    // Also check on window focus (app resumed from background)
+    const handleFocus = () => {
+      const nowKey = getLocalDayKey();
+      if (nowKey !== todayKey) {
+        setTodayKey(nowKey);
+      }
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [todayKey]);
 
   // 1. Fetch User Profile
   const userRef = useMemoFirebase(() => {
@@ -34,7 +61,7 @@ export function useHydration() {
 
   const { data: profile, isLoading: isProfileLoading } = useDoc(userRef);
 
-  // 2. Fetch Today's Logs
+  // 2. Fetch Today's Logs - Now reactively depends on todayKey
   const logsRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return collection(firestore, 'users', user.uid, 'logs');
@@ -42,10 +69,10 @@ export function useHydration() {
 
   const todayQuery = useMemoFirebase(() => {
     if (!logsRef) return null;
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    return query(logsRef, where('timestamp', '>=', startOfDay.toISOString()), orderBy('timestamp', 'desc'));
-  }, [logsRef]);
+    // Query logs from the start of the current reactive local day
+    const startOfToday = getStartOfLocalDayISO();
+    return query(logsRef, where('timestamp', '>=', startOfToday), orderBy('timestamp', 'desc'));
+  }, [logsRef, todayKey]); // todayKey ensures the query refreshes at midnight
 
   const { data: logs, isLoading: isLogsLoading } = useCollection(todayQuery);
 
@@ -62,7 +89,8 @@ export function useHydration() {
   const addGlass = useCallback(async () => {
     if (!user || !profile || !logsRef || !userRef) return;
 
-    const todayStr = new Date().toISOString().split('T')[0];
+    // Use current reactive day key for consistent reward tracking
+    const activeDayKey = getLocalDayKey();
     const isGoalReached = (currentGlasses + 1) >= profile.dailyGoalGlasses;
     const isFirstDrinkOfDay = currentGlasses === 0;
 
@@ -78,9 +106,10 @@ export function useHydration() {
     let extraStars = 1; // 1 star per glass
     let newBonusDates = [...(profile.bonusEarnedDates || [])];
 
-    if (isGoalReached && !newBonusDates.includes(todayStr)) {
+    // Check if the goal bonus was already earned today using the local day key
+    if (isGoalReached && !newBonusDates.includes(activeDayKey)) {
       extraStars += 5; // +5 for reaching goal
-      newBonusDates.push(todayStr);
+      newBonusDates.push(activeDayKey);
     }
 
     updateDocumentNonBlocking(userRef, {
@@ -93,7 +122,6 @@ export function useHydration() {
     const immediateMsg = REFRESHING_MESSAGES[Math.floor(Math.random() * REFRESHING_MESSAGES.length)];
     setAiMessage(immediateMsg);
     
-    // Automatically clear the message after a delay to prevent it from reappearing on navigation
     setTimeout(() => {
       setAiMessage(prev => prev === immediateMsg ? '' : prev);
     }, 3000);
@@ -108,12 +136,11 @@ export function useHydration() {
       remainingAmountMl: Math.max(0, (profile.dailyGoalGlasses - (currentGlasses + 1)) * 250),
     }).then(response => {
       setAiMessage(response.message);
-      // Automatically clear the AI message after a delay
       setTimeout(() => {
         setAiMessage(prev => prev === response.message ? '' : prev);
-      }, 3000);
+      }, 5000); // 5s for reading AI messages
     }).catch(() => {
-      // Quota issues or errors handled gracefully
+      // Graceful fallback if Genkit quota or network fails
     });
   }, [user, profile, logsRef, userRef, currentGlasses]);
 
@@ -127,31 +154,19 @@ export function useHydration() {
     });
   }, [userRef, profile]);
 
-  /**
-   * Performs a full application reset for the current user.
-   * Deletes profile and all logs from Firestore and reloads the app.
-   */
   const resetApp = useCallback(async () => {
     if (!user || !firestore) return;
 
     const batch = writeBatch(firestore);
-    
-    // 1. Delete all logs
     const logsColRef = collection(firestore, 'users', user.uid, 'logs');
     const logsSnap = await getDocs(logsColRef);
     logsSnap.forEach(doc => batch.delete(doc.ref));
 
-    // 2. Delete profile
     const profileRef = doc(firestore, 'users', user.uid);
     batch.delete(profileRef);
 
-    // 3. Commit the batch
     await batch.commit();
-
-    // 4. Clear local storage if any
     localStorage.clear();
-
-    // 5. Hard reload to restart the app state
     window.location.reload();
   }, [user, firestore]);
 
