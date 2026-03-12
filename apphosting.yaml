@@ -1,14 +1,12 @@
+
 # Settings to manage and configure a Firebase App Hosting backend.
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
-  # The maximum number of concurrent requests each instance can handle.
+  # Optimized for moderate traffic and cold start balance
   concurrency: 80
-  # The amount of memory to allocate to each instance (e.g., 512Mi, 1Gi).
   memory: 512Mi
-  # The maximum number of instances to scale up to.
   maxInstances: 10
-  # The minimum number of instances to keep running.
   minInstances: 0
 
 env:

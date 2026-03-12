@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -29,18 +30,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // @ts-ignore - Configuration for Next.js 15 workstation environments to allow workstation origins
-  allowedDevOrigins: [
-    '6000-firebase-studio-1773164205444.cluster-qmsugz722jg6qxf6wapsr2r5hc.cloudworkstations.dev'
-  ],
+  // Production-ready experimental features
   experimental: {
     serverActions: {
-      allowedOrigins: [
-        '6000-firebase-studio-1773164205444.cluster-qmsugz722jg6qxf6wapsr2r5hc.cloudworkstations.dev',
-        'localhost:9002'
-      ]
-    }
-  }
+      bodySizeLimit: '2mb',
+    },
+  },
 };
 
 export default nextConfig;
