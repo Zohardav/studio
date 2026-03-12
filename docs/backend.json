@@ -13,6 +13,7 @@
         "evolutionStars": { "type": "number", "default": 0, "description": "Total stars spent on sanctuary evolution." },
         "bonusEarnedDates": { "type": "array", "items": { "type": "string" }, "description": "Dates (YYYY-MM-DD) when the daily goal bonus was earned." },
         "lastRewardClaimedDate": { "type": "string", "description": "The last date (YYYY-MM-DD) the daily login reward was claimed." },
+        "language": { "type": "string", "enum": ["en", "he"], "default": "en" },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },

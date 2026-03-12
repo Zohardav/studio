@@ -1,10 +1,11 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react';
 import { useHydration } from '@/hooks/use-hydration';
 import { useAudio, useBackgroundMusic } from '@/components/audio/AudioEngine';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Droplets, Home, Scroll, Heart, Star, Loader2, ShieldCheck, Cloud, LogIn, VolumeX, Volume2, Trash2, ChevronRight, Lock, Gift, CheckCircle2, Construction } from 'lucide-react';
+import { Award, Droplets, Home, Scroll, Heart, Star, Loader2, ShieldCheck, Cloud, LogIn, VolumeX, Volume2, Trash2, ChevronRight, Lock, Gift, CheckCircle2, Construction, Languages } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import * as Tone from 'tone';
+import { translations, Language } from '@/lib/translations';
 
 const PixelWorld = lazy(() => import('@/components/world/PixelWorld').then(m => ({ default: m.PixelWorld })));
 const HydrationTracker = lazy(() => import('@/components/dashboard/HydrationTracker').then(m => ({ default: m.HydrationTracker })));
@@ -53,6 +55,9 @@ export default function DrinkAndEarn() {
     aiMessage, achievements, todayLogs, totalStars, evolutionStars,
     isLoading, resetApp, isRewardClaimedToday, claimDailyReward
   } = useHydration();
+
+  const t = translations[settings.language];
+  const isRtl = settings.language === 'he';
 
   const [isResetting, setIsResetting] = useState(false);
   const { toast } = useToast();
@@ -90,8 +95,8 @@ export default function DrinkAndEarn() {
     
     if (currentGlasses + 1 >= settings.dailyGoalGlasses && currentGlasses < settings.dailyGoalGlasses) {
       toast({
-        title: "Goal Fulfilled! +5 Stars Bonus ✨",
-        description: "Your sanctuary glows with gratitude!",
+        title: isRtl ? "היעד הושג! בונוס של 5 כוכבים ✨" : "Goal Fulfilled! +5 Stars Bonus ✨",
+        description: isRtl ? "הסנקטוארי שלך זוהר בהכרת תודה!" : "Your sanctuary glows with gratitude!",
       });
       playAchievement();
     }
@@ -118,19 +123,20 @@ export default function DrinkAndEarn() {
     if (success) {
       playAchievement();
       toast({
-        title: "Daily Star Claimed! ✨",
-        description: "Your sanctuary grows stronger with every visit. Come back tomorrow!",
+        title: isRtl ? "הכוכב היומי נאסף! ✨" : "Daily Star Claimed! ✨",
+        description: isRtl ? "הסנקטוארי שלך גדל עם כל ביקור. חזרו מחר!" : "Your sanctuary grows stronger with every visit. Come back tomorrow!",
       });
     }
   };
 
-  const handleOnboarding = async (name: string, goal: number) => {
+  const handleOnboarding = async (name: string, goal: number, lang: Language) => {
     if (!user || !firestore) return;
     const userRef = doc(firestore, 'users', user.uid);
     await setDoc(userRef, {
       id: user.uid,
       displayName: name,
       dailyGoalGlasses: goal,
+      language: lang,
       totalStars: 0,
       evolutionStars: 0,
       bonusEarnedDates: [],
@@ -143,8 +149,8 @@ export default function DrinkAndEarn() {
     try {
       await linkAccountToGoogle(auth);
       toast({
-        title: "Sanctuary Secured! 🛡️",
-        description: "Your progress is now linked to your Google account.",
+        title: isRtl ? "הסנקטוארי מאובטח! 🛡️" : "Sanctuary Secured! 🛡️",
+        description: isRtl ? "ההתקדמות שלך מקושרת כעת לחשבון גוגל." : "Your progress is now linked to your Google account.",
       });
     } catch (error: any) {
       if (error.code === 'auth/operation-not-allowed') {
@@ -207,7 +213,11 @@ export default function DrinkAndEarn() {
   }
 
   return (
-    <div className="max-w-md mx-auto min-h-svh bg-[#FFF9FC] dark:bg-[#120F1A] flex flex-col relative pb-32 pt-safe" suppressHydrationWarning>
+    <div 
+      className={`max-w-md mx-auto min-h-svh bg-[#FFF9FC] dark:bg-[#120F1A] flex flex-col relative pb-32 pt-safe ${isRtl ? 'font-sans' : 'font-body'}`} 
+      dir={isRtl ? 'rtl' : 'ltr'}
+      suppressHydrationWarning
+    >
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden gpu-boost">
         <motion.div animate={{ scale: [1, 1.2, 1], x: [0, 20, 0] }} transition={{ duration: 15, repeat: Infinity }} className="absolute top-[-10%] left-[-20%] w-full h-[60%] bg-primary/10 rounded-full blur-[120px]" />
         <motion.div animate={{ scale: [1, 1.3, 1], y: [0, -30, 0] }} transition={{ duration: 20, repeat: Infinity }} className="absolute bottom-[-10%] right-[-20%] w-full h-[60%] bg-reward/10 rounded-full blur-[120px]" />
@@ -218,9 +228,9 @@ export default function DrinkAndEarn() {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <h1 className="text-3xl font-headline font-bold text-foreground leading-none">
-                Hi, <span className="text-primary">{settings.name}</span>
+                {t.hi}, <span className="text-primary">{settings.name}</span>
               </h1>
-              <p className="text-[10px] font-black text-muted-foreground/40 tracking-widest uppercase">My Sanctuary</p>
+              <p className="text-[10px] font-black text-muted-foreground/40 tracking-widest uppercase">{t.mySanctuary}</p>
             </div>
             <div className="flex gap-2">
               <Badge variant="secondary" className="px-3 py-2 bg-white/80 border-2 border-primary/20 rounded-[1.2rem] shadow-sm flex gap-2 items-center">
@@ -237,22 +247,22 @@ export default function DrinkAndEarn() {
                     </Badge>
                   </motion.div>
                 </DialogTrigger>
-                <DialogContent className="max-w-[320px] rounded-[2.5rem] p-0 bg-white/40 backdrop-blur-3xl shadow-2xl overflow-hidden border border-white/20 z-[150]">
+                <DialogContent className="max-w-[320px] rounded-[2.5rem] p-0 bg-white/40 backdrop-blur-3xl shadow-2xl overflow-hidden border border-white/20 z-[150]" dir={isRtl ? 'rtl' : 'ltr'}>
                   <div className="p-8 space-y-6">
                     <div className="flex flex-col items-center text-center space-y-2">
                       <div className="p-4 bg-reward/10 rounded-[2rem] border-2 border-reward/20 shadow-inner mb-2">
                         <Star className="h-8 w-8 text-reward fill-reward" />
                       </div>
                       <DialogHeader>
-                        <DialogTitle className="text-2xl font-headline font-bold">Evolution Guide</DialogTitle>
-                        <CardDescription className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">How to earn stars</CardDescription>
+                        <DialogTitle className="text-2xl font-headline font-bold">{t.evolutionGuide}</DialogTitle>
+                        <CardDescription className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{t.howToEarn}</CardDescription>
                       </DialogHeader>
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between p-4 bg-white/20 rounded-3xl border-2 border-primary/5">
                         <div className="flex items-center gap-3">
                           <GlassWaterIcon className="h-5 w-5 text-primary" />
-                          <span className="text-xs font-bold">1 Glass</span>
+                          <span className="text-xs font-bold">{t.oneGlass}</span>
                         </div>
                         <div className="flex items-center gap-1.5 bg-reward px-3 py-1 rounded-full text-white">
                           <Star className="h-3 w-3 fill-white" />
@@ -262,7 +272,7 @@ export default function DrinkAndEarn() {
                       <div className="flex items-center justify-between p-4 bg-white/20 rounded-3xl border-2 border-reward/10">
                         <div className="flex items-center gap-3">
                           <Award className="h-5 w-5 text-reward" />
-                          <span className="text-xs font-bold">Daily Goal</span>
+                          <span className="text-xs font-bold">{t.dailyGoal}</span>
                         </div>
                         <div className="flex items-center gap-1.5 bg-reward px-3 py-1 rounded-full text-white">
                           <Star className="h-3 w-3 fill-white" />
@@ -272,7 +282,7 @@ export default function DrinkAndEarn() {
                       <div className="flex items-center justify-between p-4 bg-white/20 rounded-3xl border-2 border-reward/10">
                         <div className="flex items-center gap-3">
                           <Gift className="h-5 w-5 text-reward" />
-                          <span className="text-xs font-bold">Daily Login</span>
+                          <span className="text-xs font-bold">{t.dailyLogin}</span>
                         </div>
                         <div className="flex items-center gap-1.5 bg-reward px-3 py-1 rounded-full text-white">
                           <Star className="h-3 w-3 fill-white" />
@@ -298,6 +308,7 @@ export default function DrinkAndEarn() {
                 aiMessage={aiMessage} 
                 onSpendStar={handleSpendStar} 
                 onOpenEvolutionGuide={() => setIsEvolutionGuideOpen(true)}
+                language={settings.language}
               />
             </Suspense>
             <Suspense fallback={<div className="h-32 w-full rounded-[3rem] bg-muted animate-pulse" />}>
@@ -308,6 +319,7 @@ export default function DrinkAndEarn() {
                 nextStageStars={nextStage?.requiredStars || (evolutionStars + 10)}
                 dailyProgress={dailyProgressPercent}
                 onAddGlass={handleAddGlass}
+                language={settings.language}
               />
             </Suspense>
           </TabsContent>
@@ -317,9 +329,9 @@ export default function DrinkAndEarn() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
                   <Gift className="h-5 w-5 text-reward" />
-                  Daily Sanctuary Blessing
+                  {t.dailyBlessing}
                 </CardTitle>
-                <CardDescription className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Visit your world to claim</CardDescription>
+                <CardDescription className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{t.visitClaim}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col items-center gap-4 py-2">
@@ -331,22 +343,22 @@ export default function DrinkAndEarn() {
                     <div className="flex flex-col items-center gap-2 text-center">
                       <Badge variant="outline" className="bg-reward/20 text-reward border-reward/30 font-black text-[9px] uppercase px-4 py-1 rounded-full">
                         <CheckCircle2 className="h-3 w-3 mr-2" />
-                        Today's Reward Secured
+                        {t.rewardSecured}
                       </Badge>
                       <p className="text-xs font-bold text-muted-foreground italic leading-relaxed">
-                        "Your presence brings warmth to this world. Come back tomorrow for another star."
+                        "{t.comeBackTomorrow}"
                       </p>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-4 w-full">
                       <p className="text-xs font-bold text-center text-muted-foreground leading-relaxed">
-                        Your world thrives on consistency. Claim your daily star to evolve your sanctuary.
+                        {isRtl ? "העולם שלכם משגשג בזכות עקביות. אספו את הכוכב היומי כדי לפתח את הסנקטוארי." : "Your world thrives on consistency. Claim your daily star to evolve your sanctuary."}
                       </p>
                       <Button 
                         onClick={handleClaimDailyReward}
                         className="w-full h-12 bg-reward hover:bg-reward/90 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg border-b-4 border-reward/20 active:border-b-0 active:translate-y-1 transition-all"
                       >
-                        Claim 1 Star
+                        {t.claimStar}
                       </Button>
                     </div>
                   )}
@@ -359,10 +371,10 @@ export default function DrinkAndEarn() {
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
                     <Star className="h-5 w-5 text-reward fill-reward" />
-                    Evolution Badges
+                    {t.evolutionBadges}
                   </CardTitle>
                   <Badge variant="outline" className="bg-reward/10 text-reward border-reward/20 font-black text-[8px] uppercase px-3 py-1 rounded-full animate-pulse">
-                    Coming Soon
+                    {t.comingSoon}
                   </Badge>
                 </div>
               </CardHeader>
@@ -371,8 +383,8 @@ export default function DrinkAndEarn() {
                   <div className="p-3 bg-white/80 rounded-full shadow-lg mb-2">
                     <Construction className="h-6 w-6 text-reward" />
                   </div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-reward text-center">New Achievements Brewing</p>
-                  <p className="text-[8px] font-bold text-muted-foreground/60 uppercase mt-1">Under Construction</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-reward text-center">{t.newAchievements}</p>
+                  <p className="text-[8px] font-bold text-muted-foreground/60 uppercase mt-1">{t.underConstruction}</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 opacity-40 grayscale-[0.4]">
@@ -389,19 +401,19 @@ export default function DrinkAndEarn() {
             </Card>
 
             <Card className="pixel-card border-none overflow-hidden bg-white/60">
-              <CardHeader className="pb-2"><CardTitle className="text-xl font-headline font-bold flex items-center gap-3">Nourishment History</CardTitle></CardHeader>
+              <CardHeader className="pb-2"><CardTitle className="text-xl font-headline font-bold flex items-center gap-3">{t.nourishmentHistory}</CardTitle></CardHeader>
               <CardContent>
                 <ScrollArea className="h-[280px] pr-2">
                   <div className="space-y-3">
                     {todayLogs.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-12 text-center opacity-30">
                          <Home className="h-10 w-10 mb-4" />
-                         <p className="text-xs font-bold uppercase tracking-widest">No nourishment yet today</p>
+                         <p className="text-xs font-bold uppercase tracking-widest">{t.noNourishment}</p>
                       </div>
                     ) : (
                       todayLogs.map(log => (
                         <div key={log.id} className="flex justify-between items-center p-4 bg-white/80 rounded-2xl border-2 border-primary/10">
-                          <div className="flex items-center gap-4"><div className="p-2.5 bg-primary/10 rounded-xl"><Droplets className="h-5 w-5 text-primary" /></div><span className="font-bold text-lg">{log.glassesCount} Glass</span></div>
+                          <div className="flex items-center gap-4"><div className="p-2.5 bg-primary/10 rounded-xl"><Droplets className="h-5 w-5 text-primary" /></div><span className="font-bold text-lg">{log.glassesCount} {isRtl ? 'כוסות' : 'Glass'}</span></div>
                           <span className="text-[10px] font-black text-muted-foreground/60 uppercase text-right">
                             {formatTimestamp(log.timestamp)}
                           </span>
@@ -417,34 +429,51 @@ export default function DrinkAndEarn() {
           <TabsContent value="self" className="space-y-6 mt-0 focus-visible:ring-0 pb-12">
             {user?.isAnonymous && (
               <Card className="pixel-card border-none overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 border-2 border-white">
-                <CardHeader className="pb-2"><CardTitle className="text-xl font-headline font-bold flex items-center gap-3"><Cloud className="h-5 w-5 text-primary" />Secure Progress</CardTitle></CardHeader>
-                <CardContent><Button onClick={handleLinkAccount} className="w-full h-12 bg-white text-primary hover:bg-white/90 rounded-2xl font-black text-xs uppercase shadow-lg border-b-4 border-primary/10"><LogIn className="h-4 w-4 mr-2" />Backup to Cloud</Button></CardContent>
+                <CardHeader className="pb-2"><CardTitle className="text-xl font-headline font-bold flex items-center gap-3"><Cloud className="h-5 w-5 text-primary" />{t.secureProgress}</CardTitle></CardHeader>
+                <CardContent><Button onClick={handleLinkAccount} className="w-full h-12 bg-white text-primary hover:bg-white/90 rounded-2xl font-black text-xs uppercase shadow-lg border-b-4 border-primary/10"><LogIn className="h-4 w-4 mr-2" />{t.backupCloud}</Button></CardContent>
               </Card>
             )}
             <Card className="pixel-card border-none overflow-hidden bg-white/60">
-              <CardHeader><CardTitle className="text-xl font-headline font-bold">Guardian Settings</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-xl font-headline font-bold">{t.guardianSettings}</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between p-5 bg-white/80 rounded-3xl border-2 border-primary/5">
-                  <p className="text-xs font-black uppercase tracking-widest">Name</p>
+                  <p className="text-xs font-black uppercase tracking-widest">{t.name}</p>
                   <input className="w-32 bg-transparent border-none text-right font-black text-primary focus:ring-0 text-lg" value={settings.name} onChange={(e) => setSettings({...settings, name: e.target.value})} />
                 </div>
                 <div className="flex items-center justify-between p-5 bg-white/80 rounded-3xl border-2 border-primary/5">
-                  <p className="text-xs font-black uppercase tracking-widest">Daily Goal</p>
+                  <p className="text-xs font-black uppercase tracking-widest">{t.dailyGoal}</p>
                   <div className="flex items-center gap-2">
                     <input type="number" className="w-12 bg-transparent border-none text-right font-black text-primary focus:ring-0 text-lg" value={settings.dailyGoalGlasses} onChange={(e) => setSettings({...settings, dailyGoalGlasses: parseInt(e.target.value) || 0})} />
-                    <span className="text-[10px] font-black opacity-30 uppercase">Glasses</span>
+                    <span className="text-[10px] font-black opacity-30 uppercase">{t.glasses}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between p-5 bg-white/80 rounded-3xl border-2 border-primary/5">
-                  <p className="text-xs font-black uppercase tracking-widest">Atmosphere</p>
+                  <p className="text-xs font-black uppercase tracking-widest">{t.atmosphere}</p>
                   <Switch checked={settings.soundEnabled} onCheckedChange={handleSoundToggle} />
+                </div>
+                <div className="flex items-center justify-between p-5 bg-white/80 rounded-3xl border-2 border-primary/5">
+                  <p className="text-xs font-black uppercase tracking-widest">{t.language}</p>
+                  <div className="flex bg-muted/40 p-1 rounded-xl">
+                    <button 
+                      onClick={() => setSettings({...settings, language: 'en'})}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${settings.language === 'en' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground opacity-50'}`}
+                    >
+                      EN
+                    </button>
+                    <button 
+                      onClick={() => setSettings({...settings, language: 'he'})}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${settings.language === 'he' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground opacity-50'}`}
+                    >
+                      HE
+                    </button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
             <div className="space-y-3">
               <Dialog onOpenChange={(open) => { if (!open) setAdminAuth(''); }}>
-                <DialogTrigger asChild><Button variant="ghost" className="w-full justify-between h-12 bg-white/60 rounded-2xl px-5 text-xs font-black uppercase tracking-widest"><div className="flex items-center gap-3"><Lock className="h-4 w-4 text-reward" />Manage Stage Progression</div></Button></DialogTrigger>
-                <DialogContent className="max-w-4xl h-[85vh] overflow-hidden flex flex-col p-0 border-none rounded-[3rem] bg-background/95 backdrop-blur-3xl shadow-2xl z-[150]">
+                <DialogTrigger asChild><Button variant="ghost" className="w-full justify-between h-12 bg-white/60 rounded-2xl px-5 text-xs font-black uppercase tracking-widest"><div className="flex items-center gap-3"><Lock className="h-4 w-4 text-reward" />{t.manageStages}</div></Button></DialogTrigger>
+                <DialogContent className="max-w-4xl h-[85vh] overflow-hidden flex flex-col p-0 border-none rounded-[3rem] bg-background/95 backdrop-blur-3xl shadow-2xl z-[150]" dir={isRtl ? 'rtl' : 'ltr'}>
                   <DialogHeader className="sr-only">
                     <DialogTitle>Stage Management</DialogTitle>
                     <DialogDescription>Access and edit world evolution stages.</DialogDescription>
@@ -461,10 +490,10 @@ export default function DrinkAndEarn() {
                 </DialogContent>
               </Dialog>
               <AlertDialog>
-                <AlertDialogTrigger asChild><Button variant="destructive" className="w-full h-12 rounded-2xl font-black text-xs uppercase tracking-widest bg-red-500/10 text-red-500 border-2 border-red-500/20"><Trash2 className="h-4 w-4 mr-2" />Reset App</Button></AlertDialogTrigger>
-                <AlertDialogContent className="rounded-[2.5rem] p-8 z-[150]">
-                  <AlertDialogHeader><AlertDialogTitle className="text-2xl font-headline font-bold">Destroy All Progress?</AlertDialogTitle></AlertDialogHeader>
-                  <AlertDialogFooter className="mt-6 gap-3"><AlertDialogCancel className="rounded-2xl font-black text-xs uppercase">Nevermind</AlertDialogCancel><AlertDialogAction onClick={handleResetApp} className="rounded-2xl font-black text-xs uppercase bg-red-500">Wipe Everything</AlertDialogAction></AlertDialogFooter>
+                <AlertDialogTrigger asChild><Button variant="destructive" className="w-full h-12 rounded-2xl font-black text-xs uppercase tracking-widest bg-red-500/10 text-red-500 border-2 border-red-500/20"><Trash2 className="h-4 w-4 mr-2" />{t.resetApp}</Button></AlertDialogTrigger>
+                <AlertDialogContent className="rounded-[2.5rem] p-8 z-[150]" dir={isRtl ? 'rtl' : 'ltr'}>
+                  <AlertDialogHeader><AlertDialogTitle className="text-2xl font-headline font-bold">{isRtl ? 'לאפס את הכל?' : 'Destroy All Progress?'}</AlertDialogTitle></AlertDialogHeader>
+                  <AlertDialogFooter className="mt-6 gap-3"><AlertDialogCancel className="rounded-2xl font-black text-xs uppercase">{isRtl ? 'ביטול' : 'Nevermind'}</AlertDialogCancel><AlertDialogAction onClick={handleResetApp} className="rounded-2xl font-black text-xs uppercase bg-red-500">{isRtl ? 'מחיקת הכל' : 'Wipe Everything'}</AlertDialogAction></AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
             </div>
@@ -473,9 +502,9 @@ export default function DrinkAndEarn() {
           <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-4rem)] max-w-sm z-[100] pb-safe">
             <div className="pixel-card p-2 shadow-2xl bg-white/90 backdrop-blur-xl">
               <TabsList className="w-full bg-transparent h-14 grid grid-cols-3 gap-2">
-                <TabsTrigger value="home" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-[1.5rem] flex flex-col h-full"><Home className="h-5 w-5" /><span className="text-[9px] font-black uppercase mt-1">World</span></TabsTrigger>
-                <TabsTrigger value="scroll" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-[1.5rem] flex flex-col h-full"><Scroll className="h-5 w-5" /><span className="text-[9px] font-black uppercase mt-1">History</span></TabsTrigger>
-                <TabsTrigger value="self" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-[1.5rem] flex flex-col h-full"><Heart className="h-5 w-5" /><span className="text-[9px] font-black uppercase mt-1">Guardian</span></TabsTrigger>
+                <TabsTrigger value="home" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-[1.5rem] flex flex-col h-full"><Home className="h-5 w-5" /><span className="text-[9px] font-black uppercase mt-1">{t.worldTab}</span></TabsTrigger>
+                <TabsTrigger value="scroll" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-[1.5rem] flex flex-col h-full"><Scroll className="h-5 w-5" /><span className="text-[9px] font-black uppercase mt-1">{t.historyTab}</span></TabsTrigger>
+                <TabsTrigger value="self" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-[1.5rem] flex flex-col h-full"><Heart className="h-5 w-5" /><span className="text-[9px] font-black uppercase mt-1">{t.guardianTab}</span></TabsTrigger>
               </TabsList>
             </div>
           </div>

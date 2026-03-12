@@ -8,6 +8,7 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Loader2, ImageOff, Sparkles, Droplets } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Language, translations } from '@/lib/translations';
 
 interface PixelWorldProps {
   evolutionStars: number;
@@ -15,13 +16,23 @@ interface PixelWorldProps {
   aiMessage?: string;
   onSpendStar: () => void;
   onOpenEvolutionGuide?: () => void;
+  language?: Language;
 }
 
-export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar, onOpenEvolutionGuide }: PixelWorldProps) {
+export function PixelWorld({ 
+  evolutionStars, 
+  totalStars, 
+  aiMessage, 
+  onSpendStar, 
+  onOpenEvolutionGuide,
+  language = 'en'
+}: PixelWorldProps) {
   const [visibleMessage, setVisibleMessage] = useState<string | null>(null);
   const [poppingStars, setPoppingStars] = useState<{ id: number }[]>([]);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const firestore = useFirestore();
+  const t = translations[language];
+  const isRtl = language === 'he';
   
   const stagesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -72,14 +83,9 @@ export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar,
 
   const handleSpendStarClick = () => {
     if (totalStars > 0) {
-      // Trigger the pop-up animation
       const starId = Date.now();
       setPoppingStars(prev => [...prev, { id: starId }]);
-      
-      // Call the original spend logic
       onSpendStar();
-
-      // Clean up the star after animation
       setTimeout(() => {
         setPoppingStars(prev => prev.filter(s => s.id !== starId));
       }, 1000);
@@ -105,12 +111,12 @@ export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar,
                   <Star className="h-3 w-3 text-reward fill-reward" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[6px] font-black text-reward uppercase tracking-[0.2em] leading-tight">Next Evolution</span>
-                  <span className="text-[10px] font-bold text-foreground">Stage {nextStage?.stageNumber || '?'}</span>
+                  <span className="text-[6px] font-black text-reward uppercase tracking-[0.2em] leading-tight">{t.nextEvolution}</span>
+                  <span className="text-[10px] font-bold text-foreground">{isRtl ? 'שלב' : 'Stage'} {nextStage?.stageNumber || '?'}</span>
                 </div>
               </div>
               <div className="flex flex-col items-end">
-                <span className="text-[6px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] leading-tight">Stars Needed</span>
+                <span className="text-[6px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] leading-tight">{t.starsNeeded}</span>
                 <div className="flex items-center gap-1">
                   <Star className="h-2 w-2 text-reward fill-reward" />
                   <span className="text-[9px] font-black text-reward">{remainingStars}</span>
@@ -123,7 +129,7 @@ export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar,
                 initial={{ width: 0 }}
                 animate={{ width: `${evolutionProgress}%` }}
                 transition={{ duration: 1.2, ease: "easeOut" }}
-                className="h-full bg-reward shadow-[0_0_8px_hsl(var(--reward)/0.3)]"
+                className={`h-full bg-reward shadow-[0_0_8px_hsl(var(--reward)/0.3)] ${isRtl ? 'origin-right' : 'origin-left'}`}
               />
             </div>
           </motion.div>
@@ -140,7 +146,7 @@ export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar,
                 className="flex flex-col items-center gap-2 z-10"
               >
                 <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Glimpsing the Sanctuary...</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">{isRtl ? 'צופה בסנקטוארי...' : 'Glimpsing the Sanctuary...'}</span>
               </motion.div>
             ) : currentStage?.imageUrl ? (
               <motion.div
@@ -190,9 +196,9 @@ export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar,
                   />
                 </div>
                 <div className="space-y-1 px-6">
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/40">Level 0: The Void</h3>
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/40">{isRtl ? 'רמה 0: הריק' : 'Level 0: The Void'}</h3>
                   <p className="text-xs font-bold text-muted-foreground/60 max-w-[180px] leading-relaxed mx-auto">
-                    Invest stars to grow your sanctuary!
+                    {isRtl ? 'השקיעו כוכבים כדי להצמיח את הסנקטוארי שלכם!' : 'Invest stars to grow your sanctuary!'}
                   </p>
                 </div>
               </motion.div>
@@ -209,7 +215,7 @@ export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar,
                 className="absolute inset-0 flex items-center justify-center z-[60] px-8 pointer-events-none"
               >
                 <div className="bg-white/70 backdrop-blur-xl p-4 rounded-[2rem] border-2 border-white/40 shadow-2xl text-center max-w-[90%] pointer-events-none">
-                  <p className="text-[8px] font-black text-primary uppercase tracking-[0.3em] mb-1">Sanctuary Spirit</p>
+                  <p className="text-[8px] font-black text-primary uppercase tracking-[0.3em] mb-1">{isRtl ? 'רוח הסנקטוארי' : 'Sanctuary Spirit'}</p>
                   <div className="relative min-h-[40px] flex items-center justify-center">
                     <p className="text-xs font-bold text-foreground leading-relaxed italic">
                       "{visibleMessage}"
@@ -229,7 +235,7 @@ export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar,
           animate={{ scale: 1 }}
           className="bg-white/95 backdrop-blur-md px-4 py-1.5 rounded-full border-2 border-primary/10 shadow-lg flex items-center gap-2"
         >
-          <span className="text-[8px] font-black text-primary uppercase tracking-[0.2em]">SANCTUARY LVL</span>
+          <span className="text-[8px] font-black text-primary uppercase tracking-[0.2em]">{t.sanctuaryLvl}</span>
           <span className="text-lg font-headline font-bold text-primary">{currentStage?.stageNumber || 0}</span>
         </motion.div>
 
@@ -259,7 +265,7 @@ export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar,
               }`}
             >
               <Star className={`h-3.5 w-3.5 ${totalStars > 0 ? 'fill-white animate-pulse' : ''}`} />
-              Use Star ({totalStars})
+              {t.useStar} ({totalStars})
             </Button>
           </motion.div>
         </div>

@@ -7,11 +7,13 @@ import { doc, collection, query, where, orderBy, getDocs, writeBatch } from 'fir
 import { updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { generateHydrationEncouragement } from '@/ai/flows/hydration-encouragement-generator';
 import { getLocalDayKey, getStartOfLocalDayISO } from '@/lib/date-utils';
+import { Language } from '@/lib/translations';
 
 export type UserSettings = {
   name: string;
   dailyGoalGlasses: number;
   soundEnabled: boolean;
+  language: Language;
 };
 
 const REFRESHING_MESSAGES = [
@@ -20,6 +22,14 @@ const REFRESHING_MESSAGES = [
   "Refreshing drop!",
   "Roots drinking deeply.",
   "Sanctuary feels alive.",
+];
+
+const REFRESHING_MESSAGES_HE = [
+  "הסנקטוארי הוזן!",
+  "חיים טהורים נוספו.",
+  "טיפה מרעננת!",
+  "השורשים שותים לעומק.",
+  "הסנקטוארי מרגיש חי.",
 ];
 
 export function useHydration() {
@@ -135,7 +145,8 @@ export function useHydration() {
       updatedAt: new Date().toISOString(),
     });
 
-    const immediateMsg = REFRESHING_MESSAGES[Math.floor(Math.random() * REFRESHING_MESSAGES.length)];
+    const msgs = profile.language === 'he' ? REFRESHING_MESSAGES_HE : REFRESHING_MESSAGES;
+    const immediateMsg = msgs[Math.floor(Math.random() * msgs.length)];
     setAiMessage(immediateMsg);
     
     setTimeout(() => {
@@ -164,6 +175,7 @@ export function useHydration() {
       displayName: newSettings.name ?? profile.displayName,
       dailyGoalGlasses: newSettings.dailyGoalGlasses ?? profile.dailyGoalGlasses,
       soundEnabled: newSettings.soundEnabled ?? (profile.soundEnabled !== undefined ? profile.soundEnabled : true),
+      language: newSettings.language ?? profile.language ?? 'en',
       updatedAt: new Date().toISOString(),
     });
   }, [userRef, profile]);
@@ -185,8 +197,8 @@ export function useHydration() {
   }, [user, firestore]);
 
   const achievements = [
-    { id: 'first_glass', name: 'First Drop', description: 'Gave the soil its first glass of life.', unlockedAt: profile?.totalStars ? Date.now() : undefined },
-    { id: 'daily_goal', name: 'Full Bloom', description: 'Met your daily hydration ritual.', unlockedAt: profile?.bonusEarnedDates?.length ? Date.now() : undefined },
+    { id: 'first_glass', name: profile?.language === 'he' ? 'טיפה ראשונה' : 'First Drop', description: profile?.language === 'he' ? 'השקיית האדמה בפעם הראשונה.' : 'Gave the soil its first glass of life.', unlockedAt: profile?.totalStars ? Date.now() : undefined },
+    { id: 'daily_goal', name: profile?.language === 'he' ? 'פריחה מלאה' : 'Full Bloom', description: profile?.language === 'he' ? 'עמידה ביעד ההזנה היומי.' : 'Met your daily hydration ritual.', unlockedAt: profile?.bonusEarnedDates?.length ? Date.now() : undefined },
   ];
 
   return {
@@ -194,6 +206,7 @@ export function useHydration() {
       name: profile?.displayName || 'Guardian',
       dailyGoalGlasses: profile?.dailyGoalGlasses || 8,
       soundEnabled: profile?.soundEnabled !== undefined ? profile.soundEnabled : true,
+      language: (profile?.language as Language) || 'en',
     },
     setSettings,
     logs: logs || [],

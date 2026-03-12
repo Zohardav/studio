@@ -1,9 +1,11 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Wand2, Star, CheckCircle2, Timer } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Language, translations } from '@/lib/translations';
 
 interface HydrationTrackerProps {
   currentGlasses: number;
@@ -12,6 +14,7 @@ interface HydrationTrackerProps {
   nextStageStars: number;
   dailyProgress: number;
   onAddGlass: () => void;
+  language?: Language;
 }
 
 const GlassWaterIcon = ({ className }: { className?: string }) => (
@@ -38,11 +41,14 @@ export function HydrationTracker({
   totalStars,
   nextStageStars,
   dailyProgress,
-  onAddGlass
+  onAddGlass,
+  language = 'en'
 }: HydrationTrackerProps) {
   const [cooldown, setCooldown] = useState(0);
   const isGoalReached = currentGlasses >= goalGlasses;
   const isCooldownActive = cooldown > 0;
+  const t = translations[language];
+  const isRtl = language === 'he';
 
   useEffect(() => {
     if (cooldown > 0) {
@@ -76,22 +82,22 @@ export function HydrationTracker({
               {currentGlasses}<span className="text-xl font-headline font-bold text-muted-foreground/30 ml-1">/{goalGlasses}</span>
             </h2>
           </motion.div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Glasses Today</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">{t.glassesToday}</p>
         </div>
 
         <div className="relative px-2">
           <div className="h-4 w-full bg-secondary/80 rounded-full overflow-hidden border-2 border-white/50 shadow-inner">
             <motion.div 
-              className="h-full bg-primary"
+              className={`h-full bg-primary ${isRtl ? 'origin-right' : 'origin-left'}`}
               initial={{ width: 0 }}
               animate={{ width: `${dailyProgress}%` }}
               transition={{ type: "spring", damping: 15, stiffness: 60 }}
             />
           </div>
           <div className="flex justify-between mt-2 px-1">
-            <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">Daily Goal</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">{t.dailyGoal}</span>
             <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
-              {isGoalReached ? "Satiated" : `${Math.max(0, goalGlasses - currentGlasses)} More to Go`}
+              {isGoalReached ? t.satiated : `${Math.max(0, goalGlasses - currentGlasses)} ${t.moreToGo}`}
             </span>
           </div>
         </div>
@@ -117,7 +123,7 @@ export function HydrationTracker({
             )}
           </div>
           <span className="relative z-10">
-            {isGoalReached ? "Goal Fulfilled" : isCooldownActive ? `Wait ${cooldown}s` : "Drink a Glass"}
+            {isGoalReached ? t.goalFulfilled : isCooldownActive ? `${isRtl ? 'המתנה' : t.wait} ${cooldown}s` : t.drinkGlass}
           </span>
           {isGoalReached && (
              <motion.div 
@@ -134,7 +140,7 @@ export function HydrationTracker({
             animate={{ opacity: 1, y: 0 }}
             className="text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60"
           >
-            The sanctuary is glowing. Rest now, Guardian.
+            {t.restNow}
           </motion.p>
         )}
 
@@ -144,7 +150,7 @@ export function HydrationTracker({
             animate={{ opacity: 1, scale: 1 }}
             className="text-center text-[10px] font-black uppercase tracking-widest text-primary/60"
           >
-            Absorbing nourishment...
+            {t.absorbing}
           </motion.p>
         )}
       </div>
