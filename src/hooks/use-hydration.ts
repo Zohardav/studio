@@ -27,10 +27,8 @@ export function useHydration() {
   const firestore = useFirestore();
   const [aiMessage, setAiMessage] = useState<string>('');
   
-  // Reactive "today" key to handle day changes while the app is open
   const [todayKey, setTodayKey] = useState(getLocalDayKey());
 
-  // Check for day changes every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       const nowKey = getLocalDayKey();
@@ -39,7 +37,6 @@ export function useHydration() {
       }
     }, 30000);
     
-    // Also check on window focus (app resumed from background)
     const handleFocus = () => {
       const nowKey = getLocalDayKey();
       if (nowKey !== todayKey) {
@@ -54,7 +51,6 @@ export function useHydration() {
     };
   }, [todayKey]);
 
-  // 1. Fetch User Profile
   const userRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
@@ -62,7 +58,6 @@ export function useHydration() {
 
   const { data: profile, isLoading: isProfileLoading } = useDoc(userRef);
 
-  // 2. Fetch Today's Logs - Now reactively depends on todayKey
   const logsRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return collection(firestore, 'users', user.uid, 'logs');
@@ -70,10 +65,9 @@ export function useHydration() {
 
   const todayQuery = useMemoFirebase(() => {
     if (!logsRef) return null;
-    // Query logs from the start of the current reactive local day
     const startOfToday = getStartOfLocalDayISO();
     return query(logsRef, where('timestamp', '>=', startOfToday), orderBy('timestamp', 'desc'));
-  }, [logsRef, todayKey]); // todayKey ensures the query refreshes at midnight
+  }, [logsRef, todayKey]);
 
   const { data: logs, isLoading: isLogsLoading } = useCollection(todayQuery);
 
@@ -103,15 +97,23 @@ export function useHydration() {
     return true;
   }, [user, profile, userRef, isRewardClaimedToday, todayKey]);
 
+  const spendStar = useCallback(() => {
+    if (!user || !profile || !userRef || (profile.totalStars || 0) <= 0) return;
+
+    updateDocumentNonBlocking(userRef, {
+      totalStars: profile.totalStars - 1,
+      evolutionStars: (profile.evolutionStars || 0) + 1,
+      updatedAt: new Date().toISOString(),
+    });
+  }, [user, profile, userRef]);
+
   const addGlass = useCallback(async () => {
     if (!user || !profile || !logsRef || !userRef) return;
 
-    // Use current reactive day key for consistent reward tracking
     const activeDayKey = getLocalDayKey();
     const isGoalReached = (currentGlasses + 1) >= profile.dailyGoalGlasses;
     const isFirstDrinkOfDay = currentGlasses === 0;
 
-    // 1. Add Log Entry
     const newLog = {
       userId: user.uid,
       glassesCount: 1,
@@ -119,13 +121,11 @@ export function useHydration() {
     };
     addDocumentNonBlocking(logsRef, newLog);
 
-    // 2. Update Profile (Stars & Bonus)
-    let extraStars = 1; // 1 star per glass
+    let extraStars = 1;
     let newBonusDates = [...(profile.bonusEarnedDates || [])];
 
-    // Check if the goal bonus was already earned today using the local day key
     if (isGoalReached && !newBonusDates.includes(activeDayKey)) {
-      extraStars += 5; // +5 for reaching goal
+      extraStars += 5;
       newBonusDates.push(activeDayKey);
     }
 
@@ -135,7 +135,6 @@ export function useHydration() {
       updatedAt: new Date().toISOString(),
     });
 
-    // 3. AI Feedback
     const immediateMsg = REFRESHING_MESSAGES[Math.floor(Math.random() * REFRESHING_MESSAGES.length)];
     setAiMessage(immediateMsg);
     
@@ -155,10 +154,8 @@ export function useHydration() {
       setAiMessage(response.message);
       setTimeout(() => {
         setAiMessage(prev => prev === response.message ? '' : prev);
-      }, 5000); // 5s for reading AI messages
-    }).catch(() => {
-      // Graceful fallback if Genkit quota or network fails
-    });
+      }, 5000);
+    }).catch(() => {});
   }, [user, profile, logsRef, userRef, currentGlasses]);
 
   const setSettings = useCallback((newSettings: Partial<UserSettings>) => {
@@ -204,10 +201,12 @@ export function useHydration() {
     currentGlasses,
     dailyProgressPercent,
     totalStars: profile?.totalStars || 0,
+    evolutionStars: profile?.evolutionStars || 0,
     streak: 0,
     achievements,
     onboardingComplete: !!profile,
     addGlass,
+    spendStar,
     resetApp,
     aiMessage,
     isRewardClaimedToday,

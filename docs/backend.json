@@ -9,13 +9,14 @@
         "id": { "type": "string" },
         "displayName": { "type": "string" },
         "dailyGoalGlasses": { "type": "number" },
-        "totalStars": { "type": "number" },
+        "totalStars": { "type": "number", "description": "Available stars in stock." },
+        "evolutionStars": { "type": "number", "default": 0, "description": "Total stars spent on sanctuary evolution." },
         "bonusEarnedDates": { "type": "array", "items": { "type": "string" }, "description": "Dates (YYYY-MM-DD) when the daily goal bonus was earned." },
         "lastRewardClaimedDate": { "type": "string", "description": "The last date (YYYY-MM-DD) the daily login reward was claimed." },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "displayName", "dailyGoalGlasses", "totalStars", "createdAt", "updatedAt"]
+      "required": ["id", "displayName", "dailyGoalGlasses", "totalStars", "evolutionStars", "createdAt", "updatedAt"]
     },
     "WorldStage": {
       "title": "WorldStage",

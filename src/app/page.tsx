@@ -21,7 +21,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from '@/components/ui/input';
 import * as Tone from 'tone';
 
-// Dynamic Imports for performance optimization
 const PixelWorld = lazy(() => import('@/components/world/PixelWorld').then(m => ({ default: m.PixelWorld })));
 const HydrationTracker = lazy(() => import('@/components/dashboard/HydrationTracker').then(m => ({ default: m.HydrationTracker })));
 const Onboarding = lazy(() => import('@/components/dashboard/Onboarding').then(m => ({ default: m.Onboarding })));
@@ -50,8 +49,8 @@ export default function DrinkAndEarn() {
   const { 
     settings, setSettings, 
     currentGlasses, dailyProgressPercent, 
-    addGlass, onboardingComplete,
-    aiMessage, achievements, todayLogs, totalStars,
+    addGlass, spendStar, onboardingComplete,
+    aiMessage, achievements, todayLogs, totalStars, evolutionStars,
     isLoading, resetApp, isRewardClaimedToday, claimDailyReward
   } = useHydration();
 
@@ -59,10 +58,8 @@ export default function DrinkAndEarn() {
   const { toast } = useToast();
   const { playWaterLog, playAchievement } = useAudio(settings.soundEnabled);
   
-  // Background music engine - Optimized for mobile (only runs if enabled)
   useBackgroundMusic(settings.soundEnabled);
 
-  // Fetch world stages - Memoized to prevent re-querying on every render
   const stagesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'worldStages'), orderBy('requiredStars', 'asc'));
@@ -71,8 +68,8 @@ export default function DrinkAndEarn() {
 
   const nextStage = useMemo(() => {
     if (!stages) return null;
-    return stages.find(s => s.requiredStars > totalStars) || null;
-  }, [stages, totalStars]);
+    return stages.find(s => s.requiredStars > evolutionStars) || null;
+  }, [stages, evolutionStars]);
 
   useEffect(() => {
     setMounted(true);
@@ -85,7 +82,6 @@ export default function DrinkAndEarn() {
   }, [auth, user, isLoading]);
 
   const handleAddGlass = async () => {
-    // Safari requirement: AudioContext must be resumed on user gesture
     if (settings.soundEnabled && Tone.context.state !== 'running') {
       await Tone.start();
     }
@@ -101,10 +97,19 @@ export default function DrinkAndEarn() {
     }
   };
 
+  const handleSpendStar = async () => {
+    if (totalStars > 0) {
+      spendStar();
+      if (settings.soundEnabled && Tone.context.state !== 'running') {
+        await Tone.start();
+      }
+      playAchievement();
+    }
+  };
+
   const handleClaimDailyReward = async () => {
     if (isRewardClaimedToday) return;
     
-    // Ensure AudioContext is running
     if (settings.soundEnabled && Tone.context.state !== 'running') {
       await Tone.start();
     }
@@ -127,6 +132,7 @@ export default function DrinkAndEarn() {
       displayName: name,
       dailyGoalGlasses: goal,
       totalStars: 0,
+      evolutionStars: 0,
       bonusEarnedDates: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -268,14 +274,19 @@ export default function DrinkAndEarn() {
         <Tabs defaultValue="home" className="w-full">
           <TabsContent value="home" className="space-y-8 mt-0 focus-visible:ring-0">
             <Suspense fallback={<div className="aspect-square w-full rounded-[3rem] bg-muted animate-pulse" />}>
-              <PixelWorld totalStars={totalStars} aiMessage={aiMessage} />
+              <PixelWorld 
+                evolutionStars={evolutionStars} 
+                totalStars={totalStars} 
+                aiMessage={aiMessage} 
+                onSpendStar={handleSpendStar} 
+              />
             </Suspense>
             <Suspense fallback={<div className="h-32 w-full rounded-[3rem] bg-muted animate-pulse" />}>
               <HydrationTracker 
                 currentGlasses={currentGlasses}
                 goalGlasses={settings.dailyGoalGlasses}
                 totalStars={totalStars}
-                nextStageStars={nextStage?.requiredStars || (totalStars + 10)}
+                nextStageStars={nextStage?.requiredStars || (evolutionStars + 10)}
                 dailyProgress={dailyProgressPercent}
                 onAddGlass={handleAddGlass}
               />

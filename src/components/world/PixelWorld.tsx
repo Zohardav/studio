@@ -7,13 +7,16 @@ import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Zap, Loader2, ImageOff, Sparkles, Droplets } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface PixelWorldProps {
+  evolutionStars: number;
   totalStars: number;
   aiMessage?: string;
+  onSpendStar: () => void;
 }
 
-export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
+export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar }: PixelWorldProps) {
   const [visibleMessage, setVisibleMessage] = useState<string | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const firestore = useFirestore();
@@ -32,7 +35,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
     let next = stages[0] || null;
 
     for (let i = 0; i < stages.length; i++) {
-      if (totalStars >= stages[i].requiredStars) {
+      if (evolutionStars >= stages[i].requiredStars) {
         active = stages[i];
         next = stages[i + 1] || null;
       } else {
@@ -41,27 +44,21 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
     }
 
     return { currentStage: active, nextStage: next, isLoading: false };
-  }, [stages, totalStars]);
+  }, [stages, evolutionStars]);
 
-  const remainingStars = nextStage ? Math.max(0, nextStage.requiredStars - totalStars) : 0;
+  const remainingStars = nextStage ? Math.max(0, nextStage.requiredStars - evolutionStars) : 0;
   const evolutionProgress = nextStage 
-    ? Math.min(100, (totalStars / nextStage.requiredStars) * 100)
+    ? Math.min(100, (evolutionStars / nextStage.requiredStars) * 100)
     : 100;
 
-  // Handle message updates and synchronization with the prop
   useEffect(() => {
     if (aiMessage && aiMessage.trim() !== '') {
-      // Clear any existing timeout to avoid premature hiding
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      
       setVisibleMessage(aiMessage);
-      
-      // Auto-hide after a reasonable reading time
       timeoutRef.current = setTimeout(() => {
         setVisibleMessage(null);
       }, 5000);
     } else if (aiMessage === '') {
-      // If the parent explicitly cleared the message, we should hide it too
       setVisibleMessage(null);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }
@@ -73,11 +70,9 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
 
   return (
     <div className="relative w-full aspect-[16/16] flex flex-col mb-12">
-      {/* Main Sanctuary Card Container */}
       <div className="relative flex-1 flex flex-col pixel-card p-4 overflow-hidden border-none shadow-2xl">
         <div className="absolute inset-0 bg-[#f8f1de]" />
 
-        {/* Evolution Milestone UI - Sleek Compact Glass Box */}
         <div className="relative z-50 w-full px-2 pt-1 mb-auto">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -95,10 +90,10 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
                 </div>
               </div>
               <div className="flex flex-col items-end">
-                <span className="text-[6px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] leading-tight">Requirements</span>
+                <span className="text-[6px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] leading-tight">Stars Needed</span>
                 <div className="flex items-center gap-1">
                   <Star className="h-2 w-2 text-reward fill-reward" />
-                  <span className="text-[9px] font-black text-reward">{remainingStars} Stars</span>
+                  <span className="text-[9px] font-black text-reward">{remainingStars}</span>
                 </div>
               </div>
             </div>
@@ -177,14 +172,13 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
                 <div className="space-y-1 px-6">
                   <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/40">Level 0: The Void</h3>
                   <p className="text-xs font-bold text-muted-foreground/60 max-w-[180px] leading-relaxed mx-auto">
-                    Drink water to grow your sanctuary!
+                    Invest stars to grow your sanctuary!
                   </p>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Motivation Pop-up */}
           <AnimatePresence>
             {visibleMessage && (
               <motion.div
@@ -208,8 +202,7 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
         </div>
       </div>
 
-      {/* Level Badge - Overlapping the bottom boundary */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-[60] flex justify-center">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-[60] flex items-center gap-3">
         <motion.div
           key={currentStage?.stageNumber || 0}
           initial={{ scale: 0.9 }}
@@ -218,6 +211,21 @@ export function PixelWorld({ totalStars, aiMessage }: PixelWorldProps) {
         >
           <span className="text-[8px] font-black text-primary uppercase tracking-[0.2em]">SANCTUARY LVL</span>
           <span className="text-lg font-headline font-bold text-primary">{currentStage?.stageNumber || 0}</span>
+        </motion.div>
+
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button
+            onClick={onSpendStar}
+            disabled={totalStars <= 0}
+            className={`h-10 px-4 rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2 transition-all ${
+              totalStars > 0 
+                ? 'bg-reward text-white hover:bg-reward/90' 
+                : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+            }`}
+          >
+            <Zap className={`h-3.5 w-3.5 ${totalStars > 0 ? 'fill-white animate-pulse' : ''}`} />
+            Use Star ({totalStars})
+          </Button>
         </motion.div>
       </div>
     </div>
