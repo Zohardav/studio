@@ -18,7 +18,6 @@ import { collection, query, orderBy, setDoc, doc } from 'firebase/firestore';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
-import * as Tone from 'tone';
 import { translations, Language } from '@/lib/translations';
 
 const PixelWorld = lazy(() => import('@/components/world/PixelWorld').then(m => ({ default: m.PixelWorld })));
@@ -86,8 +85,11 @@ export default function DrinkAndEarn() {
   }, [auth, user, isLoading]);
 
   const handleAddGlass = async () => {
-    if (settings.soundEnabled && Tone.context.state !== 'running') {
-      await Tone.start();
+    if (settings.soundEnabled) {
+      const Tone = await import('tone');
+      if (Tone.context.state !== 'running') {
+        await Tone.start();
+      }
     }
     addGlass();
     playWaterLog();
@@ -104,8 +106,11 @@ export default function DrinkAndEarn() {
   const handleSpendStar = async () => {
     if (totalStars > 0) {
       spendStar();
-      if (settings.soundEnabled && Tone.context.state !== 'running') {
-        await Tone.start();
+      if (settings.soundEnabled) {
+        const Tone = await import('tone');
+        if (Tone.context.state !== 'running') {
+          await Tone.start();
+        }
       }
       playAchievement();
     }
@@ -114,8 +119,11 @@ export default function DrinkAndEarn() {
   const handleClaimDailyReward = async () => {
     if (isRewardClaimedToday) return;
     
-    if (settings.soundEnabled && Tone.context.state !== 'running') {
-      await Tone.start();
+    if (settings.soundEnabled) {
+      const Tone = await import('tone');
+      if (Tone.context.state !== 'running') {
+        await Tone.start();
+      }
     }
     
     const success = await claimDailyReward();
@@ -179,7 +187,10 @@ export default function DrinkAndEarn() {
   };
 
   const handleSoundToggle = async (val: boolean) => {
-    if (val) await Tone.start();
+    if (val) {
+      const Tone = await import('tone');
+      await Tone.start();
+    }
     setSettings({...settings, soundEnabled: val});
   };
 
