@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -78,19 +79,6 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
           className={`absolute inset-0 bg-gradient-to-b ${slides[current].color} -z-10`}
         />
       </AnimatePresence>
-
-      <div className="absolute top-10 right-8 z-[210]">
-        <Button 
-          variant="ghost" 
-          onClick={(e) => {
-            e.stopPropagation();
-            handleComplete();
-          }}
-          className="text-xs font-black uppercase tracking-widest text-muted-foreground hover:bg-transparent hover:text-primary"
-        >
-          Skip
-        </Button>
-      </div>
 
       <div className="w-full max-w-md min-h-full flex flex-col px-8 pointer-events-none py-12">
         <Carousel 
