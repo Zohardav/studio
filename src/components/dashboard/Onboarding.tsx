@@ -36,7 +36,7 @@ export function Onboarding({ onComplete }: { onComplete: (name: string, goal: nu
       await signInWithGoogle(auth);
       toast({
         title: isRtl ? "ברוכים השבים! ✨" : "Welcome Back! ✨",
-        description: isRtl ? "משחזרים את הסנקטוארי שלך..." : "Restoring your sanctuary...",
+        description: isRtl ? "משחזרים את המקדש שלך..." : "Restoring your sanctuary...",
       });
     } catch (error: any) {
       if (error.code !== 'auth/popup-closed-by-user') {
