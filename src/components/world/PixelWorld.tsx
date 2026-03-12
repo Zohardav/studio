@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
@@ -6,7 +5,7 @@ import Image from 'next/image';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Zap, Loader2, ImageOff, Sparkles, Droplets } from 'lucide-react';
+import { Star, Loader2, ImageOff, Sparkles, Droplets } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PixelWorldProps {
@@ -223,7 +222,7 @@ export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar 
                 : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
             }`}
           >
-            <Zap className={`h-3.5 w-3.5 ${totalStars > 0 ? 'fill-white animate-pulse' : ''}`} />
+            <Star className={`h-3.5 w-3.5 ${totalStars > 0 ? 'fill-white animate-pulse' : ''}`} />
             Use Star ({totalStars})
           </Button>
         </motion.div>
