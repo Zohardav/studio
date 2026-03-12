@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -67,9 +66,9 @@
     @apply font-headline tracking-tight;
   }
   
-  /* Apply Heebo to all Hebrew text elements globally by checking for RTL direction */
+  /* Apply Heebo to all Hebrew text elements globally using direct font-family to avoid Tailwind @apply circularity in build */
   [dir="rtl"] {
-    @apply font-hebrew;
+    font-family: 'Heebo', sans-serif !important;
   }
 }
 
