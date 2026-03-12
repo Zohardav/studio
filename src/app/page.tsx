@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react';
@@ -260,6 +259,16 @@ export default function DrinkAndEarn() {
                         <div className="flex items-center gap-1.5 bg-reward px-3 py-1 rounded-full text-white">
                           <Star className="h-3 w-3 fill-white" />
                           <span className="text-xs font-black">5</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-white/20 rounded-3xl border-2 border-reward/10">
+                        <div className="flex items-center gap-3">
+                          <Gift className="h-5 w-5 text-reward" />
+                          <span className="text-xs font-bold">Daily Login</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-reward px-3 py-1 rounded-full text-white">
+                          <Star className="h-3 w-3 fill-white" />
+                          <span className="text-xs font-black">1</span>
                         </div>
                       </div>
                     </div>
