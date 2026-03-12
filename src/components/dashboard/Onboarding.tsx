@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Droplets, Sparkles, Heart, Minus, Plus, Star, Leaf, Wand2, ChevronRight, LogIn, Loader2 } from 'lucide-react';
+import { Droplets, Sparkles, Minus, Plus, Star, Leaf, Wand2, ChevronRight, LogIn, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFirebase, signInWithGoogle } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
