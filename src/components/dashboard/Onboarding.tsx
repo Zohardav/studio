@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react';
@@ -5,12 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Droplets, Sparkles, Heart, Minus, Plus, Star, Leaf, Wand2, ChevronRight } from 'lucide-react';
+import { Droplets, Sparkles, Heart, Minus, Plus, Star, Leaf, Wand2, ChevronRight, LogIn, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFirebase, signInWithGoogle } from '@/firebase';
+import { useToast } from '@/hooks/use-toast';
 
 export function Onboarding({ onComplete }: { onComplete: (name: string, goal: number) => void }) {
   const [name, setName] = useState('');
   const [goal, setGoal] = useState(8);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const { auth } = useFirebase();
+  const { toast } = useToast();
 
   const handleDecrement = () => {
     setGoal(prev => Math.max(1, prev - 1));
@@ -18,6 +24,27 @@ export function Onboarding({ onComplete }: { onComplete: (name: string, goal: nu
 
   const handleIncrement = () => {
     setGoal(prev => Math.min(30, prev + 1));
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsSigningIn(true);
+    try {
+      await signInWithGoogle(auth);
+      toast({
+        title: "Welcome Back! ✨",
+        description: "Restoring your sanctuary...",
+      });
+    } catch (error: any) {
+      if (error.code !== 'auth/popup-closed-by-user') {
+        toast({
+          variant: "destructive",
+          title: "Sign-in Failed",
+          description: error.message,
+        });
+      }
+    } finally {
+      setIsSigningIn(false);
+    }
   };
 
   return (
@@ -196,7 +223,7 @@ export function Onboarding({ onComplete }: { onComplete: (name: string, goal: nu
               </div>
             </CardContent>
 
-            <CardFooter className="pb-10 pt-8 px-8">
+            <CardFooter className="pb-6 pt-8 px-8 flex flex-col gap-4">
               <motion.div className="w-full relative" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   className="w-full h-18 text-xl font-black rounded-[2rem] shadow-2xl shadow-primary/30 transition-all bg-primary hover:bg-primary/90 text-white border-b-8 border-primary/20 relative group overflow-hidden" 
@@ -212,6 +239,26 @@ export function Onboarding({ onComplete }: { onComplete: (name: string, goal: nu
                 </Button>
                 <div className="absolute -inset-1 bg-primary/20 blur-xl -z-10 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity" />
               </motion.div>
+
+              <div className="flex items-center gap-4 w-full">
+                <div className="h-px bg-muted-foreground/10 flex-1" />
+                <span className="text-[8px] font-black uppercase text-muted-foreground/30">Or</span>
+                <div className="h-px bg-muted-foreground/10 flex-1" />
+              </div>
+
+              <Button 
+                variant="ghost"
+                disabled={isSigningIn}
+                onClick={handleGoogleSignIn}
+                className="w-full h-14 rounded-2xl font-black text-[10px] uppercase tracking-widest text-primary hover:bg-primary/5 border-2 border-dashed border-primary/20"
+              >
+                {isSigningIn ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <LogIn className="h-4 w-4 mr-2" />
+                )}
+                Already a Guardian? Restore
+              </Button>
             </CardFooter>
           </Card>
           
