@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react';
 import { useHydration } from '@/hooks/use-hydration';
 import { useAudio, useBackgroundMusic } from '@/components/audio/AudioEngine';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Droplets, Home, Scroll, Heart, Star, Loader2, ShieldCheck, Cloud, LogIn, VolumeX, Volume2, Trash2, ChevronRight, Lock, Gift, CheckCircle2 } from 'lucide-react';
+import { Award, Droplets, Home, Scroll, Heart, Star, Loader2, ShieldCheck, Cloud, LogIn, VolumeX, Volume2, Trash2, ChevronRight, Lock, Gift, CheckCircle2, Construction } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -354,19 +354,40 @@ export default function DrinkAndEarn() {
               </CardContent>
             </Card>
 
-            <Card className="pixel-card border-none overflow-hidden bg-white/60">
-              <CardHeader className="pb-2"><CardTitle className="text-xl font-headline font-bold flex items-center gap-3"><Star className="h-5 w-5 text-reward fill-reward" />Evolution Badges</CardTitle></CardHeader>
-              <CardContent className="grid grid-cols-2 gap-4">
-                {achievements.map(a => (
-                  <div key={a.id} className={`p-5 rounded-[2rem] flex flex-col items-center text-center border-4 transition-all ${a.unlockedAt ? 'border-reward/40 bg-reward/5 shadow-inner' : 'border-dashed border-muted opacity-40'}`}>
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3 ${a.unlockedAt ? 'bg-white shadow-xl reward-glow' : 'bg-muted'}`}>
-                      <Award className={`h-7 w-7 ${a.unlockedAt ? 'text-reward' : 'text-muted-foreground'}`} />
-                    </div>
-                    <p className="text-[10px] font-black uppercase leading-tight">{a.name}</p>
+            <Card className="pixel-card border-none overflow-hidden bg-white/60 relative">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
+                    <Star className="h-5 w-5 text-reward fill-reward" />
+                    Evolution Badges
+                  </CardTitle>
+                  <Badge variant="outline" className="bg-reward/10 text-reward border-reward/20 font-black text-[8px] uppercase px-3 py-1 rounded-full animate-pulse">
+                    Coming Soon
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 bg-white/40 backdrop-blur-[2px] rounded-[2rem] border-2 border-dashed border-reward/20">
+                  <div className="p-3 bg-white/80 rounded-full shadow-lg mb-2">
+                    <Construction className="h-6 w-6 text-reward" />
                   </div>
-                ))}
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-reward text-center">New Achievements Brewing</p>
+                  <p className="text-[8px] font-bold text-muted-foreground/60 uppercase mt-1">Under Construction</p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 opacity-40 grayscale-[0.4]">
+                  {achievements.map(a => (
+                    <div key={a.id} className={`p-5 rounded-[2rem] flex flex-col items-center text-center border-4 transition-all ${a.unlockedAt ? 'border-reward/40 bg-reward/5 shadow-inner' : 'border-dashed border-muted opacity-40'}`}>
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3 ${a.unlockedAt ? 'bg-white shadow-xl reward-glow' : 'bg-muted'}`}>
+                        <Award className={`h-7 w-7 ${a.unlockedAt ? 'text-reward' : 'text-muted-foreground'}`} />
+                      </div>
+                      <p className="text-[10px] font-black uppercase leading-tight">{a.name}</p>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
+
             <Card className="pixel-card border-none overflow-hidden bg-white/60">
               <CardHeader className="pb-2"><CardTitle className="text-xl font-headline font-bold flex items-center gap-3">Nourishment History</CardTitle></CardHeader>
               <CardContent>
