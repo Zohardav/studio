@@ -95,7 +95,7 @@ export default function DrinkAndEarn() {
     if (currentGlasses + 1 >= settings.dailyGoalGlasses && currentGlasses < settings.dailyGoalGlasses) {
       toast({
         title: isRtl ? "היעד הושג! בונוס של 5 כוכבים ✨" : "Goal Fulfilled! +5 Stars Bonus ✨",
-        description: isRtl ? "הסנקטוארי שלך זוהר בהכרת תודה!" : "Your sanctuary glows with gratitude!",
+        description: isRtl ? "המקדש שלך זוהר בהכרת תודה!" : "Your sanctuary glows with gratitude!",
       });
       playAchievement();
     }
@@ -123,7 +123,7 @@ export default function DrinkAndEarn() {
       playAchievement();
       toast({
         title: isRtl ? "הכוכב היומי נאסף! ✨" : "Daily Star Claimed! ✨",
-        description: isRtl ? "הסנקטוארי שלך גדל עם כל ביקור. חזרו מחר!" : "Your sanctuary grows stronger with every visit. Come back tomorrow!",
+        description: isRtl ? "המקדש שלך גדל עם כל ביקור. חזרו מחר!" : "Your sanctuary grows stronger with every visit. Come back tomorrow!",
       });
     }
   };
@@ -148,7 +148,7 @@ export default function DrinkAndEarn() {
     try {
       await linkAccountToGoogle(auth);
       toast({
-        title: isRtl ? "הסנקטוארי מאובטח! 🛡️" : "Sanctuary Secured! 🛡️",
+        title: isRtl ? "המקדש מאובטח! 🛡️" : "Sanctuary Secured! 🛡️",
         description: isRtl ? "ההתקדמות שלך מקושרת כעת לחשבון גוגל." : "Your progress is now linked to your Google account.",
       });
     } catch (error: any) {
@@ -351,7 +351,7 @@ export default function DrinkAndEarn() {
                   ) : (
                     <div className="flex flex-col items-center gap-4 w-full">
                       <p className="text-xs font-bold text-center text-muted-foreground leading-relaxed">
-                        {isRtl ? "העולם שלכם משגשג בזכות עקביות. אספו את הכוכב היומי כדי לפתח את הסנקטוארי." : "Your world thrives on consistency. Claim your daily star to evolve your sanctuary."}
+                        {isRtl ? "העולם שלכם משגשג בזכות עקביות. אספו את הכוכב היומי כדי לפתח את המקדש." : "Your world thrives on consistency. Claim your daily star to evolve your sanctuary."}
                       </p>
                       <Button 
                         onClick={handleClaimDailyReward}

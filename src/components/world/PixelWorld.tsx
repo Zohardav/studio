@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
@@ -96,6 +95,25 @@ export function PixelWorld({
 
   return (
     <div className="relative w-full aspect-[16/16] flex flex-col mb-12">
+      <div className="relative z-[70] pointer-events-none w-full px-8 absolute top-1/2 left-0 -translate-y-1/2">
+        <AnimatePresence>
+          {visibleMessage && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              transition={{ type: "spring", damping: 30, stiffness: 200 }}
+              className="bg-white/70 backdrop-blur-xl p-4 rounded-[2rem] border-2 border-white/40 shadow-2xl text-center w-full"
+            >
+              <p className="text-[8px] font-black text-primary uppercase tracking-[0.3em] mb-1">{isRtl ? 'רוח המקדש' : 'Sanctuary Spirit'}</p>
+              <p className="text-xs font-bold text-foreground leading-relaxed italic">
+                "{visibleMessage}"
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       <div className="relative flex-1 flex flex-col pixel-card p-4 overflow-hidden border-none shadow-2xl">
         <div className="absolute inset-0 bg-[#f8f1de]" />
 
@@ -146,7 +164,7 @@ export function PixelWorld({
                 className="flex flex-col items-center gap-2 z-10"
               >
                 <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">{isRtl ? 'צופה בסנקטוארי...' : 'Glimpsing the Sanctuary...'}</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">{isRtl ? 'צופה במקדש...' : 'Glimpsing the Sanctuary...'}</span>
               </motion.div>
             ) : currentStage?.imageUrl ? (
               <motion.div
@@ -198,29 +216,8 @@ export function PixelWorld({
                 <div className="space-y-1 px-6">
                   <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/40">{isRtl ? 'רמה 0: הריק' : 'Level 0: The Void'}</h3>
                   <p className="text-xs font-bold text-muted-foreground/60 max-w-[180px] leading-relaxed mx-auto">
-                    {isRtl ? 'השקיעו כוכבים כדי להצמיח את הסנקטוארי שלכם!' : 'Invest stars to grow your sanctuary!'}
+                    {isRtl ? 'השקיעו כוכבים כדי להצמיח את המקדש שלכם!' : 'Invest stars to grow your sanctuary!'}
                   </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <AnimatePresence>
-            {visibleMessage && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                transition={{ type: "spring", damping: 30, stiffness: 200 }}
-                className="absolute inset-0 flex items-center justify-center z-[60] px-8 pointer-events-none"
-              >
-                <div className="bg-white/70 backdrop-blur-xl p-4 rounded-[2rem] border-2 border-white/40 shadow-2xl text-center max-w-[90%] pointer-events-none">
-                  <p className="text-[8px] font-black text-primary uppercase tracking-[0.3em] mb-1">{isRtl ? 'רוח הסנקטוארי' : 'Sanctuary Spirit'}</p>
-                  <div className="relative min-h-[40px] flex items-center justify-center">
-                    <p className="text-xs font-bold text-foreground leading-relaxed italic">
-                      "{visibleMessage}"
-                    </p>
-                  </div>
                 </div>
               </motion.div>
             )}
@@ -228,7 +225,7 @@ export function PixelWorld({
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-[60] flex items-center gap-3">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-[80] flex items-center gap-3">
         <motion.div
           key={currentStage?.stageNumber || 0}
           initial={{ scale: 0.9 }}
@@ -248,7 +245,7 @@ export function PixelWorld({
                 animate={{ y: -80, opacity: 0, scale: 1.5, x: -10 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="absolute left-1/2 top-0 pointer-events-none z-[70]"
+                className="absolute left-1/2 top-0 pointer-events-none z-[90]"
               >
                 <Star className="h-6 w-6 text-reward fill-reward" />
               </motion.div>

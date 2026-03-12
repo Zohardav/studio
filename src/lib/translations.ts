@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Translation strings for English and Hebrew.
  */
@@ -73,17 +72,17 @@ export const translations = {
     ready: "מוכנים להתחיל?",
     readyDesc: "התחילו את המסע שלכם עכשיו וראו כמה רחוק הרגלי השתייה שלכם יכולים לקחת אתכם.",
     startBtn: "אני מוכן/ה להתחיל",
-    sanctuary: "הסנקטוארי האישי שלך",
+    sanctuary: "המקדש האישי שלך",
     sanctuaryDesc: "ככל שתזינו את עצמכם במים, כך העולם הסודי שלכם יפרח וישגשג.",
     nameLabel: "איך לקרוא לך?",
     namePlaceholder: "למשל: אלכס השומר",
     goalLabel: "יעד הזנה יומי",
     recommended: "מומלץ: 8",
     glasses: "כוסות",
-    enterSanctuary: "כניסה לסנקטוארי",
+    enterSanctuary: "כניסה למקדש",
     alreadyGuardian: "כבר שומר/ת? שחזור",
     hi: "היי",
-    mySanctuary: "הסנקטוארי שלי",
+    mySanctuary: "המקדש שלי",
     glassesToday: "כוסות היום",
     dailyGoal: "יעד יומי",
     satiated: "רווי/ה",
@@ -92,11 +91,11 @@ export const translations = {
     goalFulfilled: "היעד הושג",
     wait: "המתנה",
     absorbing: "סופג הזנה...",
-    restNow: "הסנקטוארי זוהר. נוחו עכשיו, שומרים.",
+    restNow: "המקדש זוהר. נוחו עכשיו, שומרים.",
     worldTab: "עולם",
     historyTab: "היסטוריה",
     guardianTab: "שומר/ת",
-    dailyBlessing: "ברכת סנקטוארי יומית",
+    dailyBlessing: "ברכת מקדש יומית",
     visitClaim: "בקרו בעולם שלכם כדי לאסוף",
     rewardSecured: "הפרס היומי נאסף",
     comeBackTomorrow: "נוכחותך מביאה חום לעולם הזה. חזרו מחר לכוכב נוסף.",
@@ -121,7 +120,7 @@ export const translations = {
     useStar: "שימוש בכוכב",
     nextEvolution: "האבולוציה הבאה",
     starsNeeded: "כוכבים חסרים",
-    sanctuaryLvl: "רמת סנקטוארי",
+    sanctuaryLvl: "רמת מקדש",
     language: "שפה"
   }
 };

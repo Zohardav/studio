@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useCallback, useMemo, useState, useEffect } from 'react';
@@ -25,11 +24,11 @@ const REFRESHING_MESSAGES = [
 ];
 
 const REFRESHING_MESSAGES_HE = [
-  "הסנקטוארי הוזן!",
+  "המקדש הוזן!",
   "חיים טהורים נוספו.",
   "טיפה מרעננת!",
   "השורשים שותים לעומק.",
-  "הסנקטוארי מרגיש חי.",
+  "המקדש מרגיש חי.",
 ];
 
 export function useHydration() {
