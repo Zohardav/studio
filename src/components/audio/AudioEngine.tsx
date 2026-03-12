@@ -1,13 +1,19 @@
 "use client"
 
 import * as React from 'react';
-import * as Tone from 'tone';
+
+/**
+ * AudioEngine - Manages app sound effects and atmosphere using Tone.js.
+ * We dynamically import Tone to avoid issues during server-side pre-rendering.
+ */
 
 export const useAudio = (enabled: boolean) => {
   const playWaterLog = React.useCallback(async () => {
     if (!enabled) return;
     
-    // Ensure AudioContext is running (Safari fix)
+    // Dynamic import to prevent SSR evaluation errors
+    const Tone = await import('tone');
+    
     if (Tone.context.state !== 'running') {
       await Tone.start();
     }
@@ -27,6 +33,8 @@ export const useAudio = (enabled: boolean) => {
 
   const playAchievement = React.useCallback(async () => {
     if (!enabled) return;
+    
+    const Tone = await import('tone');
     
     if (Tone.context.state !== 'running') {
       await Tone.start();
@@ -51,63 +59,64 @@ export const useAudio = (enabled: boolean) => {
 };
 
 export const useBackgroundMusic = (enabled: boolean) => {
-  const playerRef = React.useRef<Tone.PolySynth | null>(null);
-  const filterRef = React.useRef<Tone.Filter | null>(null);
-  const loopRef = React.useRef<Tone.Loop | null>(null);
+  const musicStateRef = React.useRef<{
+    player?: any;
+    filter?: any;
+    loop?: any;
+  }>({});
 
   React.useEffect(() => {
-    // Only initialize if enabled to save battery/CPU on mobile
-    if (!enabled) {
-      if (Tone.getTransport().state === 'started') {
-        Tone.getTransport().stop();
-      }
-      return;
-    }
+    let active = true;
 
-    const initMusic = async () => {
-      if (!playerRef.current) {
-        filterRef.current = new Tone.Filter(800, "lowpass").toDestination();
-        playerRef.current = new Tone.PolySynth(Tone.Synth, {
+    const startMusic = async () => {
+      if (!enabled) {
+        const Tone = await import('tone');
+        if (Tone.getTransport().state === 'started') {
+          Tone.getTransport().stop();
+        }
+        return;
+      }
+
+      const Tone = await import('tone');
+      if (!active) return;
+
+      if (!musicStateRef.current.player) {
+        musicStateRef.current.filter = new Tone.Filter(800, "lowpass").toDestination();
+        musicStateRef.current.player = new Tone.PolySynth(Tone.Synth, {
           oscillator: { type: "fatsine", count: 3, spread: 30 },
           envelope: { attack: 4, decay: 2, sustain: 0.8, release: 5 },
           volume: -12
-        }).connect(filterRef.current);
+        }).connect(musicStateRef.current.filter);
 
         const sequence = ["C3", "G3", "A3", "E3", "F3", "G3"];
         let index = 0;
 
-        loopRef.current = new Tone.Loop((time) => {
-          if (playerRef.current) {
-            playerRef.current.triggerAttackRelease(sequence[index % sequence.length], "1n", time);
+        musicStateRef.current.loop = new Tone.Loop((time) => {
+          if (musicStateRef.current.player) {
+            musicStateRef.current.player.triggerAttackRelease(sequence[index % sequence.length], "1n", time);
             index++;
           }
         }, "2n").start(0);
       }
 
-      // Defer transport start to ensure it doesn't block main thread
-      requestAnimationFrame(() => {
-        if (Tone.context.state === 'running') {
-          Tone.getTransport().start();
-        }
-      });
+      if (Tone.context.state === 'running') {
+        Tone.getTransport().start();
+      }
     };
 
-    initMusic();
+    startMusic();
 
     return () => {
-      Tone.getTransport().stop();
-      if (playerRef.current) {
-        playerRef.current.dispose();
-        playerRef.current = null;
-      }
-      if (filterRef.current) {
-        filterRef.current.dispose();
-        filterRef.current = null;
-      }
-      if (loopRef.current) {
-        loopRef.current.dispose();
-        loopRef.current = null;
-      }
+      active = false;
+      const cleanup = async () => {
+        const Tone = await import('tone');
+        Tone.getTransport().stop();
+        if (musicStateRef.current.player) musicStateRef.current.player.dispose();
+        if (musicStateRef.current.filter) musicStateRef.current.filter.dispose();
+        if (musicStateRef.current.loop) musicStateRef.current.loop.dispose();
+        musicStateRef.current = {};
+      };
+      cleanup();
     };
   }, [enabled]);
 };

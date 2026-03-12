@@ -1,4 +1,3 @@
-
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -30,7 +29,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Production-ready experimental features
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
