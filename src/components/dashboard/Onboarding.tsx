@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react';
@@ -53,7 +52,7 @@ export function Onboarding({ onComplete }: { onComplete: (name: string, goal: nu
   };
 
   return (
-    <div className={`fixed inset-0 z-50 bg-[#F4F7F8] overflow-y-auto pb-safe ${isRtl ? 'font-sans' : 'font-body'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className={`fixed inset-0 z-50 bg-[#F4F7F8] overflow-y-auto pb-safe ${isRtl ? 'font-hebrew' : 'font-body'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Immersive Background Atmosphere */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         <motion.div 
@@ -118,7 +117,7 @@ export function Onboarding({ onComplete }: { onComplete: (name: string, goal: nu
               </motion.div>
               
               <div className="space-y-2">
-                <CardTitle className="text-4xl font-headline font-black text-foreground tracking-tight">
+                <CardTitle className={`text-4xl font-black text-foreground tracking-tight ${isRtl ? 'font-hebrew' : 'font-headline'}`}>
                   {t.sanctuary.split(' ')[0]} <span className="text-primary">{t.sanctuary.split(' ').slice(1).join(' ')}</span>
                 </CardTitle>
                 <CardDescription className="text-sm font-medium text-muted-foreground/80 leading-relaxed px-4">
@@ -165,7 +164,7 @@ export function Onboarding({ onComplete }: { onComplete: (name: string, goal: nu
                         key={goal}
                         initial={{ y: 10, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        className="text-4xl font-headline font-black text-primary leading-none"
+                        className={`text-4xl font-black text-primary leading-none ${isRtl ? 'font-hebrew' : 'font-headline'}`}
                       >
                         {goal}
                       </motion.span>

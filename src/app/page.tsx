@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react';
@@ -214,7 +213,7 @@ export default function DrinkAndEarn() {
 
   return (
     <div 
-      className={`max-w-md mx-auto min-h-svh bg-[#FFF9FC] dark:bg-[#120F1A] flex flex-col relative pb-32 pt-safe ${isRtl ? 'font-sans' : 'font-body'}`} 
+      className={`max-w-md mx-auto min-h-svh bg-[#FFF9FC] dark:bg-[#120F1A] flex flex-col relative pb-32 pt-safe ${isRtl ? 'font-hebrew' : 'font-body'}`} 
       dir={isRtl ? 'rtl' : 'ltr'}
       suppressHydrationWarning
     >
@@ -227,7 +226,7 @@ export default function DrinkAndEarn() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h1 className="text-3xl font-headline font-bold text-foreground leading-none">
+              <h1 className={`text-3xl font-bold text-foreground leading-none ${isRtl ? 'font-hebrew' : 'font-headline'}`}>
                 {t.hi}, <span className="text-primary">{settings.name}</span>
               </h1>
               <p className="text-[10px] font-black text-muted-foreground/40 tracking-widest uppercase">{t.mySanctuary}</p>
@@ -254,7 +253,7 @@ export default function DrinkAndEarn() {
                         <Star className="h-8 w-8 text-reward fill-reward" />
                       </div>
                       <DialogHeader>
-                        <DialogTitle className="text-2xl font-headline font-bold">{t.evolutionGuide}</DialogTitle>
+                        <DialogTitle className={`text-2xl font-bold ${isRtl ? 'font-hebrew' : 'font-headline'}`}>{t.evolutionGuide}</DialogTitle>
                         <CardDescription className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{t.howToEarn}</CardDescription>
                       </DialogHeader>
                     </div>
@@ -327,7 +326,7 @@ export default function DrinkAndEarn() {
           <TabsContent value="scroll" className="space-y-6 mt-0 focus-visible:ring-0">
             <Card className="pixel-card border-none overflow-hidden bg-gradient-to-br from-reward/10 to-primary/10 border-2 border-white/50">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
+                <CardTitle className={`text-xl font-bold flex items-center gap-3 ${isRtl ? 'font-hebrew' : 'font-headline'}`}>
                   <Gift className="h-5 w-5 text-reward" />
                   {t.dailyBlessing}
                 </CardTitle>
@@ -369,7 +368,7 @@ export default function DrinkAndEarn() {
             <Card className="pixel-card border-none overflow-hidden bg-white/60 relative">
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
+                  <CardTitle className={`text-xl font-bold flex items-center gap-3 ${isRtl ? 'font-hebrew' : 'font-headline'}`}>
                     <Star className="h-5 w-5 text-reward fill-reward" />
                     {t.evolutionBadges}
                   </CardTitle>
@@ -401,7 +400,11 @@ export default function DrinkAndEarn() {
             </Card>
 
             <Card className="pixel-card border-none overflow-hidden bg-white/60">
-              <CardHeader className="pb-2"><CardTitle className="text-xl font-headline font-bold flex items-center gap-3">{t.nourishmentHistory}</CardTitle></CardHeader>
+              <CardHeader className="pb-2">
+                <CardTitle className={`text-xl font-bold flex items-center gap-3 ${isRtl ? 'font-hebrew' : 'font-headline'}`}>
+                  {t.nourishmentHistory}
+                </CardTitle>
+              </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[280px] pr-2">
                   <div className="space-y-3">
@@ -429,12 +432,20 @@ export default function DrinkAndEarn() {
           <TabsContent value="self" className="space-y-6 mt-0 focus-visible:ring-0 pb-12">
             {user?.isAnonymous && (
               <Card className="pixel-card border-none overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 border-2 border-white">
-                <CardHeader className="pb-2"><CardTitle className="text-xl font-headline font-bold flex items-center gap-3"><Cloud className="h-5 w-5 text-primary" />{t.secureProgress}</CardTitle></CardHeader>
+                <CardHeader className="pb-2">
+                  <CardTitle className={`text-xl font-bold flex items-center gap-3 ${isRtl ? 'font-hebrew' : 'font-headline'}`}>
+                    <Cloud className="h-5 w-5 text-primary" />{t.secureProgress}
+                  </CardTitle>
+                </CardHeader>
                 <CardContent><Button onClick={handleLinkAccount} className="w-full h-12 bg-white text-primary hover:bg-white/90 rounded-2xl font-black text-xs uppercase shadow-lg border-b-4 border-primary/10"><LogIn className="h-4 w-4 mr-2" />{t.backupCloud}</Button></CardContent>
               </Card>
             )}
             <Card className="pixel-card border-none overflow-hidden bg-white/60">
-              <CardHeader><CardTitle className="text-xl font-headline font-bold">{t.guardianSettings}</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle className={`text-xl font-bold ${isRtl ? 'font-hebrew' : 'font-headline'}`}>
+                  {t.guardianSettings}
+                </CardTitle>
+              </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between p-5 bg-white/80 rounded-3xl border-2 border-primary/5">
                   <p className="text-xs font-black uppercase tracking-widest">{t.name}</p>
@@ -492,7 +503,7 @@ export default function DrinkAndEarn() {
               <AlertDialog>
                 <AlertDialogTrigger asChild><Button variant="destructive" className="w-full h-12 rounded-2xl font-black text-xs uppercase tracking-widest bg-red-500/10 text-red-500 border-2 border-red-500/20"><Trash2 className="h-4 w-4 mr-2" />{t.resetApp}</Button></AlertDialogTrigger>
                 <AlertDialogContent className="rounded-[2.5rem] p-8 z-[150]" dir={isRtl ? 'rtl' : 'ltr'}>
-                  <AlertDialogHeader><AlertDialogTitle className="text-2xl font-headline font-bold">{isRtl ? 'לאפס את הכל?' : 'Destroy All Progress?'}</AlertDialogTitle></AlertDialogHeader>
+                  <AlertDialogHeader><AlertDialogTitle className={`text-2xl font-bold ${isRtl ? 'font-hebrew' : 'font-headline'}`}>{isRtl ? 'לאפס את הכל?' : 'Destroy All Progress?'}</AlertDialogTitle></AlertDialogHeader>
                   <AlertDialogFooter className="mt-6 gap-3"><AlertDialogCancel className="rounded-2xl font-black text-xs uppercase">{isRtl ? 'ביטול' : 'Nevermind'}</AlertDialogCancel><AlertDialogAction onClick={handleResetApp} className="rounded-2xl font-black text-xs uppercase bg-red-500">{isRtl ? 'מחיקת הכל' : 'Wipe Everything'}</AlertDialogAction></AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>

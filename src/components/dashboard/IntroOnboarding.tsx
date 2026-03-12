@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -70,7 +69,7 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
 
   return (
     <div 
-      className={`fixed inset-0 z-[200] bg-background flex flex-col items-center justify-center overflow-y-auto cursor-pointer ${isRtl ? 'font-sans' : 'font-body'}`}
+      className={`fixed inset-0 z-[200] bg-background flex flex-col items-center justify-center overflow-y-auto cursor-pointer ${isRtl ? 'font-hebrew' : 'font-body'}`}
       dir={isRtl ? 'rtl' : 'ltr'}
       onClick={handleContainerClick}
     >
@@ -127,7 +126,7 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="text-4xl font-headline font-bold text-foreground"
+                    className={`text-4xl font-bold text-foreground ${isRtl ? 'font-hebrew' : 'font-headline'}`}
                   >
                     {slide.title}
                   </motion.h2>

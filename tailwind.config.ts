@@ -12,6 +12,7 @@ export default {
       fontFamily: {
         body: ['PT Sans', 'sans-serif'],
         headline: ['Alegreya', 'serif'],
+        hebrew: ['Heebo', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
