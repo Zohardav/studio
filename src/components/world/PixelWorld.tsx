@@ -17,6 +17,7 @@ interface PixelWorldProps {
 
 export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar }: PixelWorldProps) {
   const [visibleMessage, setVisibleMessage] = useState<string | null>(null);
+  const [poppingStars, setPoppingStars] = useState<{ id: number }[]>([]);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const firestore = useFirestore();
   
@@ -66,6 +67,22 @@ export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar 
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [aiMessage]);
+
+  const handleSpendStar = () => {
+    if (totalStars <= 0) return;
+    
+    // Trigger the pop-up animation
+    const starId = Date.now();
+    setPoppingStars(prev => [...prev, { id: starId }]);
+    
+    // Call the original spend logic
+    onSpendStar();
+
+    // Clean up the star after animation
+    setTimeout(() => {
+      setPoppingStars(prev => prev.filter(s => s.id !== starId));
+    }, 1000);
+  };
 
   return (
     <div className="relative w-full aspect-[16/16] flex flex-col mb-12">
@@ -212,20 +229,37 @@ export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar 
           <span className="text-lg font-headline font-bold text-primary">{currentStage?.stageNumber || 0}</span>
         </motion.div>
 
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Button
-            onClick={onSpendStar}
-            disabled={totalStars <= 0}
-            className={`h-10 px-4 rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2 transition-all ${
-              totalStars > 0 
-                ? 'bg-reward text-white hover:bg-reward/90' 
-                : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
-            }`}
-          >
-            <Star className={`h-3.5 w-3.5 ${totalStars > 0 ? 'fill-white animate-pulse' : ''}`} />
-            Use Star ({totalStars})
-          </Button>
-        </motion.div>
+        <div className="relative">
+          <AnimatePresence>
+            {poppingStars.map((star) => (
+              <motion.div
+                key={star.id}
+                initial={{ y: 0, opacity: 1, scale: 1, x: -10 }}
+                animate={{ y: -80, opacity: 0, scale: 1.5, x: -10 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="absolute left-1/2 top-0 pointer-events-none z-[70]"
+              >
+                <Star className="h-6 w-6 text-reward fill-reward" />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              onClick={handleSpendStar}
+              disabled={totalStars <= 0}
+              className={`h-10 px-4 rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2 transition-all ${
+                totalStars > 0 
+                  ? 'bg-reward text-white hover:bg-reward/90' 
+                  : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+              }`}
+            >
+              <Star className={`h-3.5 w-3.5 ${totalStars > 0 ? 'fill-white animate-pulse' : ''}`} />
+              Use Star ({totalStars})
+            </Button>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
