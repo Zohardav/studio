@@ -2,6 +2,15 @@
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
-  # Increase this value if you'd like to automatically spin up
-  # more instances in response to increased traffic.
-  maxInstances: 1
+  # The maximum number of concurrent requests each instance can handle.
+  concurrency: 80
+  # The amount of memory to allocate to each instance (e.g., 512Mi, 1Gi).
+  memory: 512Mi
+  # The maximum number of instances to scale up to.
+  maxInstances: 10
+  # The minimum number of instances to keep running.
+  minInstances: 0
+
+env:
+  - variable: NODE_ENV
+    value: production
