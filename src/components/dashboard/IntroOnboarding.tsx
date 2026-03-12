@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Droplets, Sparkles, Rocket, ChevronRight, ArrowRight } from 'lucide-react';
+import { Droplets, Sparkles, Rocket, ChevronRight, ArrowRight, LogIn, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useFirebase, signInWithGoogle } from '@/firebase';
+import { useToast } from '@/hooks/use-toast';
 import {
   Carousel,
   CarouselContent,
@@ -18,6 +20,9 @@ interface IntroOnboardingProps {
 export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const { auth } = useFirebase();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!api) return;
@@ -54,6 +59,30 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
     onComplete();
   };
 
+  const handleGoogleSignIn = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsSigningIn(true);
+    try {
+      await signInWithGoogle(auth);
+      toast({
+        title: "Welcome Back! ✨",
+        description: "Checking your sanctuary's progress...",
+      });
+      // onComplete will be handled by the parent component observing the auth/profile state
+      onComplete();
+    } catch (error: any) {
+      if (error.code !== 'auth/popup-closed-by-user') {
+        toast({
+          variant: "destructive",
+          title: "Sign-in Failed",
+          description: error.message,
+        });
+      }
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
   const handleContainerClick = (e: React.MouseEvent) => {
     // Don't advance if the user clicked a button (Skip or the final CTA)
     if ((e.target as HTMLElement).closest('button')) return;
@@ -79,7 +108,16 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
         />
       </AnimatePresence>
 
-      <div className="absolute top-10 right-8 z-[210]">
+      <div className="absolute top-10 right-8 z-[210] flex gap-2">
+        <Button 
+          variant="ghost" 
+          disabled={isSigningIn}
+          onClick={handleGoogleSignIn}
+          className="text-xs font-black uppercase tracking-widest text-primary hover:bg-primary/5 rounded-full px-4"
+        >
+          {isSigningIn ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <LogIn className="h-3 w-3 mr-2" />}
+          Restore
+        </Button>
         <Button 
           variant="ghost" 
           onClick={(e) => {
@@ -137,7 +175,7 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.6, type: "spring" }}
-                    className="pt-8 w-full px-4"
+                    className="pt-8 w-full px-4 flex flex-col gap-4"
                   >
                     <Button 
                       onClick={(e) => {
@@ -148,6 +186,16 @@ export function IntroOnboarding({ onComplete }: IntroOnboardingProps) {
                     >
                       I'm Ready to Start
                       <ArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                    
+                    <Button 
+                      variant="outline"
+                      disabled={isSigningIn}
+                      onClick={handleGoogleSignIn}
+                      className="w-full h-14 text-sm font-black uppercase tracking-widest rounded-[1.5rem] border-2 border-primary/20 bg-white/50 hover:bg-white transition-all"
+                    >
+                      {isSigningIn ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <LogIn className="h-4 w-4 mr-2" />}
+                      Already a Guardian? Sign In
                     </Button>
                   </motion.div>
                 )}

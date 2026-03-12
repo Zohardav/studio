@@ -2,7 +2,7 @@
 
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, linkWithPopup } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, linkWithPopup, signInWithPopup } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore'
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
@@ -48,6 +48,14 @@ export async function linkAccountToGoogle(auth: any) {
   if (!user) return;
   const provider = new GoogleAuthProvider();
   return linkWithPopup(user, provider);
+}
+
+/**
+ * Utility to sign in with Google.
+ */
+export async function signInWithGoogle(auth: any) {
+  const provider = new GoogleAuthProvider();
+  return signInWithPopup(auth, provider);
 }
 
 export * from './provider';
