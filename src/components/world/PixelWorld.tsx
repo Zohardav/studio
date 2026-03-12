@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
@@ -13,9 +14,10 @@ interface PixelWorldProps {
   totalStars: number;
   aiMessage?: string;
   onSpendStar: () => void;
+  onOpenEvolutionGuide?: () => void;
 }
 
-export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar }: PixelWorldProps) {
+export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar, onOpenEvolutionGuide }: PixelWorldProps) {
   const [visibleMessage, setVisibleMessage] = useState<string | null>(null);
   const [poppingStars, setPoppingStars] = useState<{ id: number }[]>([]);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -68,20 +70,22 @@ export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar 
     };
   }, [aiMessage]);
 
-  const handleSpendStar = () => {
-    if (totalStars <= 0) return;
-    
-    // Trigger the pop-up animation
-    const starId = Date.now();
-    setPoppingStars(prev => [...prev, { id: starId }]);
-    
-    // Call the original spend logic
-    onSpendStar();
+  const handleSpendStarClick = () => {
+    if (totalStars > 0) {
+      // Trigger the pop-up animation
+      const starId = Date.now();
+      setPoppingStars(prev => [...prev, { id: starId }]);
+      
+      // Call the original spend logic
+      onSpendStar();
 
-    // Clean up the star after animation
-    setTimeout(() => {
-      setPoppingStars(prev => prev.filter(s => s.id !== starId));
-    }, 1000);
+      // Clean up the star after animation
+      setTimeout(() => {
+        setPoppingStars(prev => prev.filter(s => s.id !== starId));
+      }, 1000);
+    } else if (onOpenEvolutionGuide) {
+      onOpenEvolutionGuide();
+    }
   };
 
   return (
@@ -247,12 +251,11 @@ export function PixelWorld({ evolutionStars, totalStars, aiMessage, onSpendStar 
 
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
-              onClick={handleSpendStar}
-              disabled={totalStars <= 0}
+              onClick={handleSpendStarClick}
               className={`h-10 px-4 rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2 transition-all ${
                 totalStars > 0 
                   ? 'bg-reward text-white hover:bg-reward/90' 
-                  : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
               }`}
             >
               <Star className={`h-3.5 w-3.5 ${totalStars > 0 ? 'fill-white animate-pulse' : ''}`} />

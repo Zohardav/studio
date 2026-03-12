@@ -45,6 +45,7 @@ export default function DrinkAndEarn() {
   const [mounted, setMounted] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [adminAuth, setAdminAuth] = useState('');
+  const [isEvolutionGuideOpen, setIsEvolutionGuideOpen] = useState(false);
   const { auth, firestore, user } = useFirebase();
   const { 
     settings, setSettings, 
@@ -220,7 +221,7 @@ export default function DrinkAndEarn() {
                 <span className="font-black text-[10px]">{currentGlasses}</span>
               </Badge>
               
-              <Dialog>
+              <Dialog open={isEvolutionGuideOpen} onOpenChange={setIsEvolutionGuideOpen}>
                 <DialogTrigger asChild>
                   <motion.div whileTap={{ scale: 0.95 }} className="cursor-pointer">
                     <Badge variant="secondary" className="px-3 py-2 bg-white/80 border-2 border-reward/20 rounded-[1.2rem] shadow-sm flex gap-2 items-center hover:bg-reward/5 transition-colors">
@@ -279,6 +280,7 @@ export default function DrinkAndEarn() {
                 totalStars={totalStars} 
                 aiMessage={aiMessage} 
                 onSpendStar={handleSpendStar} 
+                onOpenEvolutionGuide={() => setIsEvolutionGuideOpen(true)}
               />
             </Suspense>
             <Suspense fallback={<div className="h-32 w-full rounded-[3rem] bg-muted animate-pulse" />}>
