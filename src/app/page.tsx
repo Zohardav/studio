@@ -178,6 +178,14 @@ export default function DrinkAndEarn() {
     setSettings({...settings, soundEnabled: val});
   };
 
+  const formatTimestamp = (ts: string) => {
+    const d = new Date(ts);
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const dateStr = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear().toString().slice(-2)}`;
+    const timeStr = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return `${dateStr} ${timeStr}`;
+  };
+
   if (!mounted || isLoading || isResetting) {
     return <LoadingSpinner />;
   }
@@ -229,7 +237,7 @@ export default function DrinkAndEarn() {
                     </Badge>
                   </motion.div>
                 </DialogTrigger>
-                <DialogContent className="max-w-[320px] rounded-[2.5rem] p-0 border-none bg-white/40 backdrop-blur-3xl shadow-2xl overflow-hidden border border-white/20">
+                <DialogContent className="max-w-[320px] rounded-[2.5rem] p-0 bg-white/40 backdrop-blur-3xl shadow-2xl overflow-hidden border border-white/20 z-[150]">
                   <div className="p-8 space-y-6">
                     <div className="flex flex-col items-center text-center space-y-2">
                       <div className="p-4 bg-reward/10 rounded-[2rem] border-2 border-reward/20 shadow-inner mb-2">
@@ -373,7 +381,9 @@ export default function DrinkAndEarn() {
                       todayLogs.map(log => (
                         <div key={log.id} className="flex justify-between items-center p-4 bg-white/80 rounded-2xl border-2 border-primary/10">
                           <div className="flex items-center gap-4"><div className="p-2.5 bg-primary/10 rounded-xl"><Droplets className="h-5 w-5 text-primary" /></div><span className="font-bold text-lg">{log.glassesCount} Glass</span></div>
-                          <span className="text-[10px] font-black text-muted-foreground/60 uppercase">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          <span className="text-[10px] font-black text-muted-foreground/60 uppercase text-right">
+                            {formatTimestamp(log.timestamp)}
+                          </span>
                         </div>
                       ))
                     )}
@@ -413,7 +423,7 @@ export default function DrinkAndEarn() {
             <div className="space-y-3">
               <Dialog onOpenChange={(open) => { if (!open) setAdminAuth(''); }}>
                 <DialogTrigger asChild><Button variant="ghost" className="w-full justify-between h-12 bg-white/60 rounded-2xl px-5 text-xs font-black uppercase tracking-widest"><div className="flex items-center gap-3"><Lock className="h-4 w-4 text-reward" />Manage Stage Progression</div></Button></DialogTrigger>
-                <DialogContent className="max-w-4xl h-[85vh] overflow-hidden flex flex-col p-0 border-none rounded-[3rem] bg-background/95 backdrop-blur-3xl shadow-2xl">
+                <DialogContent className="max-w-4xl h-[85vh] overflow-hidden flex flex-col p-0 border-none rounded-[3rem] bg-background/95 backdrop-blur-3xl shadow-2xl z-[150]">
                   <DialogHeader className="sr-only">
                     <DialogTitle>Stage Management</DialogTitle>
                     <DialogDescription>Access and edit world evolution stages.</DialogDescription>
@@ -431,7 +441,7 @@ export default function DrinkAndEarn() {
               </Dialog>
               <AlertDialog>
                 <AlertDialogTrigger asChild><Button variant="destructive" className="w-full h-12 rounded-2xl font-black text-xs uppercase tracking-widest bg-red-500/10 text-red-500 border-2 border-red-500/20"><Trash2 className="h-4 w-4 mr-2" />Reset App</Button></AlertDialogTrigger>
-                <AlertDialogContent className="rounded-[2.5rem] p-8">
+                <AlertDialogContent className="rounded-[2.5rem] p-8 z-[150]">
                   <AlertDialogHeader><AlertDialogTitle className="text-2xl font-headline font-bold">Destroy All Progress?</AlertDialogTitle></AlertDialogHeader>
                   <AlertDialogFooter className="mt-6 gap-3"><AlertDialogCancel className="rounded-2xl font-black text-xs uppercase">Nevermind</AlertDialogCancel><AlertDialogAction onClick={handleResetApp} className="rounded-2xl font-black text-xs uppercase bg-red-500">Wipe Everything</AlertDialogAction></AlertDialogFooter>
                 </AlertDialogContent>
