@@ -67,8 +67,8 @@
     @apply font-headline tracking-tight;
   }
   
-  /* Apply Heebo to all Hebrew text elements globally */
-  [dir="rtl"], .font-hebrew {
+  /* Apply Heebo to all Hebrew text elements globally by checking for RTL direction */
+  [dir="rtl"] {
     @apply font-hebrew;
   }
 }
