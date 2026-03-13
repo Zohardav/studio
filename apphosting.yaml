@@ -3,9 +3,9 @@
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
-  # Optimized for moderate traffic and cold start balance
+  # Optimized for Next.js 15 builds and SSR concurrency
   concurrency: 80
-  memory: 512Mi
+  memory: 1024Mi
   maxInstances: 10
   minInstances: 0
 
